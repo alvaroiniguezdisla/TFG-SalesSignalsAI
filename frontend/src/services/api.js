@@ -6,9 +6,9 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
  * Obtiene las últimas noticias del backend.
  * @returns {Promise<Array>} Lista de noticias
  */
-export const getNoticias = async () => {
+export const getNoticias = async (metodo ='html') => {
     try {
-        const response = await fetch(`${API_URL}/noticias`);
+        const response = await fetch(`${API_URL}/noticias?metodo=${metodo}`);
 
         if (!response.ok) {
             throw new Error(`Error HTTP: ${response.status}`);

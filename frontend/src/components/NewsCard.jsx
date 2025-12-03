@@ -8,6 +8,10 @@ function NewsCard({ noticia }) {
     return (
         <div className="news-card">
             <h2>{noticia.titulo}</h2>
+            
+            {/* NUEVO: Si hay resumen, píntalo. Si no, no hagas nada. */}
+            {noticia.resumen && <p className="news-summary">{noticia.resumen}</p>}
+
             <p className="news-source">Fuente: El País</p>
             <a
                 href={noticia.link}

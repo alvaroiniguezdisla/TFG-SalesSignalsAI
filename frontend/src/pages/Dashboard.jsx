@@ -7,11 +7,10 @@ function Dashboard() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    useEffect(() => {
-        const loadNews = async () => {
+    const loadNews = async (metodo ='html') => {
             try {
                 setLoading(true);
-                const data = await getNoticias();
+                const data = await getNoticias(metodo);
                 setNoticias(data);
             } catch (err) {
                 setError("No se pudieron cargar las noticias. ¿Está el backend encendido?");
@@ -19,6 +18,8 @@ function Dashboard() {
                 setLoading(false);
             }
         };
+
+    useEffect(() => {
 
         loadNews();
     }, []);
@@ -31,6 +32,10 @@ function Dashboard() {
             <header>
                 <h1>📡 Observatorio de Señales</h1>
                 <p>Monitorización en tiempo real de El País</p>
+                <div className="filters">
+                    <button onClick={() => loadNews('html')}>Scraper HTML</button>
+                    <button onClick={() => loadNews('rss')}>Feed RSS</button>
+                </div>
             </header>
 
             <div className="news-grid">
