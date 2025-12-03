@@ -1,6 +1,6 @@
 // Definimos la URL base de nuestro backend
-// En un futuro esto podría venir de una variable de entorno (.env)
-const API_URL = 'http://localhost:8000';
+// Usamos variables de entorno de Vite (empiezan por VITE_)
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 /**
  * Obtiene las últimas noticias del backend.
