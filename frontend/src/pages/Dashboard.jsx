@@ -7,17 +7,17 @@ function Dashboard() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    const loadNews = async (metodo ='html') => {
-            try {
-                setLoading(true);
-                const data = await getNoticias(metodo);
-                setNoticias(data);
-            } catch (err) {
-                setError("No se pudieron cargar las noticias. ¿Está el backend encendido?");
-            } finally {
-                setLoading(false);
-            }
-        };
+    const loadNews = async (metodo = 'html') => {
+        try {
+            setLoading(true);
+            const data = await getNoticias(metodo);
+            setNoticias(data);
+        } catch (err) {
+            setError("No se pudieron cargar las noticias. ¿Está el backend encendido?");
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
 
@@ -35,6 +35,7 @@ function Dashboard() {
                 <div className="filters">
                     <button onClick={() => loadNews('html')}>Scraper HTML</button>
                     <button onClick={() => loadNews('rss')}>Feed RSS</button>
+                    <button onClick={() => loadNews('browser')}>Navegador Real</button>
                 </div>
             </header>
 
