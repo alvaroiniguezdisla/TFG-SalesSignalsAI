@@ -1,12 +1,12 @@
-# 📡 SalesSignalsAI (Observatorio de Señales)
+#  SalesSignalsAI (Observatorio de Señales)
 
 Este proyecto es una herramienta de inteligencia de ventas que monitoriza fuentes de información pública (como El País) para detectar "señales" de negocio relevantes para cuentas clave.
 
-## 🚀 Cómo Arrancar el Proyecto
+##  Cómo Arrancar el Proyecto
 
-Necesitas dos terminales abiertas (una para el cerebro y otra para la cara).
+Necesitas dos terminales abiertas (una para el backend y otra para el frontend).
 
-### 1. Backend (Cerebro Python)
+### 1. Backend (FastAPI)
 ```bash
 cd backend
 source venv/bin/activate  # En Windows: venv\Scripts\activate
@@ -22,7 +22,7 @@ npm run dev
 ```
 La web se abrirá en: `http://localhost:5173`
 
-## 🏗️ Estructura del Proyecto
+##  Estructura del Proyecto
 
 *   **`backend/`**: API REST en FastAPI.
     *   `main.py`: Controlador de rutas.
@@ -32,6 +32,6 @@ La web se abrirá en: `http://localhost:5173`
     *   `src/pages/`: Vistas principales (Dashboard).
     *   `src/components/`: Piezas reutilizables (Tarjetas de noticias).
 
-## 🛠️ Tecnologías
+## Tecnologías
 *   **Backend**: Python 3.12, FastAPI, BeautifulSoup4.
 *   **Frontend**: React 18, Vite.
