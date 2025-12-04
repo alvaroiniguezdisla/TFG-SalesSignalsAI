@@ -3,12 +3,14 @@ import os
 from bs4 import BeautifulSoup
 from typing import List, Dict
 from dotenv import load_dotenv
+from app.core.config import settings
+
 
 # Cargar variables de entorno desde .env
 load_dotenv()
 
 def obtener_noticias() -> List[Dict[str, str]]:
-    url = os.getenv("SCRAPER_TARGET_URL", "https://elpais.com/")
+    url = settings.SCRAPER_TARGET_URL
     try:
         response = requests.get(url)
         response.raise_for_status() # Lanza error si no es 200

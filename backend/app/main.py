@@ -17,7 +17,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Incluir routers
+# Incluimos routers
 app.include_router(noticias.router)
 
 @app.get("/")

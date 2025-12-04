@@ -1,5 +1,6 @@
 from playwright.sync_api import sync_playwright
 from typing import List, Dict
+from app.core.config import settings 
 
 def obtener_noticias_browser() -> List[Dict[str, str]]:
     # "sync_playwright" es el gestor que arranca la maquinaria
@@ -13,7 +14,7 @@ def obtener_noticias_browser() -> List[Dict[str, str]]:
         page = browser.new_page()
         
         # 3. Vamos a la web
-        page.goto("https://elpais.com")
+        page.goto(settings.SCRAPER_TARGET_URL)
         
         # 4. Esperamos a que existan los articulos
         # Esto es lo que BeautifulSoup no puede hacer (esperar a JS).
