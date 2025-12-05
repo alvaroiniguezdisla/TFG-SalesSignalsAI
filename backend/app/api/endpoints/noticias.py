@@ -10,7 +10,7 @@ from app.schemas.noticia import Noticia
 router = APIRouter()
 
 @router.get("/noticias", response_model=List[Noticia])
-def get_noticias(metodo: str = Query("html" , description="Metodo de obtención: 'html' o 'rss'")):
+def get_noticias(metodo: str = Query("html" , description="Metodo de obtención: 'html' , 'rss' o 'browser'")):
     
 
     if metodo == "rss":
