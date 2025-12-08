@@ -1,23 +1,44 @@
-import { useNoticias } from '../hooks/useNoticias'; 
+import { useState } from 'react';
+import { useNoticias } from '../hooks/useNoticias';
 import NewsCard from '../components/NewsCard';
 
 function Dashboard() {
-    // Usamos el Custom Hook: Lógica separada de la Vista
     const { noticias, loading, error, loadNews } = useNoticias();
+    const [activeMethod, setActiveMethod] = useState('html'); // Estado para saber cuál está activo
+
+    const handleMethodChange = (method) => {
+        setActiveMethod(method);
+        loadNews(method);
+    };
 
     if (loading) return <div className="loading">Cargando señales...</div>;
     if (error) return <div className="error">{error}</div>;
 
     return (
-        <div className="dashboard">
+        <div className="dashboard-container"> {/* Añadido container para márgenes */}
 
             <header>
                 <h1>Observatorio de Señales</h1>
                 <p>Monitorización en tiempo real de El País</p>
                 <div className="filters">
-                    <button onClick={() => loadNews('html')}>Scraper HTML</button>
-                    <button onClick={() => loadNews('rss')}>Feed RSS</button>
-                    <button onClick={() => loadNews('browser')}>Navegador Real</button>
+                    <button
+                        className={activeMethod === 'html' ? 'active' : ''}
+                        onClick={() => handleMethodChange('html')}
+                    >
+                        Scraper HTML
+                    </button>
+                    <button
+                        className={activeMethod === 'rss' ? 'active' : ''}
+                        onClick={() => handleMethodChange('rss')}
+                    >
+                        Feed RSS
+                    </button>
+                    <button
+                        className={activeMethod === 'browser' ? 'active' : ''}
+                        onClick={() => handleMethodChange('browser')}
+                    >
+                        Navegador Real
+                    </button>
                 </div>
             </header>
 
