@@ -1,7 +1,7 @@
-import { BrowserRouter, Routes, Route, Navigate} from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Dashboard from '../pages/Dashboard';
 
-export const AppRouter = () => {
+function AppRouter() {
     return (
         <BrowserRouter>
             <Routes>
@@ -17,3 +17,5 @@ export const AppRouter = () => {
         </BrowserRouter>
     )
 }
+
+export default AppRouter;
