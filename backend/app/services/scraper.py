@@ -1,44 +1,52 @@
 import requests
-import os
+import hashlib
 from bs4 import BeautifulSoup
+from datetime import datetime
 from typing import List, Dict
-from dotenv import load_dotenv
 from app.core.config import settings
 
 
-# Cargar variables de entorno desde .env
-load_dotenv()
+def hash_url(url:str) -> str:
+    "Crea una huella digital para cada URL para evitar duplicados"
+    return hashlib.md5(url.encode('utf-8')).hexdigest()
 
-def obtener_noticias() -> List[Dict[str, str]]:
+
+def scrape_elpais_portada() -> List[Dict]:
     url = settings.SCRAPER_TARGET_URL
+
     try:
         response = requests.get(url)
         response.raise_for_status() # Lanza error si no es 200
         
         soup = BeautifulSoup(response.text, 'html.parser')
-        noticias = []
+        noticias_limpias = []
 
         # En El País, las noticias suelen estar en etiquetas <article>
         articulos = soup.find_all('article')
 
         for articulo in articulos[:10]:
             # Buscamos el titular, que suele ser un h2
-            titulo_tag = articulo.find('h2')
-            if titulo_tag:
-                link_tag = titulo_tag.find('a')
-                if link_tag:
-                    titulo = link_tag.text.strip()
-                    link = link_tag['href']
+            h2 = articulo.find('h2')
+            if h2 and h2.find('a'):
+                etiqueta_link= h2.find('a')
+                href =etiqueta_link['href']
 
-                    # A veces los enlaces son relativos
-                    if link.startswith('/'):
-                        link = f'https://elpais.com{link}'
+                #Normalizamos la URL
+                url_completa= f"https://elpais.com{href}" if href.startswith("/") else href
 
-                    noticias.append({
-                        'titulo': titulo,
-                        'link': link
-                    })
-        return noticias
+                noticias_limpias.append({
+                    "url":url_completa,
+                    "url_hash": hash_url(url_completa),
+                    "titulo": etiqueta_link.text.strip(),
+                    "fuente": "El País-portada",
+                    "raw_content": str(articulo),
+                    "scraped_at": datetime.now().isoformat()
+                    
+                })
+
+
+        return noticias_limpias
+
     except Exception as e:
-        print(f"Error haciendo scraping: {e}")
+        print(f"Error en scrape_elpais_portada: {e}")
         return []

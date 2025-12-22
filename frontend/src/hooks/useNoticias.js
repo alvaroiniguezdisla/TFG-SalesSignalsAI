@@ -5,8 +5,8 @@ import { getNoticias } from '../services/api';
  * Custom Hook para gestionar la lógica de noticias.
  * @returns {Object} { noticias, loading, error, loadNews }
  */
-export const useNoticias = () => {
-    
+function useNoticias() {
+
     const [noticias, setNoticias] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -31,4 +31,6 @@ export const useNoticias = () => {
     }, [loadNews]);
 
     return { noticias, loading, error, loadNews };
-};
+}
+
+export default useNoticias;

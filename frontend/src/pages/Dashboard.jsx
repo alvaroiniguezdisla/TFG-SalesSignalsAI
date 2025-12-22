@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNoticias } from '../hooks/useNoticias';
+import useNoticias from '../hooks/useNoticias';
 import NewsCard from '../components/NewsCard';
 
 function Dashboard() {
