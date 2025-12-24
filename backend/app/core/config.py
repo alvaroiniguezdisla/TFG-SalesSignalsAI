@@ -5,10 +5,11 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "SalesSignalsAI"
     
     # Esta variable buscará automáticamente "SCRAPER_TARGET_URL" en el .env
-    SCRAPER_TARGET_URL: str = "https://elpais.com/"
-
+    SCRAPER_TARGET_URL: str = "https://cincodias.elpais.com/companias/"
+    
     #URL del feed RSS
-    RSS_TARGET_URL: str = "https://feeds.elpais.com/mrss-s/pages/ep/site/elpais.com/portada"
+    RSS_TARGET_URL: str = "https://feeds.elpais.com/mrss-s/list/ep/site/cincodias.elpais.com/section/companias"
+
 
     # Supabase Credentials
     SUPABASE_URL: str = ""

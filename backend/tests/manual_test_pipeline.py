@@ -4,8 +4,8 @@ import os
 # Truco para encontrar la carpeta 'app'
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from app.services.scraper import scrape_elpais_portada
-from app.services.database import SupabaseService
+from app.services.extraccion.scraper import scrape_elpais_portada
+from app.services.almacenamiento.database import SupabaseService
 
 def ejecutar_prueba():
     print("Iniciando prueba de pipeline...")

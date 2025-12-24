@@ -14,7 +14,7 @@ class SupabaseService:
         #Si se hace ingesta de noticias  , guardaremo slas noticias en la base de datos
         try:
             data=self.client.table("noticias").upsert(
-                news_list , on_conflict="url_hash", ignore_duplicates=True
+                news_list , on_conflict="url_hash", ignore_duplicates=False
             ).execute()
             print(f"Se han insertado {len(news_list)} noticias en la base de datos")
             return data

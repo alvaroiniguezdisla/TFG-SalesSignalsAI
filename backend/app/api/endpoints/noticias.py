@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Query
 from typing import List
-from app.services.scraper import obtener_noticias
-from app.services.rss import obtener_noticias_rss 
-from app.services.browser import obtener_noticias_browser
+from app.services.extraccion.scraper import obtener_noticias
+from app.services.extraccion.rss import obtener_noticias_rss 
+from app.services.extraccion.browser import obtener_noticias_browser
 
 
 from app.schemas.noticia import Noticia

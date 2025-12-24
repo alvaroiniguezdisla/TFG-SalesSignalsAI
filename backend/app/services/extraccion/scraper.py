@@ -21,8 +21,12 @@ def scrape_elpais_portada() -> List[Dict]:
         soup = BeautifulSoup(response.text, 'html.parser')
         noticias_limpias = []
 
-        # En El País, las noticias suelen estar en etiquetas <article>
-        articulos = soup.find_all('article')
+        # BUSCAMOS SOLO EN <main> PARA EVITAR EL "TICKER" DE POLITICA DEL HEADER
+        contenedor = soup.find('main')
+        if not contenedor: 
+            contenedor = soup # Fallback por si acaso
+
+        articulos = contenedor.find_all('article')
 
         for articulo in articulos[:10]:
             # Buscamos el titular, que suele ser un h2
@@ -32,13 +36,13 @@ def scrape_elpais_portada() -> List[Dict]:
                 href =etiqueta_link['href']
 
                 #Normalizamos la URL
-                url_completa= f"https://elpais.com{href}" if href.startswith("/") else href
+                url_completa= f"https://cincodias.elpais.com{href}" if href.startswith("/") else href
 
                 noticias_limpias.append({
                     "url":url_completa,
                     "url_hash": hash_url(url_completa),
                     "titulo": etiqueta_link.text.strip(),
-                    "fuente": "El País-portada",
+                    "fuente": "Cinco Días (Scraper)",
                     "raw_content": str(articulo),
                     "scraped_at": datetime.now().isoformat()
                     

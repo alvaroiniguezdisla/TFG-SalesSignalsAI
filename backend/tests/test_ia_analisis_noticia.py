@@ -4,7 +4,7 @@ import os
 #Añadimos la carpeta raíz al path para poder importar 'backend.app...'
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
-from app.services.llm_clasificacion_noticias import LlmService
+from app.services.inteligencia.llm_clasificacion_noticias import LlmService
 
 def test_ia_analisis_noticia():
     print(" Cargando modelo Llama 3.2 (Simulando Director Comercial HP)...")
