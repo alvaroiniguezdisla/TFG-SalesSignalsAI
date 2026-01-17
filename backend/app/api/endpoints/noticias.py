@@ -1,22 +1,17 @@
 from fastapi import APIRouter, Query
 from typing import List
-from app.services.extraccion.scraper import obtener_noticias
-from app.services.extraccion.rss import obtener_noticias_rss 
-from app.services.extraccion.browser import obtener_noticias_browser
-
-
+from app.services.almacenamiento.database import supabase
 from app.schemas.noticia import Noticia
 
 router = APIRouter()
 
 @router.get("/noticias", response_model=List[Noticia])
-def get_noticias(metodo: str = Query("html" , description="Metodo de obtención: 'html' , 'rss' o 'browser'")):
+def get_noticias():
+    """
+    Obtiene las noticias YA procesadas de la Base de Datos.
+    Esta es la ruta que consumirá el Frontend.
+    """
+    # Consultamos Supabase, ordenamos por fecha (descendente)
+    response = supabase.table("noticias_procesadas").select("*").order("scraped_at", desc=True).execute()
     
-
-    if metodo == "rss":
-        return obtener_noticias_rss()
-
-    if metodo == "browser":
-        return obtener_noticias_browser()
-    
-    return obtener_noticias()
+    return response.data

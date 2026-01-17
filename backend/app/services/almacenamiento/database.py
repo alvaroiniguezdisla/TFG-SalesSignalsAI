@@ -25,3 +25,7 @@ class SupabaseService:
 
             
         
+# Instancia global para usar en el resto de la app
+# Esto permite hacer 'from ...database import supabase'
+supabase_service = SupabaseService()
+supabase = supabase_service.client

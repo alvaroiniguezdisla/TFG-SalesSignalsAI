@@ -157,3 +157,52 @@ header p {
 .error {
   color: #e74c3c;
 }
+/* --- NUEVOS ESTILOS PARA LA TARJETA INTELIGENTE (IA) --- */
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.5rem;
+}
+
+.badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: white;
+}
+
+.badge-high { background-color: #2ecc71; }   /* Verde Éxito */
+.badge-medium { background-color: #f1c40f; color: #333; } /* Amarillo Alerta */
+.badge-low { background-color: #95a5a6; }   /* Gris Triste */
+
+.ai-summary {
+  background-color: #f8f9fa;
+  border-left: 4px solid #646cff;
+  padding: 0.75rem;
+  margin: 1rem 0;
+  font-size: 0.85rem;
+  color: #555;
+  font-style: italic;
+  border-radius: 4px;
+}
+
+.tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.tag {
+  background-color: #e3f2fd;
+  color: #1976d2;
+  border: 1px solid #bbdefb;
+  padding: 0.2rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
