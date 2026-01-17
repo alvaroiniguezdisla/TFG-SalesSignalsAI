@@ -1,10 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getNoticias } from '../services/api';
+import { getNoticias, refreshNews } from '../services/api';
 
-/**
- * Custom Hook para gestionar la lógica de noticias.
- * @returns {Object} { noticias, loading, error, loadNews }
- */
+
 function useNoticias() {
 
     const [noticias, setNoticias] = useState([]);
@@ -25,12 +22,33 @@ function useNoticias() {
         }
     }, []);
 
+    const forceRefresh = useCallback(async () => {
+        try {
+            setLoading(true);
+            setError(null);
+
+            //1. LLamamos al backen para que haga la ingesta de nocticias
+            await refreshNews();
+
+            //2. Volvemos a cargar los datos de la BD
+            await loadNews();
+
+        } catch (err) {
+            console.error(err);
+            setError("Error al refrescar las noticias");
+            setLoading(false);
+        }
+    }, [loadNews]);
+
+
+
+
     // Carga inicial
     useEffect(() => {
         loadNews();
     }, [loadNews]);
 
-    return { noticias, loading, error, loadNews };
+    return { noticias, loading, error, loadNews, forceRefresh };
 }
 
 export default useNoticias;

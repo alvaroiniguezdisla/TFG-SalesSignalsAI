@@ -21,3 +21,22 @@ export async function getNoticias(metodo = 'html') {
         throw error;
     }
 }
+
+export async function refreshNews(){
+    try{
+        const response = await fetch(`${API_URL}/refrescar`, {
+            method: 'POST',
+        });
+
+        if (!response.ok) {
+            throw new Error(`Error HTTP: ${response.status}`);
+        }
+
+        return await response.json();
+
+    } catch (error) {
+        console.error("Error refrescando noticias:", error);
+        throw error;        
+    }
+
+}     

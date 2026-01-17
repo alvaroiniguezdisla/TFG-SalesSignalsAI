@@ -3,49 +3,35 @@ import useNoticias from '../hooks/useNoticias';
 import NewsCard from '../components/NewsCard';
 
 function Dashboard() {
-    const { noticias, loading, error, loadNews } = useNoticias();
-    const [activeMethod, setActiveMethod] = useState('html'); // Estado para saber cuál está activo
+    const { noticias, loading, error, forceRefresh} = useNoticias();
 
-    const handleMethodChange = (method) => {
-        setActiveMethod(method);
-        loadNews(method);
-    };
+    const handleRefresh = () => {
+        forceRefresh();
+    }
 
-    if (loading) return <div className="loading">Cargando señales...</div>;
+    if (loading) return <div className="loading">Cargando señales de la BD...</div>;
     if (error) return <div className="error">{error}</div>;
 
     return (
         <div className="dashboard-container"> {/* Añadido container para márgenes */}
 
             <header>
-                <h1>Observatorio de Señales</h1>
-                <p>Monitorización en tiempo real de El País</p>
+                <h1>Observatorio de Señales</h1>    
+                <p>Monitorización Inteligente de Oportunidades</p>
+
                 <div className="filters">
-                    <button
-                        className={activeMethod === 'html' ? 'active' : ''}
-                        onClick={() => handleMethodChange('html')}
-                    >
-                        Scraper HTML
-                    </button>
-                    <button
-                        className={activeMethod === 'rss' ? 'active' : ''}
-                        onClick={() => handleMethodChange('rss')}
-                    >
-                        Feed RSS
-                    </button>
-                    <button
-                        className={activeMethod === 'browser' ? 'active' : ''}
-                        onClick={() => handleMethodChange('browser')}
-                    >
-                        Navegador Real
-                    </button>
+                    <button onClick={handleRefresh}>Refrescar datos</button>
                 </div>
             </header>
 
             <div className="news-grid">
-                {noticias.map((noticia, index) => (
-                    <NewsCard key={index} noticia={noticia} />
-                ))}
+                {noticias.length > 0 ? (
+                    noticias.map((noticia, index) => (
+                        <NewsCard key={index} noticia={noticia} />
+                    ))
+                ) : (
+                    <p>No hay noticias disponibles. Ejecuta el pipeline</p>
+                )}
             </div>
 
         </div>
