@@ -1,0 +1,207 @@
+/* CONTENEDOR PRINCIPAL */
+.detail-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 2rem;
+  background-color: #fff;
+  min-height: 100vh;
+}
+
+/* BOTÓN VOLVER */
+.back-btn {
+  background: white;
+  border: 1px solid #e2e8f0;
+  color: #64748b;
+  margin-bottom: 2rem;
+  font-size: 0.9rem;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.back-btn:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+  border-color: #cbd5e1;
+}
+
+/* CABECERA */
+.detail-header {
+  margin-bottom: 3rem;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 2rem;
+}
+
+.detail-header h1 {
+  font-size: 2.5rem;
+  line-height: 1.2;
+  margin: 1rem 0;
+  color: #1e293b;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+
+.detail-header .meta {
+  color: #64748b;
+  font-size: 0.95rem;
+  font-weight: 500;
+  display: flex;
+  gap: 1rem;
+}
+
+/* GRID LAYOUT (2 Columnas) */
+.detail-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr; /* 66% contenido, 33% sidebar */
+  gap: 4rem;
+}
+
+@media (max-width: 768px) {
+  .detail-grid {
+    grid-template-columns: 1fr; /* Móvil: 1 columna */
+    gap: 2rem;
+  }
+}
+
+/* CAJA ANÁLISIS COMERCIAL (Estilo destacado) */
+.analysis-box {
+  background-color: #f0f9ff;
+  border-left: 5px solid #3b82f6;
+  padding: 2rem;
+  border-radius: 8px;
+  margin-bottom: 3rem;
+}
+
+.analysis-box h3 {
+  color: #1d4ed8;
+  margin-top: 0;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 700;
+}
+
+.analysis-box p {
+  font-size: 1.15rem;
+  line-height: 1.7;
+  color: #334155;
+}
+
+/* RESUMEN ORIGINAL */
+.full-text h3 {
+  font-size: 1.25rem;
+  color: #334155;
+  border-bottom: 2px solid #f1f5f9;
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
+}
+.full-text p {
+  color: #475569;
+  line-height: 1.8;
+  font-size: 1.05rem;
+}
+
+/* SIDEBAR (Derecha) */
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* TARJETA DE PUNTUACIÓN */
+.score-card {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 2rem;
+  text-align: center;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+}
+
+.score-label {
+  display: block;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  color: #64748b;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.score-value {
+  font-size: 3.5rem;
+  font-weight: 900;
+  color: #0f172a;
+  line-height: 1;
+}
+
+/* LISTA DE EMPRESAS */
+.companies-list h4 {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  color: #94a3b8;
+  margin-bottom: 1rem;
+  font-weight: 700;
+}
+
+.company-tag {
+  display: inline-block;
+  background: #f1f5f9;
+  color: #475569;
+  padding: 0.3rem 0.8rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-right: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+/* BOTONES DE ACCIÓN */
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.action-btn {
+  width: 100%;
+  padding: 1rem;
+  border-radius: 10px;
+  text-align: center;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  transition: transform 0.1s;
+}
+
+.action-btn:active {
+  transform: scale(0.98);
+}
+
+.action-btn.primary {
+  background-color: #2563eb;
+  color: white;
+  box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
+}
+.action-btn.primary:hover {
+  background-color: #1d4ed8;
+}
+.action-btn.primary:disabled {
+  background-color: #cbd5e1;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.action-btn.secondary {
+  background-color: white;
+  border: 2px solid #e2e8f0;
+  color: #475569;
+}
+.action-btn.secondary:hover {
+  border-color: #cbd5e1;
+  background-color: #f8fafc;
+}

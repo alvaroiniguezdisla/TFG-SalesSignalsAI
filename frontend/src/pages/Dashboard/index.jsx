@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import useNoticias from '../hooks/useNoticias';
-import NewsCard from '../components/NewsCard';
+import useNoticias from '../../hooks/useNoticias'; // <--- CORREGIDO (../../)
+import NewsCard from '../../components/NewsCard'; // <--- CORREGIDO (../../)
+import './Dashboard.css';
 
 function Dashboard() {
-    const { noticias, loading, error, forceRefresh} = useNoticias();
+    const { noticias, loading, error, forceRefresh } = useNoticias();
 
     const handleRefresh = () => {
         forceRefresh();
@@ -16,7 +17,7 @@ function Dashboard() {
         <div className="dashboard-container"> {/* Añadido container para márgenes */}
 
             <header>
-                <h1>Observatorio de Señales</h1>    
+                <h1>Observatorio de Señales</h1>
                 <p>Monitorización Inteligente de Oportunidades</p>
 
                 <div className="filters">

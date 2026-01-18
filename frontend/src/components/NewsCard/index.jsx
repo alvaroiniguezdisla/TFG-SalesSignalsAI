@@ -1,10 +1,13 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import './NewsCard.css';
 
 /**
- * Componente Tarjeta Inteligente (Smart Card) - Rediseño v2
+ * Componente Tarjeta Inteligente (Smart Card) 
  * Aprovecha todas las columnas disponibles y mejora la legibilidad.
  */
 function NewsCard({ noticia }) {
+    const navigate = useNavigate();
 
     // 1. HELPERS para formato
     const formatDate = (dateString) => {
@@ -38,7 +41,9 @@ function NewsCard({ noticia }) {
     const category = noticia.categoria_ia || noticia.categoria || "General";
 
     return (
-        <div className="news-card">
+        <div className="news-card" onClick={() =>
+            navigate(`/noticia/${noticia.url_hash}`)}
+            style={{ cursor: 'pointer' }}>
 
             {/* --- CABECERA SUPERIOR: Categoría y Fecha --- */}
             <div className="card-top-meta">
@@ -81,6 +86,7 @@ function NewsCard({ noticia }) {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="btn-read-more"
+                    onClick={(e) => e.stopPropagation()}
                 >
                     Leer noticia→
                 </a>

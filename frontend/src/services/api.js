@@ -40,3 +40,14 @@ export async function refreshNews(){
     }
 
 }     
+
+export async function getNoticiaById(id){
+    try{
+        const response= await fetch(`${API_URL}/noticias/${id}`);
+        if (!response.ok) throw new Error("Noticia no encontrada");
+        return await response.json();
+    }catch (error){
+        console.error(error);
+        return null;
+    }
+}
