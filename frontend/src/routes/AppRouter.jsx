@@ -1,14 +1,23 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import ProtectedRoute from '../components/ProtectedRoute';
+
 import Dashboard from '../pages/Dashboard';
 import NewsDetail from '../pages/NewsDetail'; 
+import Login from '../pages/Login';
+import Register from '../pages/Register';
+
 
 function AppRouter() {
     return (
         <BrowserRouter>
             <Routes>
-                {/* Si entra en la raíz, lo mandamos a /noticias*/}
-                <Route path="/" element={<Dashboard />} />
-                <Route path="/noticia/:id" element={<NewsDetail />} />
+                {/* Rutas publicas*/}
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                
+                {/* Rutas privadas*/}
+                <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+                <Route path="/noticia/:id" element={<ProtectedRoute><NewsDetail /></ProtectedRoute>} />
 
             </Routes>
         </BrowserRouter>
