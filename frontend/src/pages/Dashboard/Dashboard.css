@@ -1,28 +1,56 @@
 /* CONTENEDOR PRINCIPAL DEL DASHBOARD */
 .dashboard-container {
   max-width: 1200px;
-  margin: 0 auto; /* Centrado horizontal */
+  margin: 0 auto;
+  /* Centrado horizontal */
   padding: 2rem;
 }
 
 /* CABECERA (Título y Subtítulo) */
 .dashboard-header {
   margin-bottom: 3rem;
-  text-align: center;
+
+}
+
+.header-top {
+  display: flex;
+  justify-content: space-between;
+  /* Separa los elementos al máximo */
+  align-items: center;
+  /* Los centra verticalmente */
+  margin-bottom: 1.5rem;
 }
 
 .dashboard-header h1 {
   font-size: 2.5rem;
-  color: #1e293b; /* Color oscuro profesional */
+  color: #1e293b;
+  /* Color oscuro profesional */
   margin-bottom: 0.5rem;
   font-weight: 800;
   letter-spacing: -1px;
 }
 
 .dashboard-header p {
-  color: #64748b; /* Gris medio */
+  color: #64748b;
+  /* Gris medio */
   font-size: 1.2rem;
   font-weight: 400;
+}
+
+/* ICONO PERFIL */
+.profile-icon {
+  color: #3b82f6;
+  /* Azulito */
+  transition: transform 0.2s, color 0.2s;
+  display: flex;
+  align-items: center;
+}
+
+.profile-icon:hover {
+  color: #2563eb;
+  /* Azul más oscuro al pasar ratón */
+  transform: scale(1.1);
+  /* Efecto pop */
 }
 
 /* GRID DE NOTICIAS (Rejilla responsive) */
@@ -30,7 +58,8 @@
   display: grid;
   /* Crea columnas automáticamente de mín 320px */
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 2rem; /* Espacio entre tarjetas */
+  gap: 2rem;
+  /* Espacio entre tarjetas */
   padding-bottom: 3rem;
 }
 
@@ -47,18 +76,24 @@
   width: 40px;
   height: 40px;
   border: 4px solid #f3f3f3;
-  border-top: 4px solid #3b82f6; /* Azul */
+  border-top: 4px solid #3b82f6;
+  /* Azul */
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: 1rem;
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
-/* BOTÓN REFRESCAR (Opcional, si lo tienes en el header) */
+/* BOTÓN REFRESCAR  */
 .refresh-btn {
   background-color: #3b82f6;
   color: white;
@@ -68,12 +103,44 @@
   cursor: pointer;
   font-weight: 600;
   transition: background 0.2s;
-  margin-top: 1rem;
+  margin-top: 0;
+  /* Reset margin */
 }
+
 .refresh-btn:hover {
   background-color: #2563eb;
 }
+
 .refresh-btn:disabled {
   background-color: #94a3b8;
   cursor: wait;
+}
+
+/* FILTROS */
+.filters {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  margin-top: 1rem;
+}
+
+.view-selector {
+  padding: 0.6rem 1rem;
+  background-color: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  color: #374151;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.view-selector:hover {
+  border-color: #3b82f6;
+}
+
+.view-selector:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
 }

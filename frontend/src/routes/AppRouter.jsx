@@ -5,6 +5,7 @@ import Dashboard from '../pages/Dashboard';
 import NewsDetail from '../pages/NewsDetail'; 
 import Login from '../pages/Login';
 import Register from '../pages/Register';
+import Profile from '../pages/Profile';
 
 
 function AppRouter() {
@@ -18,6 +19,7 @@ function AppRouter() {
                 {/* Rutas privadas*/}
                 <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
                 <Route path="/noticia/:id" element={<ProtectedRoute><NewsDetail /></ProtectedRoute>} />
+                <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
 
             </Routes>
         </BrowserRouter>
