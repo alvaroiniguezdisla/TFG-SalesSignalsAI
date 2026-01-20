@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import './Profile.css';
 
 function Profile() {
+    const navigate = useNavigate();
     // 1. Usamos el contexto
     const { user, profile, signOut, updateProfile } = useAuth();
 
@@ -88,6 +90,7 @@ function Profile() {
 
     return (
         <div className="profile-container">
+            <button onClick={() => navigate(-1)} className="back-btn">← Volver</button>
             <h1>Mi Perfil</h1>
 
             <div className="profile-card">

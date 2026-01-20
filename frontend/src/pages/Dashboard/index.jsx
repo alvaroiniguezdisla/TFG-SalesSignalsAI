@@ -19,27 +19,26 @@ function Dashboard() {
     const filteredNoticias = viewMode === 'all'
         ? noticias
         : noticias.filter(noticia => {
-            const companies = profile?.favorite_companies || [];
-            const categories = profile?.favorite_categories || [];
+            const companies_user= profile?.favorite_companies || [];
+            const categories_user=profile?.favorite_categories || [];
 
-            // 1. Coincidencia por Empresa (Tokenizado)
-            // Divide "Vodafone España" en ["vodafone", "españa"] y busca coincidencias parciales
-            const matchCompany = companies.some(companyTag => {
-                const terms = companyTag.toLowerCase().split(' ').filter(t => t.length > 2);
-                if (terms.length === 0) return false;
-
-                // Coincidencia si ALGUNO de los términos significativos aparece
-                return terms.some(term =>
-                    noticia.title?.toLowerCase().includes(term) ||
-                    noticia.summary_ia?.toLowerCase().includes(term)
+            // --- 1.  FILTRO DE EMPRESAS ---
+            const tagsDeNoticia=noticia.empresas_clave_ia || [];
+            const matchCompany = companies_user.some(miFavorita => {
+                // Miramos si alguna  empresa favorita del user está incluída en los tags de la noticia
+                return tagsDeNoticia.some(tagIA => 
+                    tagIA.toLowerCase().includes(miFavorita.toLowerCase())
                 );
             });
 
-            // 2. Coincidencia por Categoría
-            const matchCategory = categories.some(cat =>
-                noticia.category_ia?.toLowerCase().includes(cat.toLowerCase())
-            );
-
+            // --- 2.  FILTRO DE CATEGORIAS ---
+            const tagsDeCategoria=noticia.categoria_ia || [];
+            const matchCategory = categories_user.some(miFavorita => {
+                // Miramos si alguna  categoria favorita del user está incluída en los tags de la noticia
+                return tagsDeCategoria.some(tagIA => 
+                    tagIA.toLowerCase().includes(miFavorita.toLowerCase())
+                );
+            });
             return matchCompany || matchCategory;
         });
 

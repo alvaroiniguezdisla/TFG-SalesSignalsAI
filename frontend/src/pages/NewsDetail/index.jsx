@@ -43,7 +43,7 @@ function NewsDetail() {
                     </section>
 
                     <div className="full-text">
-                        <h3>Resumen Original</h3>
+                        <h3>Resumen IA</h3>
                         <p>{noticia.resumen}</p>
                     </div>
                 </div>

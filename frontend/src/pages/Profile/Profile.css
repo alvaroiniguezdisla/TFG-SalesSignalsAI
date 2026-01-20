@@ -173,6 +173,25 @@
     transition: background 0.2s;
 }
 
+
 .save-prefs-btn:hover {
     background-color: #2563eb;
+}
+
+/* BOTÓN VOLVER */
+.back-btn {
+    background: none;
+    border: none;
+    font-size: 1rem;
+    color: #64748b;
+    cursor: pointer;
+    margin-bottom: 1rem;
+    font-weight: 500;
+    padding: 0;
+    transition: color 0.2s;
+}
+
+.back-btn:hover {
+    color: #3b82f6;
+    text-decoration: underline;
 }

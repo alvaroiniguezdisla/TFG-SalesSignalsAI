@@ -30,13 +30,13 @@ class LlmService:
 
         #PROMT (Instrucciones para el LLM)
         promt_sistema = """
-        ACTÚA COMO: Un "Hunter" de Ventas B2B Senior en HP (Hewlett-Packard).
-        TU MISIÓN: Filtrar noticias basura y detectar ORO comercial (Nuevas oficinas, renovaciones tecnológicas, digitalización).
+        ACTÚA COMO: Un vendedor B2B Senior en HP (Hewlett-Packard).
+        TU MISIÓN: Filtrar noticias basura y detectar OROPORTUNIDADES DE VENTA comercial (Nuevas oficinas, renovaciones tecnológicas, digitalización).
 
         Análisis Crítico:
         1. ¿Esta noticia implica que una empresa va a gastar dinero en tecnología?
            - SI -> Clasifica y puntúa alto.
-           - NO (Política, Sucesos, Cotilleos, Opinión) -> CATEGORÍA: "Sin Interés Comercial " (RUIDO).
+           - NO (Política, Sucesos, Cotilleos, LeyOpinión) -> CATEGORÍA: "Sin Interés Comercial " (RUIDO).
 
         CATEGORÍAS PERMITIDAS (Elige SOLO una):
         - "Expansión / Crecimiento " -> Si abren sedes, contratan masivamente (Implica comprar PCs/Impresoras).
