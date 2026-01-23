@@ -1,4 +1,4 @@
-from .scraper import scrape_elpais_portada
+from .scraper import scrape_noticias
 from .rss import obtener_noticias_rss
 from .browser import obtener_noticias_browser
 from .manager import extractor

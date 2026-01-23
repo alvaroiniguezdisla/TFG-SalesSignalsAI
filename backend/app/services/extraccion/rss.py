@@ -1,21 +1,39 @@
+from app.core.config import settings
 import feedparser
 import hashlib
 import requests
 from bs4 import BeautifulSoup
 from typing import List, Dict, Any
 from datetime import datetime
-from app.core.config import settings
+
 
 def hash_url(url:str) -> str:
     return hashlib.md5(url.encode('utf-8')).hexdigest()
 
-def obtener_noticias_rss() -> List[Dict[str, Any]]:
-    url_feed = settings.RSS_TARGET_URL
+def obtener_noticias_rss(url_feed: str, nombre_fuente: str="RSS Genérico") -> List[Dict[str, Any]]:
     print(f"Leyendo RSS desde: {url_feed}")
     
-    feed = feedparser.parse(url_feed)
-    noticias=[]
+    # 1. Descargamos el XML "disfrazados" de navegador para evitar bloqueos (El Economista)
+    headers_feed = {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'application/rss+xml, application/xml, text/xml, */*'
+    }
+    
+    try:
+        response_feed = requests.get(url_feed, headers=headers_feed, timeout=10)
+        response_feed.raise_for_status()
+        # Pasamos el contenido binario a feedparser
+        feed = feedparser.parse(response_feed.content)
+    except Exception as e:
+        print(f"Error crítico descargando el feed {url_feed}: {e}")
+        return []
 
+    #Si el feed falla o está vacío
+    if not feed.entries:
+        print(f"No se encontraron entradas en el feed (posible error de parseo): {url_feed}")
+        return []
+
+    noticias = [] # <--- RESTAURADO
     for entry in feed.entries[:10]:
         try:
             url_noticia = entry.link
@@ -44,7 +62,7 @@ def obtener_noticias_rss() -> List[Dict[str, Any]]:
                 "url": url_noticia,
                 "url_hash": hash_url(url_noticia),
                 "titulo": titulo,
-                "fuente": "Cinco Dias (RSS+Hybrid)",
+                "fuente": nombre_fuente,
                 "raw_content": raw_content,
                 "resumen": entry.summary if 'summary' in entry else "",
                 "scraped_at": datetime.now().isoformat()

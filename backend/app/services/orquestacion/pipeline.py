@@ -23,41 +23,49 @@ class NewsPipeline:
         noticias_enriquecidas= []
 
         # 2. Analizamos una a una 
-
         for noticia in noticias_crudas:
-            # --- LIMPIEZA DE TEXTO (MEJORADO) ---
-            soup = BeautifulSoup(noticia.get('raw_content', ''), 'html.parser')
-            texto_limpio = soup.get_text(separator=' ', strip=True)
-            print(f" [IA] Texto limpio enviado: {texto_limpio[:100]}...") 
+            try:
+                # Validacion de contenido base
+                raw_content = noticia.get('raw_content', '')
+                if not raw_content:
+                    print(f"[PIPELINE] Saltando noticia '{noticia.get('titulo', 'Sin titulo')[:30]}...' por falta de contenido raw")
+                    continue
 
-            analisis = self.llm.analizar_oportunidad(noticia['titulo'], texto_limpio)
-
-            # --- AÑADE ESTO ---
-            if analisis:
-                print(f" DEBUG IA RAW: {analisis}")
-            # ------------------
-
-            if analisis:
-                #3. Guardamos en la base de datos
+                # --- LIMPIEZA DE TEXTO ---
+                soup = BeautifulSoup(raw_content, 'html.parser')
+                texto_limpio = soup.get_text(separator=' ', strip=True)
                 
-                noticia['categoria_ia']= analisis['categoria']
-                noticia['relevancia_ia'] = analisis['relevancia']
-                noticia['resumen_comercial_ia'] = analisis['resumen_comercial']
-                noticia['empresas_clave_ia'] = analisis['empresas']
+                # Validacion de longitud minima
+                if len(texto_limpio) < 50:
+                    print(f"[PIPELINE] Saltando noticia '{noticia['titulo'][:30]}...' por contenido insuficiente ({len(texto_limpio)} chars)")
+                    continue
 
-            else:
-                # Fallback por si la IA no funciona
-                noticia['categoria_ia'] = "Error IA"
-                noticia['relevancia_ia'] = 0
-                noticia['resumen_comercial_ia'] = "Falló el análisis"
-                noticia['empresas_clave_ia'] = []
+                print(f"[PIPELINE] Analizando con IA: {noticia['titulo'][:50]}...") 
+                
+                # Llamada protegida a la IA
+                analisis = self.llm.analizar_oportunidad(noticia['titulo'], texto_limpio)
 
-            noticias_enriquecidas.append(noticia)
+                if analisis:
+                    noticia['categoria_ia'] = analisis.get('categoria', 'Sin clasificar')
+                    noticia['relevancia_ia'] = analisis.get('relevancia', 0)
+                    noticia['resumen_comercial_ia'] = analisis.get('resumen_comercial', '')
+                    noticia['empresas_clave_ia'] = analisis.get('empresas', [])
+                else:
+                    noticia['categoria_ia'] = "Error IA"
+                    noticia['relevancia_ia'] = 0
+                    noticia['resumen_comercial_ia'] = "No se pudo analizar"
+                    noticia['empresas_clave_ia'] = []
+
+                noticias_enriquecidas.append(noticia)
+            
+            except Exception as e:
+                print(f"[PIPELINE] Error procesando noticia '{noticia.get('titulo', 'Unknown')[:30]}': {e}")
+                continue
 
         #4. Guardamos en la base de datos
         print("[PIPELINE] Guardando noticias en la base de datos...")
         
-        self.db.insert_news(noticias_enriquecidas)
+        self.db.insert_news_deduplicacion(noticias_enriquecidas)
 
         print(f"[PIPELINE] Se han guardado {len(noticias_enriquecidas)} noticias")
 

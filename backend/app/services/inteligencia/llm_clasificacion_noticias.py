@@ -17,6 +17,7 @@ class SalesSignal(BaseModel):
     relevancia: int = Field(..., description="Puntuación 0-100 de interés para HP")
     resumen_comercial: str =Field(..., description="Justificación breve para el vendedor")
     empresas: list[str]= Field(..., description="Lista de empresas potenciales clientes")
+    #categoria_de_productos:pc,workstatios,impresoras,accesorios
 
 # 3. EL SERVICIO DE IA
 class LlmService:

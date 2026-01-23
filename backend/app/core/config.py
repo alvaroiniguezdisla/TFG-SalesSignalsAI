@@ -8,7 +8,23 @@ class Settings(BaseSettings):
     SCRAPER_TARGET_URL: str = "https://cincodias.elpais.com/companias/"
     
     #URL del feed RSS
-    RSS_TARGET_URL: str = "https://feeds.elpais.com/mrss-s/list/ep/site/cincodias.elpais.com/section/companias"
+    RSS_SOURCES: list[dict] = [
+        # Fuente 1: Cinco Días
+        {
+            "name": "Cinco Días (Compañías)",
+            "url": "https://feeds.elpais.com/mrss-s/list/ep/site/cincodias.elpais.com/section/companias", # RSS (XML)
+            "scraper_url": "https://cincodias.elpais.com/companias/", # FALLBACK (HTML)
+            "type": "rss"
+        },
+        # Fuente 2: El Economista 
+        {
+            "name": "El Economista (Mercados)",
+            "url": "https://www.eleconomista.es/rss/rss-mercados.php", 
+            "scraper_url": "https://www.eleconomista.es/empresas-finanzas/", # HTML SOLICITADO
+            "type": "rss"
+        }
+    ]
+    #economismta, bolsa española
 
 
     # Supabase Credentials

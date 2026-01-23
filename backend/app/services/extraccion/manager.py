@@ -1,9 +1,11 @@
 import logging
 from typing import List,Dict, Any
-#Importamos los metodos de extraccion de noticias
 from app.services.extraccion.rss import obtener_noticias_rss
-from app.services.extraccion.scraper import scrape_elpais_portada
+# Importamos los métodos 
+from app.services.extraccion.scraper import scrape_noticias
 from app.services.extraccion.browser import obtener_noticias_browser
+from app.core.config import settings
+from app.core.deduplication import es_titulo_similar, fusionar_datos_noticia
 
 # Configuramos un log para ver qué está pasando por debajo
 logging.basicConfig(level=logging.INFO)
@@ -11,56 +13,92 @@ logger = logging.getLogger(__name__)
 
 class NewsExtractorManager:
     """
-    Clase en la que se va a encargar de obtenr noticias en el siguiente orden:
+    Clase en la que se va a encargar de obtner noticias en el siguiente orden:
     1. RSS
     2. Scraper
     3. Browser
     """
     def obtener_noticias(self) -> List[Dict[str, Any]]:
-        noticias=[]
+        todas_las_noticias = []
 
-        #1. Intento RSS
-        try:
-            logger.info("Intentando obtener noticias con RSS")
-            noticias=obtener_noticias_rss()
-            if noticias:
-                logger.info(f" ÉXITO al obtener noticias con RSS. Se obtuvieron {len(noticias)} noticias con RSS")
-                return noticias
+        for source in settings.RSS_SOURCES:
+            nombre = source['name']
+            logger.info(f"---Procesando Fuente: {nombre} ---")
+            
+            noticias_fuente = []
+            exito = False
+            
+            rss_url = source.get('url')
+            html_url = source.get('scraper_url') # La URL de respaldo
+
+            # 1. INTENTO RSS
+            if rss_url:
+                try:
+                    logger.info(f"    RSS: {rss_url}")
+                    noticias_fuente = obtener_noticias_rss(rss_url, nombre)
+                    if noticias_fuente:
+                        logger.info(f"    RSS OK: {len(noticias_fuente)} noticias")
+                        exito = True
+                except Exception as e:
+                    logger.warning(f"    Falló RSS: {e}")
+
+            # 2. INTENTO SCRAPER 
+            if not exito and html_url:
+                try:
+                    logger.info(f"    Scraper: {html_url}")
+                    noticias_fuente = scrape_noticias(html_url, nombre)
+                    if noticias_fuente:
+                        logger.info(f"    Scraper OK: {len(noticias_fuente)} noticias")
+                        exito = True
+                except Exception as e:
+                    logger.warning(f"    Falló Scraper: {e}")
+
+            # 3. INTENTO BROWSER 
+            if not exito and html_url:
+                try:
+                    logger.info(f"    Browser: {html_url}")
+                    noticias_fuente = obtener_noticias_browser(html_url, nombre)
+                    if noticias_fuente:
+                        logger.info(f"    Browser OK: {len(noticias_fuente)} noticias")
+                        exito = True
+                except Exception as e:
+                    logger.error(f"    Falló todo para {nombre}")
+
+            # ACUMULAMOS resultados
+            if noticias_fuente:
+                todas_las_noticias.extend(noticias_fuente)
             else:
-                logger.warning("No se obtuvieron noticias con RSS")
-                
-        except Exception as e:
-            logger.error(f"Error al obtener noticias con RSS: {e}")
+                logger.error(f" Imposible obtener noticias de {nombre} por ningún método.")
 
-        #2. Intento Scraper
-        try:
-            logger.info("Intentando obtener noticias con Scraper")
-            noticias=scrape_elpais_portada()
-            if noticias:
-                logger.info(f" ÉXITO al obtener noticias con Scraper. Se obtuvieron {len(noticias)} noticias con Scraper")
-                return noticias
-            else:
-                logger.warning("No se obtuvieron noticias con Scraper")
-                
-        except Exception as e:
-            logger.error(f"Error al obtener noticias con Scraper: {e}")
+        # 4. Deduplicación Semántica
+        logger.info(f"Total noticias crudas: {len(todas_las_noticias)}")
+        noticias_unicas = self.deduplicar_por_titulo(todas_las_noticias)
+        logger.info(f"Total tras deduplicación: {len(noticias_unicas)}")
 
-        #3. Intento Browser
-        try:
-            logger.info("Intentando obtener noticias con Browser")
-            noticias=obtener_noticias_browser()
-            if noticias:
-                logger.info(f" ÉXITO al obtener noticias con Browser. Se obtuvieron {len(noticias)} noticias con Browser")
-                return noticias
-            else:
-                logger.warning("No se obtuvieron noticias con Browser")
-                
-        except Exception as e:
-            logger.error(f"Error al obtener noticias con Browser: {e}")
-
-        #4. Si no se obtuvieron noticias, devuelvo una lista vacía
-        logger.error("TODOS LOS METODOS HAN FALLADO. No se obtuvieron noticias")
-        return []
+        return noticias_unicas
+    
+    def deduplicar_por_titulo(self, lista_noticias: List[Dict])-> List[Dict]:
+        """
+        Refactorizado para usar app.core.deduplication (lógica compartida).
+        """
+        unicas = []
+        for nueva in lista_noticias:
+            es_duplicada = False
+            for existente in unicas:
+                # Usamos la función compartida
+                if es_titulo_similar(nueva['titulo'], existente['titulo']):
+                    es_duplicada = True
+                    
+                    # Usamos la función de fusión compartida
+                    cambios = fusionar_datos_noticia(existente, nueva)
+                    if cambios:
+                        logger.info(f"FUSIÓN: {existente['titulo']} <-- {nueva['titulo']}")
+                    break 
+            
+            if not es_duplicada:
+                unicas.append(nueva)
+        
+        return unicas
 
 # Instacia global para usar en pipeline
 extractor = NewsExtractorManager()

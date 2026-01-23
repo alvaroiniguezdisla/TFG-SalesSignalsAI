@@ -9,7 +9,7 @@ class Noticia(BaseModel):
     
     id: Optional[str] = None
     resumen: Optional[str] = None
-    categoria: Optional[str] = None
+
     
     # Campos enriquecidos por IA
     relevancia_ia: int = 0
