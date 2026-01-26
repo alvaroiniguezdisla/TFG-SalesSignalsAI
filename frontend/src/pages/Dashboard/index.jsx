@@ -26,19 +26,16 @@ function Dashboard() {
             const tagsDeNoticia=noticia.empresas_clave_ia || [];
             const matchCompany = companies_user.some(miFavorita => {
                 // Miramos si alguna  empresa favorita del user está incluída en los tags de la noticia
-                return tagsDeNoticia.some(tagIA => 
+                return tagsDeNoticia.some(tagIA =>
                     tagIA.toLowerCase().includes(miFavorita.toLowerCase())
                 );
             });
 
             // --- 2.  FILTRO DE CATEGORIAS ---
-            const tagsDeCategoria=noticia.categoria_ia || [];
-            const matchCategory = categories_user.some(miFavorita => {
-                // Miramos si alguna  categoria favorita del user está incluída en los tags de la noticia
-                return tagsDeCategoria.some(tagIA => 
-                    tagIA.toLowerCase().includes(miFavorita.toLowerCase())
-                );
-            });
+            const categoriaNoticia = noticia.categoria_ia || "";
+            const matchCategory = categories_user.some(miFavorita =>
+                categoriaNoticia.toLowerCase().includes(miFavorita.toLowerCase())
+            );
             return matchCompany || matchCategory;
         });
 

@@ -1,8 +1,11 @@
-import multiprocessing
+# ----------------------------------------------------------------------------------
+# HERRAMIENTA MANUAL: INGESTA DE NOTICIAS
+# Qué hace esto: Se conecta a las fuentes (El País, etc) y descarga lo que haya ahora mismo.
+# Para qué sirve: Para probar si las fuentes funcionan y qué están publicando sin guardar nada.
+# ----------------------------------------------------------------------------------
+
 import sys
 import os
-import json
-
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
 

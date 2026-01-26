@@ -1,3 +1,9 @@
+# ----------------------------------------------------------------------------------
+# HERRAMIENTA MANUAL: EJECUTAR TODO EL SISTEMA DE UNA VEZ
+# Qué hace esto: Lanza el proceso completo (Descargar -> Analizar -> Guardar)
+# Para qué sirve: Si quiero actualizar la base de datos "a mano" ahora mismo.
+# ----------------------------------------------------------------------------------
+
 import sys
 import os
 import time
@@ -33,7 +39,7 @@ def ejecutar_pipeline_real():
         print(f"\nERROR CRITICO: {e}")
         # Si es error de importacion de ollama, damos pista
         if "No module named 'ollama'" in str(e):
-             print("\n[PISTA] Parece que falta la libreria 'ollama'. Ejecuta: pip install ollama")
+            print("\n[PISTA] Parece que falta la libreria 'ollama'. Ejecuta: pip install ollama")
 
     end_time = time.time()
     duration = end_time - start_time

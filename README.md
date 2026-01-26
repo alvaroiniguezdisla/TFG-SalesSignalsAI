@@ -9,8 +9,7 @@ Necesitas dos terminales abiertas (una para el backend y otra para el frontend).
 ### 1. Backend (FastAPI)
 ```bash
 cd backend
-source venv/bin/activate  # En Windows: venv\Scripts\activate
-uvicorn main:app --reload
+./venv/bin/uvicorn app.main:app --reload
 ```
 El backend estará escuchando en: `http://localhost:8000`
 
