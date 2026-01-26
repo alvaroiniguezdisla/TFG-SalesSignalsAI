@@ -33,6 +33,18 @@
     color: #646cff;
 }
 
+.meta-product-badge {
+    background-color: #e0e7ff;
+    color: #4338ca;
+    padding: 0.1rem 0.6rem;
+    border-radius: 12px;
+    font-size: 0.65rem;
+    font-weight: 800;
+    margin-left: 0.5rem;
+    align-self: center;
+    border: 1px solid #c7d2fe;
+}
+
 .card-body {
     padding: 1.5rem;
     flex-grow: 1;

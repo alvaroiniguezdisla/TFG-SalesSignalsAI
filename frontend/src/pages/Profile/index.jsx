@@ -17,7 +17,6 @@ function Profile() {
         favorite_categories: []
     });
     const [newCompany, setNewCompany] = useState('');
-    const [newCategory, setNewCategory] = useState('');
 
     // Cargar datos del perfil en el formulario cuando llegan
     useEffect(() => {
@@ -69,16 +68,6 @@ function Profile() {
         });
     };
 
-    // Añadir categoría
-    const handleAddCategory = () => {
-        if (newCategory.trim() && !formData.favorite_categories.includes(newCategory.trim())) {
-            setFormData({
-                ...formData,
-                favorite_categories: [...formData.favorite_categories, newCategory.trim()]
-            });
-            setNewCategory('');
-        }
-    };
 
     // Eliminar categoría
     const handleRemoveCategory = (category) => {
@@ -86,6 +75,34 @@ function Profile() {
             ...formData,
             favorite_categories: formData.favorite_categories.filter(c => c !== category)
         });
+    };
+
+    // Constantes de Backend
+    // 1. SEÑALES DE NEGOCIO
+    const SIGNAL_CATEGORIES = [
+        "Expansión / Crecimiento",
+        "Transformación Digital",
+        "Resultados Financieros",
+        "M&A / Fusiones"
+    ];
+
+    // 2. PRODUCTOS HP
+    const PRODUCT_CATEGORIES = [
+        "Gaming / OMEN",
+        "Impresión y Escáner",
+        "PC Consumo (Hogar/Estudiantes)",
+        "Soluciones Empresariales (ProBook/Elite)",
+        "Servicios y Soluciones IT"
+    ];
+
+    // Función genérica para añadir tags
+    const handleAddTag = (tag) => {
+        if (tag && !formData.favorite_categories.includes(tag)) {
+            setFormData({
+                ...formData,
+                favorite_categories: [...formData.favorite_categories, tag]
+            });
+        }
     };
 
     return (
@@ -174,26 +191,54 @@ function Profile() {
                         </div>
                     </div>
 
-                    {/* CATEGORÍAS FAVORITAS */}
+                    {/* INTERESES: SEÑALES DE NEGOCIO */}
                     <div className="preference-group">
-                        <label>Categorías Favoritas</label>
+                        <label>Categorias de Señales</label>
                         <div className="add-row">
-                            <input
-                                type="text"
-                                placeholder="Ej: Energía"
-                                value={newCategory}
-                                onChange={(e) => setNewCategory(e.target.value)}
-                                onKeyPress={(e) => e.key === 'Enter' && handleAddCategory()}
-                            />
-                            <button type="button" onClick={handleAddCategory} className="add-btn">Añadir</button>
+                            <select
+                                onChange={(e) => handleAddTag(e.target.value)}
+                                className="category-select"
+                                value="" // Siempre reset
+                            >
+                                <option value="" disabled>Añadir señal...</option>
+                                {SIGNAL_CATEGORIES.map(cat => (
+                                    <option key={cat} value={cat}>{cat}</option>
+                                ))}
+                            </select>
                         </div>
+                    </div>
+
+                    {/* INTERESES: PRODUCTOS HP */}
+                    <div className="preference-group">
+                        <label>Categorias de Productos</label>
+                        <div className="add-row">
+                            <select
+                                onChange={(e) => handleAddTag(e.target.value)}
+                                className="category-select"
+                                value=""
+                            >
+                                <option value="" disabled>Añadir producto...</option>
+                                {PRODUCT_CATEGORIES.map(cat => (
+                                    <option key={cat} value={cat}>{cat}</option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
+
+                    {/* LISTA DE ETIQUETAS SELECCIONADAS (MIXTA) */}
+                    <div className="preference-group">
+                        <label>Mis Intereses Seleccionados</label>
                         <div className="tags-container">
-                            {formData.favorite_categories.map((category, index) => (
-                                <span key={index} className="tag">
-                                    {category}
-                                    <button onClick={() => handleRemoveCategory(category)} className="tag-remove">✕</button>
-                                </span>
-                            ))}
+                            {formData.favorite_categories.length > 0 ? (
+                                formData.favorite_categories.map((category, index) => (
+                                    <span key={index} className="tag">
+                                        {category}
+                                        <button onClick={() => handleRemoveCategory(category)} className="tag-remove">✕</button>
+                                    </span>
+                                ))
+                            ) : (
+                                <p className="no-tags">No has seleccionado ningún interés.</p>
+                            )}
                         </div>
                     </div>
                 </div>

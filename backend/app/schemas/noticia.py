@@ -16,6 +16,7 @@ class Noticia(BaseModel):
     resumen_comercial_ia: Optional[str] = None
     empresas_clave_ia: List[str] = []
     categoria_ia: Optional[str] = None
+    categoria_producto_ia: Optional[str] = None
     
     published_at: Optional[str] = None
     scraped_at: Optional[str] = None

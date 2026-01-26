@@ -19,11 +19,11 @@ function Dashboard() {
     const filteredNoticias = viewMode === 'all'
         ? noticias
         : noticias.filter(noticia => {
-            const companies_user= profile?.favorite_companies || [];
-            const categories_user=profile?.favorite_categories || [];
+            const companies_user = profile?.favorite_companies || [];
+            const categories_user = profile?.favorite_categories || [];
 
             // --- 1.  FILTRO DE EMPRESAS ---
-            const tagsDeNoticia=noticia.empresas_clave_ia || [];
+            const tagsDeNoticia = noticia.empresas_clave_ia || [];
             const matchCompany = companies_user.some(miFavorita => {
                 // Miramos si alguna  empresa favorita del user está incluída en los tags de la noticia
                 return tagsDeNoticia.some(tagIA =>

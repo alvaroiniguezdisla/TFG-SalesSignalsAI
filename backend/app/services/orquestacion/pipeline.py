@@ -47,11 +47,13 @@ class NewsPipeline:
 
                 if analisis:
                     noticia['categoria_ia'] = analisis.get('categoria', 'Sin clasificar')
+                    noticia['categoria_producto_ia'] = analisis.get('categoria_producto', 'Otros / No Aplica')
                     noticia['relevancia_ia'] = analisis.get('relevancia', 0)
                     noticia['resumen_comercial_ia'] = analisis.get('resumen_comercial', '')
                     noticia['empresas_clave_ia'] = analisis.get('empresas', [])
                 else:
                     noticia['categoria_ia'] = "Error IA"
+                    noticia['categoria_producto_ia'] = "Error IA"
                     noticia['relevancia_ia'] = 0
                     noticia['resumen_comercial_ia'] = "No se pudo analizar"
                     noticia['empresas_clave_ia'] = []

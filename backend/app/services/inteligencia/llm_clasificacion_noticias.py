@@ -3,7 +3,16 @@ import json
 from enum import Enum
 from pydantic import BaseModel, Field
 
-# 1. Definimos las categorias que le importan a un comercila de HP
+# 1. CATEGORÍAS DE PRODUCTO HP 
+class ProductCategory(str, Enum):
+    GAMING = "Gaming / OMEN"
+    IMPRESION = "Impresión y Escáner"
+    CONSUMO = "PC Consumo (Hogar/Estudiantes)"
+    EMPRESAS = "Soluciones Empresariales (ProBook/Elite)"
+    SERVICIOS = "Servicios y Soluciones IT"
+    OTROS = "Otros / No Aplica"
+
+# 2. SEÑALES DE NEGOCIO 
 class SignalCategory(str, Enum):
     EXPANSION = "Expansión / Crecimiento " # Nuevas oficinas, empleo -> VENDER HARDWARE
     DIGITALIZACION ="Transformación Digital" # IA, Cloud, Ciber -> VENDER SOFTWARE/SERVICIOS
@@ -11,17 +20,17 @@ class SignalCategory(str, Enum):
     FUSIONES = "M&A / Fusiones" # Cambios organizativos -> OPORTUNIDAD CONSULTORÍA
     RUIDO = "Sin Interés Comercial " # Política, Sucesos -> DESCARTAR
 
-# 2. ESAQUEMA DE SALIDA (LO QUE VA A LA BASE DE DATOS)
+# 3. ESQUEMA DE SALIDA 
 class SalesSignal(BaseModel):
-    categoria:  SignalCategory
+    categoria: SignalCategory = Field(..., description="Categoría de negocio a la que pertenece la noticia")
+    categoria_producto: ProductCategory = Field(..., description="Línea de producto HP más adecuada para vender aquí")
     relevancia: int = Field(..., description="Puntuación 0-100 de interés para HP")
-    resumen_comercial: str =Field(..., description="Justificación breve para el vendedor")
-    empresas: list[str]= Field(..., description="Lista de empresas potenciales clientes")
-    #categoria_de_productos:pc,workstatios,impresoras,accesorios
+    resumen_comercial: str = Field(..., description="Justificación breve para el vendedor")
+    empresas: list[str] = Field(..., description="Lista de empresas potenciales clientes")
 
-# 3. EL SERVICIO DE IA
+# 4. EL SERVICIO DE IA
 class LlmService:
-    def __init__(self, modelo: str = "llama3.2"):
+    def __init__(self, modelo: str = "llama3.1"):
         self.modelo= modelo
     
     def analizar_oportunidad(self, titulo: str ,contenido: str ) ->dict:
@@ -31,28 +40,30 @@ class LlmService:
 
         #PROMT (Instrucciones para el LLM)
         promt_sistema = """
-        ACTÚA COMO: Un vendedor B2B Senior en HP (Hewlett-Packard).
-        TU MISIÓN: Filtrar noticias basura y detectar OROPORTUNIDADES DE VENTA comercial (Nuevas oficinas, renovaciones tecnológicas, digitalización).
+        ACTÚA COMO: Un experto en ventas B2B de HP (Hewlett-Packard).
+        TU OBJETIVO: Analizar noticias para detectar oportunidades de venta de productos HP.
 
-        Análisis Crítico:
-        1. ¿Esta noticia implica que una empresa va a gastar dinero en tecnología?
-           - SI -> Clasifica y puntúa alto.
-           - NO (Política, Sucesos, Cotilleos, LeyOpinión) -> CATEGORÍA: "Sin Interés Comercial " (RUIDO).
+        PASO 1: DETECTAR LA SEÑAL DE NEGOCIO
+        - Expansión / Crecimiento: ¿Abren oficinas? (Oportunidad de vender PCs e Impresoras masivamente).
+        - Transformación Digital: ¿Modernizan tecnología? (Oportunidad de servicios y portátiles de alta gama).
+        - Resultados Financieros: ¿Ganan mucho dinero? (Tienen presupuesto).
+        - M&A / Fusiones: ¿Se unen empresas? (Renovación de flotas de equipos).
+        - Sin Interés Comercial: Política, leyes, cotilleos, sucesos. (RUIDO).
 
-        CATEGORÍAS PERMITIDAS (Elige SOLO una):
-        - "Expansión / Crecimiento " -> Si abren sedes, contratan masivamente (Implica comprar PCs/Impresoras).
-        - "Transformación Digital" -> Si modernizan sistemas, van a la nube, ciberseguridad.
-        - "Resultados Financieros" -> SOLO si una empresa presenta beneficios récord (Tienen presupuesto).
-        - "M&A / Fusiones" -> Fusiones de empresas (Reestructuración de IT).
-        - "Sin Interés Comercial " -> TODO lo demás (Política, Deportes, Leyes generales, Sucesos).
+        PASO 2: ASIGNAR PRODUCTO HP (¿QUÉ LES VENDEMOS?)
+        - "Gaming / OMEN": Si hablan de eSports, videojuegos, diseño gráfico potente.
+        - "Impresión y Escáner": Si abren oficinas físicas, gestión documental.
+        - "PC Consumo (Hogar/Estudiantes)": Si es para usuarios finales, educación, vuelta al cole.
+        - "Soluciones Empresariales (ProBook/Elite)": Si son empresas comprando portátiles para empleados.
+        - "Servicios y Soluciones IT": Ciberseguridad, nube, gestión de flotas.
+        - "Otros / No Aplica": Si es Ruido o no encaja claro.
 
-        FORMATO DE RESPUESTA (JSON Estricto):
-        - "categoria": Una de las opciones exactas de arriba.
-        - "relevancia": 0 para RUIDO. 50-100 para oportunidades reales.
-        - "resumen_comercial": Si es oportunidad, di QUÉ venderles (Laptops, Servidores, Impresoras). Si es RUIDO, di "Descartado por ser política/sucesos".
-        - "empresas": Lista solo las empresas con potencial de compra. Si no hay, lista vacía [].
-
-        IMPORTANTE: NO ALUCINES. Si es una noticia de Trump o de Gripe Aviar, ES RUIDO. No inventes conexiones.
+        FORMATO RESPUESTA (JSON):
+        Devuelve un JSON exacto con los campos: "categoria", "categoria_producto", "relevancia" (0-100), "resumen_comercial" (explica qué producto vender y por qué) y "empresas" (quién compra).
+        
+        EJEMPLO DE RAZONAMIENTO:
+        "Empresa X abre nueva sede en Madrid" -> Expansión -> Necesitan PCs para empleados -> "Soluciones Empresariales".
+        "Torneo de LoL patrocinado por X" -> Marketing -> "Gaming / OMEN".
         """
 
         promt_usuario = f"""

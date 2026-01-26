@@ -27,3 +27,4 @@ urllib3==2.5.0
 uvicorn==0.38.0
 supabase
 ollama
+apscheduler==3.11.2

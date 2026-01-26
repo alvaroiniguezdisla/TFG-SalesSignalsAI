@@ -48,6 +48,11 @@ function NewsCard({ noticia }) {
             {/* --- CABECERA SUPERIOR: Categoría y Fecha --- */}
             <div className="card-top-meta">
                 <span className="meta-category">{category}</span>
+                {noticia.categoria_producto_ia && (
+                    <span className="meta-product-badge">
+                        {noticia.categoria_producto_ia}
+                    </span>
+                )}
                 <span className="meta-date">{formatDate(noticia.published_at)}</span>
             </div>
 
