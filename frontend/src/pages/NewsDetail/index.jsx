@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';// Para leer el ID de la URL
-import { getNoticiaById } from '../../services/api'; 
+import { getNoticiaById } from '../../services/api';
 import './NewsDetail.css';
 
 function NewsDetail() {
@@ -24,66 +24,127 @@ function NewsDetail() {
 
     return (
         <div className="detail-container">
-            <button onClick={() => navigate('/')} className="back-btn">Volver al Dashboard</button>
+            <button onClick={() => navigate('/')} className="back-btn">
+                &larr; Volver al Dashboard
+            </button>
+
+            {/* CABECERA: Título y Categorías */}
             <header className="detail-header">
-                <span className="badge category">{noticia.categoria_ia}</span>
                 <h1>{noticia.titulo}</h1>
-                <div className="meta">
-                    <span>{noticia.published_at}</span>
-                    <span>{noticia.source}</span>
+
+                <div className="meta-row">
+                    <div className="source-column">
+                        <span className="meta-item source">
+                            Fuente: <strong>{noticia.fuente}</strong>
+                        </span>
+                        {noticia.urls_extra && noticia.urls_extra.length > 0 && (
+                            <div className="extra-sources">
+                                <span className="extra-label">También en:</span>
+                                {noticia.urls_extra.map((url, i) => (
+                                    <a key={i} href={url} target="_blank" rel="noreferrer" className="extra-source-link">
+                                        Fuente {i + 1}
+                                    </a>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="dates-row">
+                        <span className="meta-item date">
+                            Publicado: {noticia.published_at || "Fecha desconocida"}
+                        </span>
+                        <span className="meta-item date-scraped">
+                            Detectado: {noticia.scraped_at ? new Date(noticia.scraped_at).toLocaleDateString() : "-"}
+                        </span>
+                    </div>
                 </div>
             </header>
 
             <div className="detail-grid">
-                {/* COLUMNA IZQUIERDA -Contenido de la noticia */}
+
+                {/* COLUMNA PRINCIPAL */}
                 <div className="main-content">
+
+                    {/* Análisis IA */}
                     <section className="analysis-box">
-                        <h3>Analisis Comercial</h3>
-                        <p>{noticia.resumen_comercial_ia}</p>
+                        <h3>Análisis de Oportunidad (IA)</h3>
+                        <p>{noticia.resumen_comercial_ia || "No hay análisis disponible."}</p>
                     </section>
 
-                    <div className="full-text">
-                        <h3>Resumen IA</h3>
-                        <p>{noticia.resumen}</p>
-                    </div>
+                    {/* Resumen Original */}
+                    <section className="full-text">
+                        <h3>Resumen Original</h3>
+                        <p>{noticia.resumen || "Sin resumen disponible."}</p>
+                    </section>
                 </div>
 
-                {/* COLUMNA DERECHA - ACCIONES Y DATOS */}
+                {/* BARRA LATERAL */}
                 <aside className="sidebar">
+
+                    {/* 1. Relevancia (Barra) */}
                     <div className="score-card">
-                        <span className="score-label">Relevancia HP</span>
-                        <div className="score-value">
-                            {noticia.relevancia_ia}/100
+                        <span className="score-label">Relevancia</span>
+                        <div className="score-value-container">
+                            <span className="score-number">{noticia.relevancia_ia}</span>
+                            <span className="score-max">/100</span>
+                        </div>
+                        <div className="score-bar-bg">
+                            <div
+                                className="score-bar-fill"
+                                style={{ width: `${noticia.relevancia_ia}%` }}
+                            ></div>
                         </div>
                     </div>
 
-                    <div className="companies-list">
-                        <h4>Empresas Detectadas</h4>
-                        {noticia.empresas_clave_ia?.map(emp => (
-                            <span key={emp} className="company-tag">{emp}</span>
-                        ))}
+                    {/* 2. Empresas */}
+                    <div className="sidebar-section">
+                        <h4>Empresas</h4>
+                        <div className="tags-wrapper">
+                            {noticia.empresas_clave_ia && noticia.empresas_clave_ia.length > 0 ? (
+                                noticia.empresas_clave_ia.map((emp, i) => (
+                                    <span key={i} className="tag-pill">{emp}</span>
+                                ))
+                            ) : (
+                                <span className="no-data">No se detectaron empresas</span>
+                            )}
+                        </div>
                     </div>
 
-                    <div className="actions">
-                        {/* AQUI PONDREMOS EL BOTON DE GENERAR EMAIL LUEGO */}
-                        <button className="action-btn primary" disabled>
-                            Generar Email
-                        </button>
-                        <a href={noticia.url} target="_blank" rel="noreferrer" className='action-btn secondary'>
-                            Leer Fuente Original
-                        </a>
+                    {/* 3. Categorías (Movido aquí) */}
+                    <div className="sidebar-section">
+                        <h4>Categorías</h4>
+                        <div className="categories-list">
+                            {/* Señal */}
+                            <div className="category-item signal">
+                                <span className="label">Categoría:</span>
+                                <span className="value">{noticia.categoria_ia || "-"}</span>
+                            </div>
 
+                            {/* Producto */}
+                            {noticia.categoria_producto_ia && (
+                                <div className="category-item product">
+                                    <span className="label">Categoría Producto:</span>
+                                    <span className="value">{noticia.categoria_producto_ia}</span>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Botones */}
+                    <div className="actions">
+                        <a
+                            href={noticia.url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="action-btn secondary"
+                        >
+                            Leer Noticia Original
+                        </a>
                     </div>
                 </aside>
-
-
-
             </div>
-
         </div>
     );
-
-
 }
 
 export default NewsDetail;

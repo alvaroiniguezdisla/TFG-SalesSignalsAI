@@ -19,24 +19,32 @@ function Dashboard() {
     const filteredNoticias = viewMode === 'all'
         ? noticias
         : noticias.filter(noticia => {
-            const companies_user = profile?.favorite_companies || [];
-            const categories_user = profile?.favorite_categories || [];
+            if (!profile) return false;
 
-            // --- 1.  FILTRO DE EMPRESAS ---
-            const tagsDeNoticia = noticia.empresas_clave_ia || [];
-            const matchCompany = companies_user.some(miFavorita => {
-                // Miramos si alguna  empresa favorita del user está incluída en los tags de la noticia
-                return tagsDeNoticia.some(tagIA =>
-                    tagIA.toLowerCase().includes(miFavorita.toLowerCase())
-                );
+            const userCompanies = profile.favorite_companies || [];
+            const userInterests = profile.favorite_categories || [];
+
+            // 1. FILTRO DE EMPRESAS
+            // Comprobamos si alguna empresa de la noticia coincide con las favoritas
+            const newsCompanies = noticia.empresas_clave_ia || [];
+            const matchesCompany = userCompanies.some(userCo =>
+                newsCompanies.some(newsCo =>
+                    newsCo.toLowerCase().includes(userCo.toLowerCase())
+                )
+            );
+
+            // 2. FILTRO DE INTERESES (Señal de Negocio O Producto HP)
+            // Comprobamos si la categoría de negocio O el producto coinciden con los intereses
+            const newsSignal = noticia.categoria_ia || "";
+            const newsProduct = noticia.categoria_producto_ia || "";
+
+            const matchesInterest = userInterests.some(interest => {
+                const interestLower = interest.toLowerCase();
+                return newsSignal.toLowerCase().includes(interestLower) ||
+                    newsProduct.toLowerCase().includes(interestLower);
             });
 
-            // --- 2.  FILTRO DE CATEGORIAS ---
-            const categoriaNoticia = noticia.categoria_ia || "";
-            const matchCategory = categories_user.some(miFavorita =>
-                categoriaNoticia.toLowerCase().includes(miFavorita.toLowerCase())
-            );
-            return matchCompany || matchCategory;
+            return matchesCompany || matchesInterest;
         });
 
     if (loading) return <div className="loading">Cargando señales de la BD...</div>;

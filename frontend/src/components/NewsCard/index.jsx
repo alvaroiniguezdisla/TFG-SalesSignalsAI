@@ -41,59 +41,101 @@ function NewsCard({ noticia }) {
     const category = noticia.categoria_ia || noticia.categoria || "General";
 
     return (
-        <div className="news-card" onClick={() =>
-            navigate(`/noticia/${noticia.url_hash}`)}
-            style={{ cursor: 'pointer' }}>
+        <div className="news-card" onClick={() => navigate(`/noticia/${noticia.url_hash}`)}>
 
-            {/* --- CABECERA SUPERIOR: Categoría y Fecha --- */}
-            <div className="card-top-meta">
-                <span className="meta-category">{category}</span>
-                {noticia.categoria_producto_ia && (
-                    <span className="meta-product-badge">
-                        {noticia.categoria_producto_ia}
-                    </span>
-                )}
-                <span className="meta-date">{formatDate(noticia.published_at)}</span>
+            {/* 1. CABECERA: Fecha */}
+            <div className="card-header">
+                <span className="date-text">{formatDate(noticia.published_at)}</span>
             </div>
 
-            {/* --- CUERPO PRINCIPAL --- */}
+            {/* 1.5 RELEVANCIA */}
+            <div className="card-relevance-bar">
+                <span className="relevance-label">Relevancia: </span>
+                {getRelevanceBadge(noticia.relevancia_ia)}
+            </div>
+
+            {/* 2. CONTENIDO PRINCIPAL */}
             <div className="card-body">
-                <h2 className="card-title" title={noticia.titulo}>
-                    {noticia.titulo}
-                </h2>
+                <h3 className="card-title">{noticia.titulo}</h3>
 
-                <div className="card-metrics">
-                    {getRelevanceBadge(noticia.relevancia_ia)}
-                    <span className="meta-source">Fuente: {noticia.fuente || 'El País'}</span>
+                {/* Resumen: Solo si existe. Si es IA, estilo destacado. Si es raw, texto simple. */}
+                {summaryText && summaryText !== "Sin resumen disponible." && (
+                    <div className={`analysis-box ${isAiSummary ? 'ai-style' : 'raw-style'}`}>
+                        {isAiSummary && <span className="analysis-label">Análisis IA</span>}
+                        <p className="analysis-text">{summaryText}</p>
+                    </div>
+                )}
+
+                {(!summaryText || summaryText === "Sin resumen disponible.") && (
+                    <p className="no-summary-text">Sin resumen disponible</p>
+                )}
+
+
+            </div>
+
+            {/* 3. CONTEXTO DE VENTA */}
+            <div className="card-context">
+
+                {/* 0. Fuentes (Solicitud Usuario) */}
+                <div className="context-row">
+                    <span className="context-label">Fuente Principal:</span>
+                    <span className="source-tag">{noticia.fuente || 'Desconocida'}</span>
                 </div>
 
-                {/* Resumen Diferenciado */}
-                <div className={`card-summary ${isAiSummary ? 'summary-ai' : 'summary-raw'}`}>
-                    {isAiSummary && <strong> Análisis Comercial: </strong>}
-                    {summaryText}
+                {noticia.urls_extra && noticia.urls_extra.length > 0 && (
+                    <div className="context-row">
+                        <span className="context-label">Otras Fuentes:</span>
+                        <div className="tags-list">
+                            {noticia.urls_extra.map((url, idx) => (
+                                <a key={idx} href={url} target="_blank" rel="noopener noreferrer" className="extra-source-link">Source {idx + 1}</a>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* 1. Categoria  */}
+                <div className="context-row">
+                    <span className="context-label">Categoría:</span>
+                    <span className="badge-category">
+                        {category === "General" ? "Desconocida" : category}
+                    </span>
+                </div>
+
+                {/* 2. Categoria de Producto */}
+                <div className="context-row">
+                    <span className="context-label">Categoría de Producto:</span>
+                    <span className="product-pill">
+                        {noticia.categoria_producto_ia && noticia.categoria_producto_ia !== 'Otros / No Aplica'
+                            ? noticia.categoria_producto_ia
+                            : 'Desconocida'}
+                    </span>
+                </div>
+
+                {/* 3. Empresas Clave */}
+                <div className="context-row">
+                    <span className="context-label">Empresas:</span>
+                    <div className="tags-list">
+                        {noticia.empresas_clave_ia && noticia.empresas_clave_ia.length > 0 ? (
+                            noticia.empresas_clave_ia.map((empresa, idx) => (
+                                <span key={idx} className="company-tag">#{empresa}</span>
+                            ))
+                        ) : (
+                            <span className="company-tag">Desconocidas</span>
+                        )}
+                    </div>
                 </div>
             </div>
 
-            {/* --- PIE: Tags y CTA --- */}
+            {/* 4. ACCIÓN */}
             <div className="card-footer">
-                {noticia.empresas_clave_ia && noticia.empresas_clave_ia.length > 0 ? (
-                    <div className="tags-container">
-                        {noticia.empresas_clave_ia.map((empresa, index) => (
-                            <span key={index} className="tag">#{empresa}</span>
-                        ))}
-                    </div>
-                ) : (
-                    <div className="tags-placeholder"></div> /* Espacio vacío para alinear */
-                )}
-
                 <a
                     href={noticia.url || noticia.link}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="btn-read-more"
+                    className="read-more-link"
                     onClick={(e) => e.stopPropagation()}
                 >
-                    Leer noticia→
+                    Leer noticia original →
                 </a>
             </div>
         </div>

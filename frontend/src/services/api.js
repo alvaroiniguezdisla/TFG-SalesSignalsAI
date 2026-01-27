@@ -22,8 +22,22 @@ export async function getNoticias(metodo = 'html') {
     }
 }
 
-export async function refreshNews(){
-    try{
+/**
+ * Obtiene las categorías oficiales del backend
+ */
+export async function getCategories() {
+    try {
+        const response = await fetch(`${API_URL}/noticias/categorias`);
+        if (!response.ok) throw new Error("Error al cargar categorías");
+        return await response.json();
+    } catch (error) {
+        console.error("Error obteniendo categorías:", error);
+        return { signals: [], products: [] }; // Fallback seguro
+    }
+}
+
+export async function refreshNews() {
+    try {
         const response = await fetch(`${API_URL}/refrescar`, {
             method: 'POST',
         });
@@ -36,14 +50,14 @@ export async function refreshNews(){
 
     } catch (error) {
         console.error("Error refrescando noticias:", error);
-        throw error;        
+        throw error;
     }
 
-}     
+}
 
-export async function getNoticiaById(id){
-    try{
-        const response= await fetch(`${API_URL}/noticias/${id}`);
+export async function getNoticiaById(id) {
+    try {
+        const response = await fetch(`${API_URL}/noticias/${id}`);
         if (!response.ok) throw new Error("Noticia no encontrada");
         return await response.json();
     }catch (error){

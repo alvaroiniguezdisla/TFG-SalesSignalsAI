@@ -1,24 +1,53 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { getCategories } from '../../services/api';
 import './Profile.css';
 
 function Profile() {
     const navigate = useNavigate();
-    // 1. Usamos el contexto
     const { user, profile, signOut, updateProfile } = useAuth();
 
-    // 2. Estados locales para la edición
-    const [isEditing, setIsEditing] = useState(false);
+    // Estado de carga y datos
+    const [loading, setLoading] = useState(true);
+    const [isEditingInfo, setIsEditingInfo] = useState(false);
+
+    // Formulario de Datos Personales
     const [formData, setFormData] = useState({
         first_name: '',
         last_name: '',
         favorite_companies: [],
         favorite_categories: []
     });
-    const [newCompany, setNewCompany] = useState('');
 
-    // Cargar datos del perfil en el formulario cuando llegan
+    // Inputs temporales para añadir tags
+    const [newCompany, setNewCompany] = useState('');
+    const [selectedSignal, setSelectedSignal] = useState('');
+    const [selectedProduct, setSelectedProduct] = useState('');
+
+    // Listas maestras del Backend
+    const [availableSignals, setAvailableSignals] = useState([]);
+    const [availableProducts, setAvailableProducts] = useState([]);
+
+    // --- CARGA DE DATOS ---
+    // 1. Carga Inicial de Categorias (Solo una vez)
+    useEffect(() => {
+        const loadCategories = async () => {
+            setLoading(true);
+            try {
+                const cats = await getCategories();
+                setAvailableSignals(cats.signals || []);
+                setAvailableProducts(cats.products || []);
+            } catch (err) {
+                console.error("Error cargando categorías:", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        loadCategories();
+    }, []);
+
+    // 2. Sincronización de Perfil (Silenciosa - Sin Loading)
     useEffect(() => {
         if (profile) {
             setFormData({
@@ -30,242 +59,271 @@ function Profile() {
         }
     }, [profile]);
 
-    // Manejador de cambios en los inputs
-    const handleChange = (e) => {
-        setFormData({
-            ...formData,
-            [e.target.name]: e.target.value
-        });
+    // --- HANDLERS DATOS PERSONALES ---
+    const handleInfoChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    // Guardar cambios
-    const handleSave = async () => {
+    const savePersonalInfo = async () => {
         try {
-            await updateProfile(formData);
-            setIsEditing(false);
-            alert("Perfil actualizado correctamente");
+            await updateProfile({
+                first_name: formData.first_name,
+                last_name: formData.last_name
+            });
+            setIsEditingInfo(false);
         } catch (error) {
-            alert("Error al actualizar: " + error.message);
+            alert("Error al guardar: " + error.message);
         }
     };
 
-    // Añadir empresa
-    const handleAddCompany = () => {
-        if (newCompany.trim() && !formData.favorite_companies.includes(newCompany.trim())) {
-            setFormData({
-                ...formData,
-                favorite_companies: [...formData.favorite_companies, newCompany.trim()]
-            });
-            setNewCompany('');
+    // --- HANDLERS PREFERENCIAS (Agregación Genérica) ---
+    const addItem = (listName, item) => {
+        if (!item) return;
+        const list = formData[listName];
+        if (!list.includes(item)) {
+            const newData = { ...formData, [listName]: [...list, item] };
+            setFormData(newData);
+            // Auto-guardado al añadir preferencia para UX fluida
+            updateProfile(newData).catch(e => alert("Error guardando preferencia"));
         }
     };
 
-    // Eliminar empresa
-    const handleRemoveCompany = (company) => {
-        setFormData({
+    const removeItem = (listName, item) => {
+        const newData = {
             ...formData,
-            favorite_companies: formData.favorite_companies.filter(c => c !== company)
-        });
+            [listName]: formData[listName].filter(i => i !== item)
+        };
+        setFormData(newData);
+        updateProfile(newData).catch(e => alert("Error eliminando preferencia"));
     };
 
-
-    // Eliminar categoría
-    const handleRemoveCategory = (category) => {
-        setFormData({
-            ...formData,
-            favorite_categories: formData.favorite_categories.filter(c => c !== category)
-        });
+    // --- HELPERS VISUALES ---
+    const getInitials = () => {
+        const f = formData.first_name?.[0] || user?.email?.[0] || '?';
+        const l = formData.last_name?.[0] || '';
+        return (f + l).toUpperCase();
     };
 
-    // Constantes de Backend
-    // 1. SEÑALES DE NEGOCIO
-    const SIGNAL_CATEGORIES = [
-        "Expansión / Crecimiento",
-        "Transformación Digital",
-        "Resultados Financieros",
-        "M&A / Fusiones"
-    ];
+    // Filtrar mis categorías para mostrar separadas en UI
+    const mySignals = formData.favorite_categories.filter(c => availableSignals.includes(c));
+    const myProducts = formData.favorite_categories.filter(c => availableProducts.includes(c));
+    // Las que no encajan en ninguna (por si acaso cambian las listas backend)
+    const myOthers = formData.favorite_categories.filter(c => !availableSignals.includes(c) && !availableProducts.includes(c));
 
-    // 2. PRODUCTOS HP
-    const PRODUCT_CATEGORIES = [
-        "Gaming / OMEN",
-        "Impresión y Escáner",
-        "PC Consumo (Hogar/Estudiantes)",
-        "Soluciones Empresariales (ProBook/Elite)",
-        "Servicios y Soluciones IT"
-    ];
-
-    // Función genérica para añadir tags
-    const handleAddTag = (tag) => {
-        if (tag && !formData.favorite_categories.includes(tag)) {
-            setFormData({
-                ...formData,
-                favorite_categories: [...formData.favorite_categories, tag]
-            });
-        }
-    };
+    if (loading) return <div className="loading-screen">Cargando perfil...</div>;
 
     return (
-        <div className="profile-container">
-            <button onClick={() => navigate(-1)} className="back-btn">← Volver</button>
-            <h1>Mi Perfil</h1>
-
-            <div className="profile-card">
-                {/* SECCIÓN 1: Datos de la Cuenta (Vienen de auth.users / user) */}
-                <div className="section">
-                    <h3>Cuenta</h3>
-                    <p><strong>Email:</strong> {user?.email}</p>
-                    <p><strong>ID:</strong> {user?.id}</p>
-                </div>
-                <hr />
-
-                {/* SECCIÓN 2: Datos del Perfil (Editables) */}
-                <div className="section">
-                    <div className="section-header">
-                        <h3>Datos Personales</h3>
-                        {!isEditing && (
-                            <button onClick={() => setIsEditing(true)} className="edit-btn">
-                                Editar
-                            </button>
-                        )}
+        <div className="profile-layout">
+            <header className="profile-header">
+                <button onClick={() => navigate('/')} className="back-link">
+                    &larr; Volver al Dashboard
+                </button>
+                <div className="header-content">
+                    <div className="avatar-circle">
+                        {getInitials()}
                     </div>
-
-                    {isEditing ? (
-                        <div className="edit-form">
-                            <div className="form-group">
-                                <label>Nombre</label>
-                                <input
-                                    type="text"
-                                    name="first_name"
-                                    value={formData.first_name}
-                                    onChange={handleChange}
-                                />
-                            </div>
-                            <div className="form-group">
-                                <label>Apellido</label>
-                                <input
-                                    type="text"
-                                    name="last_name"
-                                    value={formData.last_name}
-                                    onChange={handleChange}
-                                />
-                            </div>
-                            <div className="edit-actions">
-                                <button onClick={handleSave} className="save-btn">Guardar</button>
-                                <button onClick={() => setIsEditing(false)} className="cancel-btn">Cancelar</button>
-                            </div>
-                        </div>
-                    ) : (
-                        <div className="view-mode">
-                            <p><strong>Nombre:</strong> {profile?.first_name || 'Sin nombre'}</p>
-                            <p><strong>Apellido:</strong> {profile?.last_name || 'Sin apellido'}</p>
-                        </div>
-                    )}
-                </div>
-                <hr />
-
-                {/* SECCIÓN 3: PREFERENCIAS */}
-                <div className="section">
-                    <h3>Mis preferencias</h3>
-
-                    {/* EMPRESAS FAVORITAS */}
-                    <div className="preference-group">
-                        <label>Empresas Favoritas</label>
-                        <div className="add-row">
-                            <input
-                                type="text"
-                                placeholder="Ej: Iberdrola"
-                                value={newCompany}
-                                onChange={(e) => setNewCompany(e.target.value)}
-                                onKeyPress={(e) => e.key === 'Enter' && handleAddCompany()}
-                            />
-                            <button type="button" onClick={handleAddCompany} className="add-btn">Añadir</button>
-                        </div>
-                        <div className="tags-container">
-                            {formData.favorite_companies.map((company, index) => (
-                                <span key={index} className="tag">
-                                    {company}
-                                    <button onClick={() => handleRemoveCompany(company)} className="tag-remove">✕</button>
-                                </span>
-                            ))}
-                        </div>
+                    <div className="user-headlines">
+                        <h1>{formData.first_name} {formData.last_name || ''}</h1>
+                        <span className="user-email">{user?.email}</span>
                     </div>
-
-                    {/* INTERESES: SEÑALES DE NEGOCIO */}
-                    <div className="preference-group">
-                        <label>Categorias de Señales</label>
-                        <div className="add-row">
-                            <select
-                                onChange={(e) => handleAddTag(e.target.value)}
-                                className="category-select"
-                                value="" // Siempre reset
-                            >
-                                <option value="" disabled>Añadir señal...</option>
-                                {SIGNAL_CATEGORIES.map(cat => (
-                                    <option key={cat} value={cat}>{cat}</option>
-                                ))}
-                            </select>
-                        </div>
-                    </div>
-
-                    {/* INTERESES: PRODUCTOS HP */}
-                    <div className="preference-group">
-                        <label>Categorias de Productos</label>
-                        <div className="add-row">
-                            <select
-                                onChange={(e) => handleAddTag(e.target.value)}
-                                className="category-select"
-                                value=""
-                            >
-                                <option value="" disabled>Añadir producto...</option>
-                                {PRODUCT_CATEGORIES.map(cat => (
-                                    <option key={cat} value={cat}>{cat}</option>
-                                ))}
-                            </select>
-                        </div>
-                    </div>
-
-                    {/* LISTA DE ETIQUETAS SELECCIONADAS (MIXTA) */}
-                    <div className="preference-group">
-                        <label>Mis Intereses Seleccionados</label>
-                        <div className="tags-container">
-                            {formData.favorite_categories.length > 0 ? (
-                                formData.favorite_categories.map((category, index) => (
-                                    <span key={index} className="tag">
-                                        {category}
-                                        <button onClick={() => handleRemoveCategory(category)} className="tag-remove">✕</button>
-                                    </span>
-                                ))
-                            ) : (
-                                <p className="no-tags">No has seleccionado ningún interés.</p>
-                            )}
-                        </div>
-                    </div>
-                </div>
-
-
-                <div className="section-actions">
-                    <button onClick={async () => {
-                        try {
-                            await updateProfile(formData);
-                            alert("Preferencias guardadas correctamente");
-                        } catch (error) {
-                            alert("Error al guardar: " + error.message);
-                        }
-                    }} className="save-prefs-btn">
-                        Guardar Preferencias
-                    </button>
-                </div>
-                <hr />
-
-                <div className="footer-actions">
-                    <button onClick={signOut} className="logout-btn">
+                    <button onClick={signOut} className="logout-btn-header">
                         Cerrar Sesión
                     </button>
                 </div>
-            </div>
+            </header>
+
+            <main className="profile-grid">
+
+                {/* COLUMNA IZQUIERDA: Configuración y Datos */}
+                <div className="profile-col-left">
+
+                    {/* Tarjeta: Datos Personales */}
+                    <div className="card profile-card">
+                        <div className="card-header">
+                            <h2>Información Personal</h2>
+                            {!isEditingInfo && (
+                                <button onClick={() => setIsEditingInfo(true)} className="btn-icon-edit">
+                                    Editar
+                                </button>
+                            )}
+                        </div>
+
+                        <div className="card-body">
+                            {isEditingInfo ? (
+                                <div className="edit-form">
+                                    <div className="form-group">
+                                        <label>Nombre</label>
+                                        <input
+                                            name="first_name"
+                                            value={formData.first_name}
+                                            onChange={handleInfoChange}
+                                            placeholder="Tu nombre"
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label>Apellidos</label>
+                                        <input
+                                            name="last_name"
+                                            value={formData.last_name}
+                                            onChange={handleInfoChange}
+                                            placeholder="Tus apellidos"
+                                        />
+                                    </div>
+                                    <div className="form-actions">
+                                        <button onClick={savePersonalInfo} className="btn-primary">Guardar</button>
+                                        <button onClick={() => setIsEditingInfo(false)} className="btn-secondary">Cancelar</button>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="info-display">
+                                    <div className="info-row">
+                                        <span className="label">Nombre completo</span>
+                                        <span className="value">{formData.first_name} {formData.last_name}</span>
+                                    </div>
+
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Tarjeta: Seguridad */}
+                    <div className="card profile-card">
+                        <div className="card-header">
+                            <h2>Seguridad</h2>
+                        </div>
+                        <div className="card-body">
+                            <div className="info-row">
+                                <span className="label">Email asociado</span>
+                                <span className="value">{user?.email}</span>
+                            </div>
+                            <div className="security-actions">
+                                <button className="btn-outline-danger" disabled title="Próximamente">
+                                    Cambiar Contraseña
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* COLUMNA DERECHA: Preferencias e Inteligencia */}
+                <div className="profile-col-right">
+
+                    {/* Preferencias de Negocio (Señales) */}
+                    <div className="card preferences-card">
+                        <div className="card-header">
+                            <h2>Intereses de Negocio</h2>
+                            <p className="card-subtitle">Filtra noticias por tipo de señal</p>
+                        </div>
+                        <div className="card-body">
+                            <div className="tags-cloud">
+                                {mySignals.map(sig => (
+                                    <span key={sig} className="tag-pill signal">
+                                        {sig}
+                                        <button onClick={() => removeItem('favorite_categories', sig)}>×</button>
+                                    </span>
+                                ))}
+                                {mySignals.length === 0 && <span className="empty-msg">Sin intereses seleccionados</span>}
+                            </div>
+
+                            <div className="add-bar">
+                                <select
+                                    value={selectedSignal}
+                                    onChange={(e) => {
+                                        addItem('favorite_categories', e.target.value);
+                                        setSelectedSignal(''); // Reset inmediato
+                                    }}
+                                >
+                                    <option value="">+ Añadir interés...</option>
+                                    {availableSignals
+                                        .filter(s => !formData.favorite_categories.includes(s))
+                                        .map(s => <option key={s} value={s}>{s}</option>)
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Preferencias de Producto */}
+                    <div className="card preferences-card">
+                        <div className="card-header">
+                            <h2>Líneas de Producto</h2>
+                            <p className="card-subtitle">Productos HP que gestionas</p>
+                        </div>
+                        <div className="card-body">
+                            <div className="tags-cloud">
+                                {myProducts.map(prod => (
+                                    <span key={prod} className="tag-pill product">
+                                        {prod}
+                                        <button onClick={() => removeItem('favorite_categories', prod)}>×</button>
+                                    </span>
+                                ))}
+                                {myProducts.length === 0 && <span className="empty-msg">Sin productos seleccionados</span>}
+                            </div>
+
+                            <div className="add-bar">
+                                <select
+                                    value={selectedProduct}
+                                    onChange={(e) => {
+                                        addItem('favorite_categories', e.target.value);
+                                        setSelectedProduct('');
+                                    }}
+                                >
+                                    <option value="">+ Añadir producto...</option>
+                                    {availableProducts
+                                        .filter(p => !formData.favorite_categories.includes(p))
+                                        .map(p => <option key={p} value={p}>{p}</option>)
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Empresas Clave */}
+                    <div className="card preferences-card">
+                        <div className="card-header">
+                            <h2>Empresas Objetivo</h2>
+                            <p className="card-subtitle">Seguimiento prioritario</p>
+                        </div>
+                        <div className="card-body">
+                            <div className="tags-cloud">
+                                {formData.favorite_companies.map(comp => (
+                                    <span key={comp} className="tag-pill company">
+                                        {comp}
+                                        <button onClick={() => removeItem('favorite_companies', comp)}>×</button>
+                                    </span>
+                                ))}
+                            </div>
+
+                            <div className="add-bar input-group">
+                                <input
+                                    type="text"
+                                    placeholder="Añadir empresa (ej: Telefónica)..."
+                                    value={newCompany}
+                                    onChange={(e) => setNewCompany(e.target.value)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter') {
+                                            addItem('favorite_companies', newCompany);
+                                            setNewCompany('');
+                                        }
+                                    }}
+                                />
+                                <button
+                                    className="btn-add"
+                                    onClick={() => {
+                                        addItem('favorite_companies', newCompany);
+                                        setNewCompany('');
+                                    }}
+                                >
+                                    +
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </main>
         </div >
-    )
+    );
 }
 
 export default Profile;

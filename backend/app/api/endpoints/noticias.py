@@ -18,6 +18,20 @@ def get_noticias():
     
     return response.data
 
+@router.get("/noticias/categorias")
+def get_categories():
+    """
+    Devuelve las categorías oficiales del sistema (definidas en el Backend).
+    Esto asegura que el Frontend siempre tenga los mismos valores que la IA.
+    """
+    # Importamos aquí mismo para evitar dependencias  
+    from app.services.inteligencia.llm_clasificacion_noticias import ProductCategory, SignalCategory
+
+    return {
+        "signals": [c.value for c in SignalCategory],
+        "products": [c.value for c in ProductCategory]
+    }
+
 @router.post("/refrescar")
 def refrescar_noticias():
     """
