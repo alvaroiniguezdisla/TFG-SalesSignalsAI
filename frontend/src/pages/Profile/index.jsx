@@ -6,8 +6,7 @@ import './Profile.css';
 
 function Profile() {
     const navigate = useNavigate();
-    const { user, profile, signOut, updateProfile } = useAuth();
-
+    const { user, profile, signOut, updateProfile } = useAuth()
     // Estado de carga y datos
     const [loading, setLoading] = useState(true);
     const [isEditingInfo, setIsEditingInfo] = useState(false);
