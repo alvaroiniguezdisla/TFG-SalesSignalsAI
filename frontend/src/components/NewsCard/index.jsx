@@ -6,8 +6,29 @@ import './NewsCard.css';
  * Componente Tarjeta Inteligente (Smart Card) 
  * Aprovecha todas las columnas disponibles y mejora la legibilidad.
  */
-function NewsCard({ noticia }) {
+function NewsCard({ noticia, userCompanies =[] }) {
     const navigate = useNavigate();
+    const getPriorityLevel =(relevancia)=>{
+        if (relevancia >= 70) return {label: 'Alta',class: 'priority-high' };
+        if (relevancia >= 40) return {label: 'Media', class: 'priority-medium' };
+        return {label: 'Baja', class: 'priority-low' };
+    };
+
+    const priority = getPriorityLevel(noticia.relevancia_ia);
+
+    // Detectar si es noticia nueva (< 24h)
+    const isNew = () => {
+        if (!noticia.scraped_at) return false;
+        const diffHours = (new Date() - new Date(noticia.scraped_at)) / (1000 * 60 * 60);
+        return diffHours < 24;
+    };
+
+    // Detectar si menciona un cliente seguido 
+    const isMyClient = (noticia.empresas_clave_ia || []).some(empresa =>
+        userCompanies.some(myCompany =>
+            empresa.toLowerCase().includes(myCompany.toLowerCase())
+        )
+    );
 
     // 1. HELPERS para formato
     const formatDate = (dateString) => {
@@ -43,9 +64,14 @@ function NewsCard({ noticia }) {
     return (
         <div className="news-card" onClick={() => navigate(`/noticia/${noticia.url_hash}`)}>
 
-            {/* 1. CABECERA: Fecha */}
+            {/* 1. CABECERA: Badges */}
             <div className="card-header">
                 <span className="date-text">{formatDate(noticia.published_at)}</span>
+                <div className="badges-container">
+                    {isNew() && <span className="new-badge">NUEVO</span>}
+                    {isMyClient && <span className="client-badge">TU CLIENTE</span>}
+                    <span className={`priority-badge ${priority.class}`}>{priority.label}</span>
+                </div>
             </div>
 
             {/* 1.5 RELEVANCIA */}

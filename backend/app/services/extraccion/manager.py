@@ -1,22 +1,18 @@
 import logging
 from typing import List,Dict, Any
 from app.services.extraccion.rss import obtener_noticias_rss
-# Importamos los métodos 
 from app.services.extraccion.scraper import scrape_noticias
 from app.services.extraccion.browser import obtener_noticias_browser
 from app.core.config import settings
 from app.core.deduplication import es_titulo_similar, fusionar_datos_noticia
 
-# Configuramos un log para ver qué está pasando por debajo
+# Configuración de logs
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class NewsExtractorManager:
     """
-    Clase en la que se va a encargar de obtner noticias en el siguiente orden:
-    1. RSS
-    2. Scraper
-    3. Browser
+    Gestor de estrategia de extracción en cascada (RSS -> HTML -> Browser).
     """
     def obtener_noticias(self) -> List[Dict[str, Any]]:
         todas_las_noticias = []

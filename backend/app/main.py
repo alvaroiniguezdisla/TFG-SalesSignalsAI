@@ -7,11 +7,11 @@ from app.core.scheduler import start_scheduler
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # 1. Código que se ejecuta AL ARRANCAR
+    # Inicio: Arrancar planificador
     print("Iniciando Scheduler...")
     start_scheduler()
-    yield # Aquí el servidor se queda corriendo
-    # 2. Código que se ejecuta AL APAGAR (opcional)
+    yield
+    # Fin de ejecución
     print("Apagando servidor...")
 
 app = FastAPI(

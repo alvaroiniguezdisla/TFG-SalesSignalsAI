@@ -5,10 +5,10 @@ import os
 # Esto permite ejecutar el script desde la raíz del proyecto o desde cualquier subcarpeta.
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 
-from app.services.llm_clasificacion_noticias import LlmService
+from app.services.inteligencia.llm_clasificacion_noticias import LlmService
 
 def test_ia_comercial():
-    print("🧠 Cargando modelo Llama 3.2 (Simulando Director Comercial HP)...")
+    print(" Cargando modelo Llama 3.2 (Simulando Director Comercial HP)...")
     ia = LlmService()
     
     # CASO 1: OPORTUNIDAD CLARA (Venta de Portátiles)
@@ -30,7 +30,7 @@ def test_ia_comercial():
     
     resultado1 = ia.analizar_oportunidad(noticia_expansion["titulo"], noticia_expansion["contenido"])
     
-    if resultad1:
+    if resultado1:
         print(f"📂 Categoría: {resultado1['categoria']}")
         print(f"📊 Relevancia: {resultado1['relevancia']}/100")
         print(f"💡 Consejo Comercial: {resultado1['resumen_comercial']}")

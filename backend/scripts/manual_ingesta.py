@@ -1,8 +1,5 @@
-# ----------------------------------------------------------------------------------
-# HERRAMIENTA MANUAL: INGESTA DE NOTICIAS
-# Qué hace esto: Se conecta a las fuentes (El País, etc) y descarga lo que haya ahora mismo.
-# Para qué sirve: Para probar si las fuentes funcionan y qué están publicando sin guardar nada.
-# ----------------------------------------------------------------------------------
+# Script para ejecutar la ingesta de noticias manualmente.
+# Útil para depurar conectores y verificar que las fuentes responden correctamente.
 
 import sys
 import os

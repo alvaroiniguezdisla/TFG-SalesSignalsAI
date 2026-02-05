@@ -1,5 +1,3 @@
-// Definimos la URL base de nuestro backend
-// Usamos variables de entorno de Vite (empiezan por VITE_)
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 /**
@@ -60,7 +58,7 @@ export async function getNoticiaById(id) {
         const response = await fetch(`${API_URL}/noticias/${id}`);
         if (!response.ok) throw new Error("Noticia no encontrada");
         return await response.json();
-    }catch (error){
+    } catch (error) {
         console.error(error);
         return null;
     }

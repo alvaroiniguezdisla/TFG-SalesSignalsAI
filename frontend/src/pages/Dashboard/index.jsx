@@ -10,6 +10,9 @@ function Dashboard() {
     const { noticias, loading, error, forceRefresh } = useNoticias();
     const { profile } = useAuth();
     const [viewMode, setViewMode] = useState('all'); // 'all' | 'preferences'
+    const [sortMode, setSortMode] = useState('relevance');
+    const [hideNoise, setHideNoise] = useState(false); // US08: Ocultar ruido
+
 
     const handleRefresh = () => {
         forceRefresh();
@@ -47,6 +50,25 @@ function Dashboard() {
             return matchesCompany || matchesInterest;
         });
 
+    // Filtrar ruido si está activado (US08)
+    const noiseFiltered = hideNoise
+        ? filteredNoticias.filter(n => (n.relevancia_ia || 0) >= 20)
+        : filteredNoticias;
+
+    // Ordenar por relevancia o fecha
+    const sortedNoticias = [...noiseFiltered].sort((a, b) => {
+        if (sortMode === 'relevance') {
+            return (b.relevancia_ia || 0) - (a.relevancia_ia || 0);
+        }
+        return new Date(b.scraped_at || 0) - new Date(a.scraped_at || 0);
+    });
+
+    // Contador de noticias nuevas prioritarias (US17)
+    const newHighPriority = noticias.filter(n => {
+        const isRecent = (new Date() - new Date(n.scraped_at)) < 24 * 60 * 60 * 1000;
+        return isRecent && (n.relevancia_ia || 0) >= 70;
+    }).length;
+
     if (loading) return <div className="loading">Cargando señales de la BD...</div>;
     if (error) return <div className="error">{error}</div>;
 
@@ -55,7 +77,12 @@ function Dashboard() {
             <header className="dashboard-header">
                 <div className="header-top">
                     <div>
-                        <h1>Observatorio de Señales</h1>
+                        <h1>
+                            Observatorio de Señales
+                            {newHighPriority > 0 && (
+                                <span className="notification-badge">{newHighPriority} nuevas</span>
+                            )}
+                        </h1>
                         <p>Monitorización Inteligente de Oportunidades</p>
                     </div>
 
@@ -77,14 +104,30 @@ function Dashboard() {
                         <option value="all">Todas las noticias</option>
                         <option value="preferences">Mis preferencias</option>
                     </select>
+                    <select
+                        value={sortMode}
+                        onChange={(e) => setSortMode(e.target.value)}
+                        className="sort-selector"
+                    >
+                        <option value="relevance">Más relevantes</option>
+                        <option value="date">Más recientes</option>
+                    </select>
+                    <label className="noise-toggle">
+                        <input
+                            type="checkbox"
+                            checked={hideNoise}
+                            onChange={(e) => setHideNoise(e.target.checked)}
+                        />
+                        Ocultar ruido
+                    </label>
                     <button onClick={handleRefresh} className="refresh-btn">Refrescar datos</button>
                 </div>
             </header>
 
             <div className="news-grid">
-                {filteredNoticias.length > 0 ? (
-                    filteredNoticias.map((noticia, index) => (
-                        <NewsCard key={index} noticia={noticia} />
+                {sortedNoticias.length > 0 ? (
+                    sortedNoticias.map((noticia, index) => (
+                        <NewsCard key={index} noticia={noticia} userCompanies={profile?.favorite_companies || []} />
                     ))
                 ) : (
                     <p>No hay noticias disponibles. Ejecuta el pipeline</p>

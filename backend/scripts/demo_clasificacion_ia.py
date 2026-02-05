@@ -1,8 +1,5 @@
-# ----------------------------------------------------------------------------------
-# SCRIPT DE DEMOSTRACIÓN: CLASIFICACIÓN IA (PARA ENSEÑAR AL TRIBUNAL)
-# Qué hace esto: Carga el modelo Llama 3.2 y le pasa dos noticias (una venta clara y otra ruido)
-# Para qué sirve: Simplemente para enseñar en vivo cómo "piensa" la IA sin ejecutar todo el sistema.
-# ----------------------------------------------------------------------------------
+# Script de prueba para validar la clasificación de noticias con el LLM.
+# Carga el modelo y prueba dos casos (éxito y ruido) para verificar la salida JSON.
 
 import sys
 import os
@@ -12,7 +9,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from app.services.inteligencia.llm_clasificacion_noticias import LlmService
 
-# Script manual para probar que la IA funciona bien
+# Función principal de prueba
 def probar_ia():
     print("Cargando Llama 3.1...")
     ia = LlmService()
