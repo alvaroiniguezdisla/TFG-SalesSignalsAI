@@ -31,6 +31,10 @@ class Settings(BaseSettings):
     SUPABASE_URL: str = ""
     SUPABASE_KEY: str = ""
     
+    # Email Notifications (Gmail SMTP)
+    GMAIL_USER: str = ""
+    GMAIL_APP_PASSWORD: str = ""
+    
     class Config:
         # Le decimos que busque el .env relativo a este archivo (backend/app/core/../../.env)
         # Esto asegura que lo encuentre aunque lancemos el script desde otra carpeta
