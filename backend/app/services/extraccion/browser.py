@@ -1,5 +1,5 @@
 from playwright.sync_api import sync_playwright
-from typing import List, Dict
+from typing import List, Dict, Any
 import hashlib
 from datetime import datetime
 
@@ -8,7 +8,7 @@ from datetime import datetime
 def hash_url(url:str) -> str:
     return hashlib.md5(url.encode('utf-8')).hexdigest()
 
-def obtener_noticias_browser(target_url: str, nombre_fuente: str="Browser Genérico") -> List[Dict[str, str]]:
+def obtener_noticias_browser(target_url: str, nombre_fuente: str="Browser Genérico") -> List[Dict[str, Any]]:
     # "sync_playwright" es el gestor que arranca la maquinaria
     with sync_playwright() as p:
         # 1. Lanzamos un navegador Chromium

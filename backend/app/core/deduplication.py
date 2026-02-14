@@ -20,12 +20,15 @@ def fusionar_datos_noticia(existente: dict, nueva: dict) -> bool:
     """
     cambios = False
     
-    # 1. Fusionar Fuente 
+    # 1. Fusionar Fuente (Usamos ", " en lugar de " + " para que quede más limpio)
     fuente_actual = existente.get('fuente', '')
     fuente_nueva = nueva.get('fuente', '')
     
     if fuente_nueva and fuente_nueva not in fuente_actual:
-        existente['fuente'] = f"{fuente_actual} + {fuente_nueva}"
+        if fuente_actual:
+            existente['fuente'] = f"{fuente_actual}, {fuente_nueva}"
+        else:
+            existente['fuente'] = fuente_nueva
         cambios = True
     
     # 2. Fusionar URLs
@@ -33,6 +36,7 @@ def fusionar_datos_noticia(existente: dict, nueva: dict) -> bool:
         existente['urls_extra'] = []
     
     url_nueva = nueva.get('url')
+    # Solo añadimos si es una URL válida y no estaba ya
     if url_nueva and url_nueva not in existente['urls_extra']:
         existente['urls_extra'].append(url_nueva)
         cambios = True

@@ -35,6 +35,9 @@ class Settings(BaseSettings):
     GMAIL_USER: str = ""
     GMAIL_APP_PASSWORD: str = ""
     
+    # LLM Settings
+    OLLAMA_MODEL: str = "llama3.1"
+    
     class Config:
         # Le decimos que busque el .env relativo a este archivo (backend/app/core/../../.env)
         # Esto asegura que lo encuentre aunque lancemos el script desde otra carpeta

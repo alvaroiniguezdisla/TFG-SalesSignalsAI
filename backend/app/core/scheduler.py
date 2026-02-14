@@ -1,7 +1,7 @@
-import app.services.inteligencia.llm_clasificacion_noticias
 from apscheduler.schedulers.background import BackgroundScheduler
 from app.services.orquestacion.pipeline import NewsPipeline
 import logging
+from app.services.notificaciones.notificador import enviar_notificaciones_a_todos
 
 #Configuramos el logger
 logging.basicConfig(level=logging.INFO)
@@ -22,7 +22,6 @@ def job_ejecutar_pipeline():
         logger.info("[SCHEDULER] Pipeline de ingesta completado.")
         
         # 2. Enviar notificaciones por email
-        from app.services.notificaciones.notificador import enviar_notificaciones_a_todos
         enviados = enviar_notificaciones_a_todos()
         logger.info(f"[SCHEDULER] Notificaciones enviadas: {enviados}")
         

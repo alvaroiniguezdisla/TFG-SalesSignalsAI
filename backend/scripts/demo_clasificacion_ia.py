@@ -1,48 +1,56 @@
-# Script de prueba para validar la clasificación de noticias con el LLM.
-# Carga el modelo y prueba dos casos (éxito y ruido) para verificar la salida JSON.
-
-import sys
-import os
-
-# Añadimos la carpeta raíz al path para poder importar 'backend.app...'
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+# ----------------------------------------------------------------------------------
+# SCRIPT MANUAL: Demostracion de la clasificacion con IA
+#
+# Uso: python -m scripts.demo_clasificacion_ia
+#
+# Que hace: Envia dos noticias al LLM (Ollama) para verificar que la
+# clasificacion funciona correctamente:
+#   - Caso 1: Noticia con oportunidad de venta clara.
+#   - Caso 2: Noticia irrelevante (ruido).
+#
+# Requisitos:
+#   - Ollama instalado y funcionando (ollama serve)
+#   - Modelo configurado en OLLAMA_MODEL (.env)
+# ----------------------------------------------------------------------------------
 
 from app.services.inteligencia.llm_clasificacion_noticias import LlmService
 
-# Función principal de prueba
-def probar_ia():
-    print("Cargando Llama 3.1...")
-    ia = LlmService()
-    
-    # Caso 1: Venta clara
-    noticia_venta = {
-        "titulo": "Glovo anuncia la apertura de un nuevo Hub tecnológico en Barcelona y contratará a 400 ingenieros",
-        "contenido": "La empresa de delivery sigue expandiéndose y busca talento tech..."
-    }
-    
-    # Caso 2: Nada que ver
-    noticia_ruido = {
-        "titulo": "El gobierno aprueba la nueva ley de educación",
-        "contenido": "El ministro ha declarado que la reforma será estructural..."
-    }
 
-    print("\n--- PRUEBA 1: VENTA (Glovo) ---")
-    res1 = ia.analizar_oportunidad(noticia_venta["titulo"], noticia_venta["contenido"])
-    if res1:
-        print(f"Categoría Negocio: {res1.get('categoria')}")
-        print(f"Producto HP: {res1.get('categoria_producto')}")
-        print(f"Relevancia: {res1.get('relevancia')}")
-        print(f"Resumen: {res1.get('resumen_comercial')}")
-        print(f"Empresas: {res1.get('empresas')}")
-    
-    print("\n--- PRUEBA 2: RUIDO ---")
-    res2 = ia.analizar_oportunidad(noticia_ruido["titulo"], noticia_ruido["contenido"])
-    if res2:
-        print(f"Categoría Negocio: {res2.get('categoria')}")
-        print(f"Producto HP: {res2.get('categoria_producto')}")
-        print(f"Relevancia: {res2.get('relevancia')}")
-        print(f"Resumen: {res2.get('resumen_comercial')}")
-        print(f"Empresas: {res2.get('empresas')}")
+def mostrar_resultado(resultado):
+    """Muestra los campos de clasificacion de forma legible."""
+    if resultado:
+        print(f"  Categoria negocio:  {resultado.get('categoria')}")
+        print(f"  Producto HP:        {resultado.get('categoria_producto')}")
+        print(f"  Relevancia:         {resultado.get('relevancia')}")
+        print(f"  Resumen comercial:  {resultado.get('resumen_comercial')}")
+        print(f"  Empresas:           {resultado.get('empresas')}")
+    else:
+        print("  Error: La IA no devolvio resultado.")
+
+
+def ejecutar():
+    print("Cargando modelo de IA...")
+    ia = LlmService()
+
+    casos = [
+        {
+            "nombre": "CASO 1: Oportunidad de venta (Glovo)",
+            "titulo": "Glovo anuncia la apertura de un nuevo Hub tecnologico en Barcelona "
+                    "y contratara a 400 ingenieros",
+            "contenido": "La empresa de delivery sigue expandiendose y busca talento tech..."
+        },
+        {
+            "nombre": "CASO 2: Ruido (Gobierno)",
+            "titulo": "El gobierno aprueba la nueva ley de educacion",
+            "contenido": "El ministro ha declarado que la reforma sera estructural..."
+        }
+    ]
+
+    for caso in casos:
+        print(f"\n--- {caso['nombre']} ---")
+        resultado = ia.analizar_oportunidad(caso["titulo"], caso["contenido"])
+        mostrar_resultado(resultado)
+
 
 if __name__ == "__main__":
-    probar_ia()
+    ejecutar()

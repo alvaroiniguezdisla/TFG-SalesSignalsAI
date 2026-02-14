@@ -25,20 +25,24 @@ class NewsPipeline:
         # 2. Analizamos una a una 
         for noticia in noticias_crudas:
             try:
-                # Validacion de contenido base
+                # Validacion de contenido: Intentar obtener texto para analizar
                 raw_content = noticia.get('raw_content', '')
-                if not raw_content:
-                    print(f"[PIPELINE] Saltando noticia '{noticia.get('titulo', 'Sin titulo')[:30]}...' por falta de contenido raw")
-                    continue
-
-                # --- LIMPIEZA DE TEXTO ---
-                soup = BeautifulSoup(raw_content, 'html.parser')
-                texto_limpio = soup.get_text(separator=' ', strip=True)
                 
-                # Validacion de longitud minima
-                if len(texto_limpio) < 50:
-                    print(f"[PIPELINE] Saltando noticia '{noticia['titulo'][:30]}...' por contenido insuficiente ({len(texto_limpio)} chars)")
-                    continue
+                if raw_content:
+                    # --- LIMPIEZA DE TEXTO (si hay raw_content) ---
+                    soup = BeautifulSoup(raw_content, 'html.parser')
+                    texto_limpio = soup.get_text(separator=' ', strip=True)
+                else:
+                    # --- FALLBACK: usar título + resumen ---
+                    titulo = noticia.get('titulo', '')
+                    resumen = noticia.get('resumen', '')
+                    texto_limpio = f"{titulo}. {resumen}".strip()
+                    
+                    if not texto_limpio or texto_limpio == ".":
+                        print(f"[PIPELINE] Saltando noticia: sin contenido, título ni resumen disponible")
+                        continue
+                    
+                    print(f"[PIPELINE] Usando fallback (título+resumen) para: {titulo[:40]}...")
 
                 print(f"[PIPELINE] Analizando con IA: {noticia['titulo'][:50]}...") 
                 

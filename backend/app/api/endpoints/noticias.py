@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Query
+from fastapi import APIRouter
 from typing import List
 from app.services.almacenamiento.database import supabase
 from app.schemas.noticia import Noticia
@@ -54,9 +54,8 @@ def get_noticia_detalle(url_hash: str):
 
     response= supabase.table("noticias").select("*").eq("url_hash", url_hash).execute()
 
+    # Validar si existe
     if not response.data:
-        pass
-    if len(response.data) == 0:
         raise HTTPException(status_code=404, detail="Noticia no encontrada")
     
     return response.data[0]

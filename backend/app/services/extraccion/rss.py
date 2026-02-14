@@ -1,4 +1,3 @@
-from app.core.config import settings
 import feedparser
 import hashlib
 import requests
@@ -25,7 +24,7 @@ def obtener_noticias_rss(url_feed: str, nombre_fuente: str="RSS Genérico") -> L
         # Pasamos el contenido binario a feedparser
         feed = feedparser.parse(response_feed.content)
     except Exception as e:
-        print(f"Error crítico descargando el feed {url_feed}: {e}")
+        print(f"Error descargando el feed {url_feed}: {e}")
         return []
 
     #Si el feed falla o está vacío
@@ -33,7 +32,7 @@ def obtener_noticias_rss(url_feed: str, nombre_fuente: str="RSS Genérico") -> L
         print(f"No se encontraron entradas en el feed (posible error de parseo): {url_feed}")
         return []
 
-    noticias = [] # <--- RESTAURADO
+    noticias = [] 
     for entry in feed.entries[:10]:
         try:
             url_noticia = entry.link

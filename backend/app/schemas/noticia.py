@@ -20,3 +20,6 @@ class Noticia(BaseModel):
     
     published_at: Optional[str] = None
     scraped_at: Optional[str] = None
+    
+    # URLs adicionales (si hay duplicados)
+    urls_extra: List[str] = []

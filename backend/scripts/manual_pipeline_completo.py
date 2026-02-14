@@ -1,54 +1,45 @@
 # ----------------------------------------------------------------------------------
-# HERRAMIENTA MANUAL: EJECUTAR TODO EL SISTEMA DE UNA VEZ
-# Qué hace esto: Lanza el proceso completo (Descargar -> Analizar -> Guardar)
-# Para qué sirve: Si quiero actualizar la base de datos "a mano" ahora mismo.
+# SCRIPT MANUAL: Ejecucion del pipeline completo
+#
+# Uso: python -m scripts.manual_pipeline_completo
+#
+# Que hace: Ejecuta el proceso completo de produccion:
+#   1. INGESTA:  Descarga noticias de RSS, Scraper o Browser.
+#   2. IA:       Analiza cada noticia con Ollama (clasificacion + relevancia).
+#   3. STORAGE:  Guarda en Supabase con deduplicacion inteligente.
+#
+# Requisitos:
+#   - Ollama instalado y funcionando (ollama serve)
+#   - Internet activo
+#   - Credenciales Supabase en .env
 # ----------------------------------------------------------------------------------
 
-import sys
-import os
 import time
-
-# Fix path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
-
 from app.services.orquestacion.pipeline import NewsPipeline
 
-def ejecutar_pipeline_real():
-    print("\n")
-    print("==================================================================")
-    print(" INICIO DEL PIPELINE REAL (SIN MOCKS)")
-    print("==================================================================")
-    print("Este script ejecutara el pipeline de produccion completo:")
-    print("1. INGESTA: Descarga noticias de RSS/Web (El Pais, El Economista).")
-    print("2. MATRICIAL (IA): Analiza cada noticia con Ollama (llama3.2).")
-    print("3. STORAGE: Guarda en Supabase (con Deduplicacion Inteligente).")
-    print("\n")
-    print("Requisitos:")
-    print(" - 'ollama serve' corriendo.")
-    print(" - Internet activo.")
-    print(" - Credenciales Supabase en .env.")
-    print("\n")
+
+def ejecutar():
+    print("=" * 60)
+    print("Ejecutando pipeline completo (Ingesta -> IA -> Base de datos)")
+    print("=" * 60)
 
     start_time = time.time()
-    
+
     try:
         pipeline = NewsPipeline()
         pipeline.ejecutar()
-        
-    except Exception as e:
-        print(f"\nERROR CRITICO: {e}")
-        # Si es error de importacion de ollama, damos pista
-        if "No module named 'ollama'" in str(e):
-            print("\n[PISTA] Parece que falta la libreria 'ollama'. Ejecuta: pip install ollama")
 
-    end_time = time.time()
-    duration = end_time - start_time
-    
-    print("\n")
-    print("==================================================================")
-    print(f"FIN DEL PROCESO (Tiempo total: {duration:.2f}s)")
-    print("==================================================================")
-    print("\n")
+    except Exception as e:
+        print(f"\nError critico: {e}")
+        if "No module named 'ollama'" in str(e):
+            print("Solucion: pip install ollama")
+
+    duration = time.time() - start_time
+
+    print("=" * 60)
+    print(f"Proceso finalizado (Tiempo total: {duration:.2f}s)")
+    print("=" * 60)
+
 
 if __name__ == "__main__":
-    ejecutar_pipeline_real()
+    ejecutar()

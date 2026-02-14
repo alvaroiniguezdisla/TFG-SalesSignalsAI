@@ -24,47 +24,47 @@ class NewsExtractorManager:
             noticias_fuente = []
             exito = False
             
-            rss_url = source.get('url')
-            html_url = source.get('scraper_url') # La URL de respaldo
+            rss_url = source.get('url') # La URL de RSS
+            html_url = source.get('scraper_url') # La URL de respaldo para scraper y browser
 
             # 1. INTENTO RSS
             if rss_url:
                 try:
-                    logger.info(f"    RSS: {rss_url}")
+                    logger.info(f"RSS: {rss_url}")
                     noticias_fuente = obtener_noticias_rss(rss_url, nombre)
                     if noticias_fuente:
-                        logger.info(f"    RSS OK: {len(noticias_fuente)} noticias")
+                        logger.info(f"RSS OK: {len(noticias_fuente)} noticias")
                         exito = True
                 except Exception as e:
-                    logger.warning(f"    Falló RSS: {e}")
+                    logger.warning(f"Falló RSS: {e}")
 
             # 2. INTENTO SCRAPER 
             if not exito and html_url:
                 try:
-                    logger.info(f"    Scraper: {html_url}")
+                    logger.info(f"Scraper: {html_url}")
                     noticias_fuente = scrape_noticias(html_url, nombre)
                     if noticias_fuente:
-                        logger.info(f"    Scraper OK: {len(noticias_fuente)} noticias")
+                        logger.info(f"Scraper OK: {len(noticias_fuente)} noticias")
                         exito = True
                 except Exception as e:
-                    logger.warning(f"    Falló Scraper: {e}")
+                    logger.warning(f"Falló Scraper: {e}")
 
             # 3. INTENTO BROWSER 
             if not exito and html_url:
                 try:
-                    logger.info(f"    Browser: {html_url}")
+                    logger.info(f"Browser: {html_url}")
                     noticias_fuente = obtener_noticias_browser(html_url, nombre)
                     if noticias_fuente:
-                        logger.info(f"    Browser OK: {len(noticias_fuente)} noticias")
+                        logger.info(f"Browser OK: {len(noticias_fuente)} noticias")
                         exito = True
                 except Exception as e:
-                    logger.error(f"    Falló todo para {nombre}")
+                    logger.error(f"Falló todo para {nombre}")
 
             # ACUMULAMOS resultados
             if noticias_fuente:
                 todas_las_noticias.extend(noticias_fuente)
             else:
-                logger.error(f" Imposible obtener noticias de {nombre} por ningún método.")
+                logger.error(f"Imposible obtener noticias de {nombre} por ningún método.")
 
         # 4. Deduplicación Semántica
         logger.info(f"Total noticias crudas: {len(todas_las_noticias)}")

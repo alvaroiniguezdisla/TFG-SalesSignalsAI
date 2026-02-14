@@ -41,20 +41,21 @@ class SupabaseService:
             for nueva in news_list:
                 # 0. Check Intra-Lote (Evitar duplicados dentro de la misma ejecucion)
                 current_hash = nueva.get('url_hash')
-                if current_hash and current_hash in hashes_procesados_lote:
-                    print(f"    [SKIP] Noticia duplicada dentro del lote: {nueva['titulo'][:30]}...")
+                
+                # Si no tiene hash o ya lo hemos procesado en este lote, saltamos
+                if not current_hash or current_hash in hashes_procesados_lote:
                     continue
                 
-                if current_hash:
-                    hashes_procesados_lote.add(current_hash)
+                # Lo marcamos como procesado
+                hashes_procesados_lote.add(current_hash)
 
                 es_duplicada_db = False
                 
-                # las comparamos con las de la base de datos
+                # Comparar con noticias existentes en DB (noticias_db_3dias)
                 for existente in noticias_db_3dias:
-                    # Usamos la lógica compartida de app.core.deduplication
                     # Check 1: Mismo Hash (Exactamente la misma URL)
-                    mismo_hash = (current_hash and existente.get('url_hash') and current_hash == existente['url_hash'])
+                    # 'existente' es la noticia de la DB, 'nueva' es la que intentamos insertar
+                    mismo_hash = (existente.get('url_hash') == current_hash)
                     
                     # Check 2: Titulo Similar
                     titulo_similar = es_titulo_similar(nueva['titulo'], existente['titulo'])
@@ -62,31 +63,37 @@ class SupabaseService:
                     if mismo_hash or titulo_similar:
                         es_duplicada_db = True
                         
-                        # Usamos la lógica de fusión compartida
-                        # Guardamos estado previo para comparar cambios
-                        fuente_previa = existente.get('fuente', '')
-                        urls_previas_len = len(existente.get('urls_extra') or [])
+                        # FUSIONAR DATOS
+                        # Guardamos el estado original de la noticia en DB para detectar cambios
+                        fuente_original = existente.get('fuente', '')
+                        num_urls_original = len(existente.get('urls_extra') or [])
                         
-                        # Fusionamos en memoria (modifica 'existente')
-                        cambios = fusionar_datos_noticia(existente, nueva)
+                        # Esta funcion modifica 'existente' con los datos de 'nueva'
+                        fusionar_datos_noticia(existente, nueva)
                         
-                        if cambios:
-                            # Preparamos payload SOLO con lo que ha cambiado para el UPDATE
+                        # Detectar si ha habido cambios reales tras la fusion
+                        fuente_nueva = existente.get('fuente', '')
+                        num_urls_nueva = len(existente.get('urls_extra') or [])
+                        
+                        cambio_fuente = (fuente_nueva != fuente_original)
+                        cambio_urls = (num_urls_nueva > num_urls_original)
+
+                        if cambio_fuente or cambio_urls:
+                            # Preparamos los datos a actualizar
                             payload = {}
-                            if existente.get('fuente') != fuente_previa:
-                                payload['fuente'] = existente['fuente']
-                            
-                            urls_nuevas_len = len(existente.get('urls_extra') or [])
-                            if urls_nuevas_len > urls_previas_len:
+                            if cambio_fuente:
+                                payload['fuente'] = fuente_nueva
+                            if cambio_urls:
                                 payload['urls_extra'] = existente['urls_extra']
                                 
-                            if payload:
-                                self.client.table("noticias").update(payload).eq("id", existente['id']).execute()
-                                print(f"    Fusión en DB: {existente['titulo'][:30]}...")
+                            # Actualizamos en DB
+                            self.client.table("noticias").update(payload).eq("id", existente['id']).execute()
+                            print(f"    Fusión realizada en DB: {existente['titulo'][:30]}...")
                         
-                        break # Ya la encontramos, pasamos a la siguiente
+                        # Si encontramos duplicado, paramos de buscar en la DB para esta noticia
+                        break 
                 
-                # Si no se parecía a ninguna, es NUEVA de verdad
+                # Si recorrimos todas las existentes y ninguna coincidió, es NUEVA
                 if not es_duplicada_db:
                     nuevas_para_insertar.append(nueva)
             
@@ -94,7 +101,7 @@ class SupabaseService:
             if nuevas_para_insertar:
                 self.client.table("noticias").insert(nuevas_para_insertar).execute()
             
-            print(f" Resultado: {len(nuevas_para_insertar)} Nuevas | {len(news_list) - len(nuevas_para_insertar)} Fusionadas")
+            print(f"Resultado: {len(nuevas_para_insertar)} Nuevas | {len(news_list) - len(nuevas_para_insertar)} Fusionadas")
             return True
 
         except Exception as e:

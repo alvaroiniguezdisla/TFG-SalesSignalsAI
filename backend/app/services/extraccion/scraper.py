@@ -1,9 +1,8 @@
-from app.core.config import settings
 import requests
 import hashlib
 from bs4 import BeautifulSoup
 from datetime import datetime
-from typing import List, Dict
+from typing import List, Dict, Any
 
 
 
@@ -12,7 +11,7 @@ def hash_url(url:str) -> str:
     return hashlib.md5(url.encode('utf-8')).hexdigest()
 
 
-def scrape_noticias(target_url: str,nombre_fuente: str="Scraper Genérico") -> List[Dict]:
+def scrape_noticias(target_url: str,nombre_fuente: str="Scraper Genérico") -> List[Dict[str, Any]]:
 
     try:
         # Añadimos cabeceras para parecer un navegador real y evitar el error 403
@@ -40,7 +39,7 @@ def scrape_noticias(target_url: str,nombre_fuente: str="Scraper Genérico") -> L
             # Filtramos solo los que tienen enlace
             articulos = [t.parent for t in titulares if t.find('a')]
 
-        for item in articulos[:15]: # Aumentamos un poco por si acaso
+        for item in articulos[:10]: # Aumentamos un poco por si acaso
             # Si es un <article>, buscamos h2. Si es un div padre, el h2/h3 ya está ahí
             h2 = item.find(['h2', 'h3'])
             if h2 and h2.find('a'):
@@ -50,9 +49,9 @@ def scrape_noticias(target_url: str,nombre_fuente: str="Scraper Genérico") -> L
                 #Normalizamos la URL de forma genérica
                 url_completa= href
                 if href.startswith("/"):
-                     # Reconstruimos dominio base: protocol://domain.com
-                     domain = "/".join(target_url.split("/")[:3])
-                     url_completa= f"{domain}{href}"
+                    # Reconstruimos dominio base: protocol://domain.com
+                    domain = "/".join(target_url.split("/")[:3])
+                    url_completa= f"{domain}{href}"
 
                 noticias_limpias.append({
                     "url":url_completa,
@@ -60,6 +59,7 @@ def scrape_noticias(target_url: str,nombre_fuente: str="Scraper Genérico") -> L
                     "titulo": etiqueta_link.text.strip(),
                     "fuente": nombre_fuente,
                     "raw_content": str(item),
+                    "resumen": "",
                     "scraped_at": datetime.now().isoformat()
                     
                 })

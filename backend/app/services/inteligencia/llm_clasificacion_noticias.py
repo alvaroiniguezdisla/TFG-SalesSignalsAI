@@ -2,6 +2,7 @@ import ollama
 import json
 from enum import Enum
 from pydantic import BaseModel, Field
+from app.core.config import settings
 
 # 1. CATEGORÍAS DE PRODUCTO HP 
 class ProductCategory(str, Enum):
@@ -30,7 +31,7 @@ class SalesSignal(BaseModel):
 
 # 4. EL SERVICIO DE IA
 class LlmService:
-    def __init__(self, modelo: str = "llama3.1"):
+    def __init__(self, modelo: str = settings.OLLAMA_MODEL):
         self.modelo= modelo
     
     def analizar_oportunidad(self, titulo: str ,contenido: str ) ->dict:
