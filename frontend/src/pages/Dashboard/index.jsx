@@ -4,6 +4,7 @@ import NewsCard from '../../components/NewsCard';
 import './Dashboard.css';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import Spinner from '../../components/Spinner';
 
 
 function Dashboard() {
@@ -69,7 +70,7 @@ function Dashboard() {
         return isRecent && (n.relevancia_ia || 0) >= 70;
     }).length;
 
-    if (loading) return <div className="loading">Cargando señales de la BD...</div>;
+    if (loading) return <Spinner message="Sincronizando señales..." />;
     if (error) return <div className="error">{error}</div>;
 
     return (

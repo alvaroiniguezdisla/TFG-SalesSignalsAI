@@ -1,11 +1,11 @@
-import  { Navigate } from 'react-router-dom';
-import { useAuth} from '../context/AuthContext';
-
-const ProtectedRoute= ({ children }) => {
-    const { user, loading}=useAuth();
+import { Navigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import Spinner from './Spinner';
+const ProtectedRoute = ({ children }) => {
+    const { user, loading } = useAuth();
 
     //Si está cargando, mostramos un mensaje
-    if (loading) return <div>Cargando...</div>
+    if (loading) return <Spinner message="Validando sesión..." />
 
     //Si no hay usuario, lo mandamos a login
     if (!user) return <Navigate to="/login" />;

@@ -1,4 +1,3 @@
-import os 
 from supabase import create_client, Client
 from app.core.config import settings
 from datetime import datetime, timedelta
@@ -107,6 +106,30 @@ class SupabaseService:
         except Exception as e:
             print(f"Error en insert_news_deduplicacion: {e}")
             return None
+            
+    def obtener_usuarios_preferencias(self):
+        """Devuelve todos los perfiles de la base de datos."""
+        try:
+            response = self.client.table("profiles").select("*").execute()
+            return response.data or []
+        except Exception as e:
+            print(f"Error obteniendo usuarios de DB: {e}")
+            return []
+            
+    def obtener_noticias_relevantes_recientes(self, horas=6, min_relevancia=40):
+        """Devuelve noticias con relevancia mínima extraídas en las últimas X horas."""
+        hace_x_horas = (datetime.utcnow() - timedelta(hours=horas)).isoformat()
+        try:
+            response = self.client.table("noticias")\
+                .select("*")\
+                .gt("scraped_at", hace_x_horas)\
+                .gte("relevancia_ia", min_relevancia)\
+                .order("relevancia_ia", desc=True)\
+                .execute()
+            return response.data or []
+        except Exception as e:
+            print(f"Error obteniendo noticias recientes en DB: {e}")
+            return []
         
 # Instancia global para usar en el resto de la app
 supabase_service = SupabaseService()

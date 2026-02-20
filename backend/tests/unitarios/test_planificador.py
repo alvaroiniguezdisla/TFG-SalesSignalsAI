@@ -17,7 +17,6 @@ from app.core.scheduler import start_scheduler, job_ejecutar_pipeline
 
 # --- Tests de start_scheduler (la configuracion) ---
 
-@patch("app.core.scheduler.BackgroundScheduler")
 def test_configuracion_intervalo():
     """
     Verifica que el planificador se configura con un intervalo de 360 minutos

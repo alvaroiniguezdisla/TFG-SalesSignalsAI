@@ -459,3 +459,38 @@
     align-items: center;
     border-bottom: 1px dotted #f1f5f9;
 }
+/* --- NUEVO INDICADOR DE RELEVANCIA MINIMALISTA --- */
+.relevance-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background-color: var(--surface-hover);
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.relevance-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.relevance-dot.badge-high { background-color: var(--success); box-shadow: 0 0 5px var(--success); }
+.relevance-dot.badge-medium { background-color: var(--warning); box-shadow: 0 0 5px var(--warning); }
+.relevance-dot.badge-low { background-color: var(--text-tertiary); }
+
+.relevance-score {
+    color: var(--text-primary);
+}
+
+.extra-source-link {
+    font-size: 0.8rem;
+    color: var(--text-tertiary);
+    text-decoration: underline;
+}
+.extra-source-link:hover {
+    color: var(--primary);
+}

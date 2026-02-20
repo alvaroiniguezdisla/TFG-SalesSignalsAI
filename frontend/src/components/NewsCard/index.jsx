@@ -6,12 +6,12 @@ import './NewsCard.css';
  * Componente Tarjeta Inteligente (Smart Card) 
  * Aprovecha todas las columnas disponibles y mejora la legibilidad.
  */
-function NewsCard({ noticia, userCompanies =[] }) {
+function NewsCard({ noticia, userCompanies = [] }) {
     const navigate = useNavigate();
-    const getPriorityLevel =(relevancia)=>{
-        if (relevancia >= 70) return {label: 'Alta',class: 'priority-high' };
-        if (relevancia >= 40) return {label: 'Media', class: 'priority-medium' };
-        return {label: 'Baja', class: 'priority-low' };
+    const getPriorityLevel = (relevancia) => {
+        if (relevancia >= 70) return { label: 'Alta', class: 'priority-high' };
+        if (relevancia >= 40) return { label: 'Media', class: 'priority-medium' };
+        return { label: 'Baja', class: 'priority-low' };
     };
 
     const priority = getPriorityLevel(noticia.relevancia_ia);
@@ -38,18 +38,18 @@ function NewsCard({ noticia, userCompanies =[] }) {
         });
     };
 
-    // Color del semáforo (Relevancia)
+    // Color del semáforo (Relevancia) - VERSIÓN LIMPIA
     const getRelevanceBadge = (score) => {
         let colorClass = 'badge-low';
-        let label = 'BAJA';
 
-        if (score >= 70) { colorClass = 'badge-high'; label = 'ALTA'; }
-        else if (score >= 40) { colorClass = 'badge-medium'; label = 'MEDIA'; }
+        if (score >= 70) { colorClass = 'badge-high'; }
+        else if (score >= 40) { colorClass = 'badge-medium'; }
 
         return (
-            <span className={`badge ${colorClass}`} title={`Relevancia IA: ${score}%`}>
-                {label} ({score || 0}%)
-            </span>
+            <div className="relevance-indicator" title={`Relevancia IA: ${score}%`}>
+                <span className={`relevance-dot ${colorClass}`}></span>
+                <span className="relevance-score">{score || 0}%</span>
+            </div>
         );
     };
 
@@ -74,11 +74,6 @@ function NewsCard({ noticia, userCompanies =[] }) {
                 </div>
             </div>
 
-            {/* 1.5 RELEVANCIA */}
-            <div className="card-relevance-bar">
-                <span className="relevance-label">Relevancia: </span>
-                {getRelevanceBadge(noticia.relevancia_ia)}
-            </div>
 
             {/* 2. CONTENIDO PRINCIPAL */}
             <div className="card-body">
@@ -101,6 +96,12 @@ function NewsCard({ noticia, userCompanies =[] }) {
 
             {/* 3. CONTEXTO DE VENTA */}
             <div className="card-context">
+
+                {/* -1. Relevancia */}
+                <div className="context-row">
+                    <span className="context-label">Relevancia:</span>
+                    {getRelevanceBadge(noticia.relevancia_ia)}
+                </div>
 
                 {/* 0. Fuentes (Solicitud Usuario) */}
                 <div className="context-row">

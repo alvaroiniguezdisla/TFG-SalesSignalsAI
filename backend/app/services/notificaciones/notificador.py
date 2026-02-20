@@ -4,25 +4,16 @@ Filtra noticias por preferencias de usuario y envía emails personalizados.
 """
 import time
 import logging
-from datetime import datetime, timedelta
-from app.services.almacenamiento.database import supabase
+from app.services.almacenamiento.database import supabase_service
 from app.services.notificaciones.email_service import email_service
+from app.core.config import settings
 
 logger = logging.getLogger(__name__)
-
-# Configuración para evitar bloqueos de Gmail
-MAX_EMAILS_POR_EJECUCION = 50
-DELAY_ENTRE_EMAILS = 1  # segundos
 
 
 def obtener_usuarios_con_preferencias():
     """Obtiene todos los usuarios con sus preferencias desde Supabase."""
-    try:
-        response = supabase.table("profiles").select("*").execute()
-        return response.data or []
-    except Exception as e:
-        logger.error(f"Error obteniendo usuarios: {e}")
-        return []
+    return supabase_service.obtener_usuarios_preferencias()
 
 
 def filtrar_noticias_para_usuario(noticias: list, perfil: dict) -> list:
@@ -76,15 +67,8 @@ def enviar_notificaciones_a_todos():
 
     try:
         # 1. Obtener noticias de las últimas 6 horas con relevancia >= 40
-        hace_6h = (datetime.utcnow() - timedelta(hours=6)).isoformat()
-        response = supabase.table("noticias")\
-            .select("*")\
-            .gt("scraped_at", hace_6h)\
-            .gte("relevancia_ia", 40)\
-            .order("relevancia_ia", desc=True)\
-            .execute()
+        noticias_recientes = supabase_service.obtener_noticias_relevantes_recientes()
         
-        noticias_recientes = response.data or []
         logger.info(f"Noticias recientes (ultimas 6h, relevancia >= 40): {len(noticias_recientes)}")
 
         if not noticias_recientes:
@@ -103,8 +87,8 @@ def enviar_notificaciones_a_todos():
         enviados = 0
         for usuario in usuarios:
             # Limite de emails por ejecucion
-            if enviados >= MAX_EMAILS_POR_EJECUCION:
-                logger.warning(f"Limite de {MAX_EMAILS_POR_EJECUCION} emails alcanzado")
+            if enviados >= settings.MAX_EMAILS_POR_EJECUCION:
+                logger.warning(f"Limite de {settings.MAX_EMAILS_POR_EJECUCION} emails alcanzado")
                 break
                 
             email = usuario.get("email")
@@ -122,7 +106,7 @@ def enviar_notificaciones_a_todos():
                     enviados += 1
                     # Delay para evitar bloqueos de Gmail
                     if enviados < len(usuarios):
-                        time.sleep(DELAY_ENTRE_EMAILS)
+                        time.sleep(settings.DELAY_ENTRE_EMAILS)
 
         logger.info(f"Notificaciones enviadas: {enviados}")
         return enviados

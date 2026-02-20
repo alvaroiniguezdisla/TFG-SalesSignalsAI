@@ -35,6 +35,13 @@ class Settings(BaseSettings):
     GMAIL_USER: str = ""
     GMAIL_APP_PASSWORD: str = ""
     
+    # Configuración de envíos
+    MAX_EMAILS_POR_EJECUCION: int = 50
+    DELAY_ENTRE_EMAILS: int = 1
+    
+    # Configuración Deduplicación
+    UMBRAL_SIMILITUD_TITULOS: float = 0.82
+    
     # LLM Settings
     OLLAMA_MODEL: str = "llama3.1"
     

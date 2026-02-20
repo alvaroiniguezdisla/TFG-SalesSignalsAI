@@ -1,8 +1,8 @@
 import difflib
 import logging
-logger = logging.getLogger(__name__)
+from app.core.config import settings
 
-SIMILITUD_UMBRAL = 0.85
+logger = logging.getLogger(__name__)
 
 def es_titulo_similar(titulo1: str, titulo2: str) -> bool:
     """Devuelve True si los títulos son 'iguales' (>85% similitud)."""
@@ -11,7 +11,7 @@ def es_titulo_similar(titulo1: str, titulo2: str) -> bool:
     
     ratio = difflib.SequenceMatcher(None, titulo1, titulo2).ratio()
     
-    return ratio > SIMILITUD_UMBRAL
+    return ratio > settings.UMBRAL_SIMILITUD_TITULOS
 
 def fusionar_datos_noticia(existente: dict, nueva: dict) -> bool:
     """

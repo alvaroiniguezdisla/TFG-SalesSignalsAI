@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';// Para leer el ID de la URL
 import { getNoticiaById } from '../../services/api';
 import './NewsDetail.css';
-
+import Spinner from '../../components/Spinner';
 function NewsDetail() {
     const { id } = useParams(); //sacamos el id de la URL
     const navigate = useNavigate(); //para el boton de volver
@@ -19,7 +19,7 @@ function NewsDetail() {
         loadData();
     }, [id]);
 
-    if (loading) return <div className="loading">Cargando noticia...</div>;
+    if (loading) return <Spinner message="Cargando noticia..." />;
     if (!noticia) return <div className="error">Noticia no encontrada</div>;
 
     return (

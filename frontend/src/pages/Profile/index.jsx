@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { getCategories } from '../../services/api';
 import './Profile.css';
-
+import Spinner from '../../components/Spinner';
 function Profile() {
     const navigate = useNavigate();
     const { user, profile, signOut, updateProfile } = useAuth()
@@ -109,7 +109,7 @@ function Profile() {
     // Las que no encajan en ninguna (por si acaso cambian las listas backend)
     const myOthers = formData.favorite_categories.filter(c => !availableSignals.includes(c) && !availableProducts.includes(c));
 
-    if (loading) return <div className="loading-screen">Cargando perfil...</div>;
+    if (loading) return <Spinner message="Cargando perfil..." />;
 
     return (
         <div className="profile-layout">
