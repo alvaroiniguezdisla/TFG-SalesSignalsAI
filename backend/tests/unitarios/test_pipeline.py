@@ -47,7 +47,9 @@ RESPUESTA_IA_FAKE = {
     "categoria_producto": "Soluciones Empresariales",
     "relevancia": 90,
     "resumen_comercial": "Oportunidad detectada",
-    "empresas": ["Empresa Test"]
+    "empresas": [{"nombre": "Empresa Test", "tamano": "Gran Cuenta"}],
+    "talk_track": "- Punto de conversacion 1\n- Punto de conversacion 2",
+    "email_draft": "Asunto: Oportunidad\n\nEstimado..."
 }
 
 
@@ -87,6 +89,9 @@ def test_ejecucion_completa(MockDB, MockLLM, MockExtractor):
     assert noticias_guardadas[0]["categoria_ia"] == "Expansion / Crecimiento"
     assert noticias_guardadas[0]["relevancia_ia"] == 90
     assert noticias_guardadas[0]["empresas_clave_ia"] == ["Empresa Test"]
+    assert noticias_guardadas[0]["empresas_detalle_ia"] == [{"nombre": "Empresa Test", "tamano": "Gran Cuenta"}]
+    assert noticias_guardadas[0]["talk_track_ia"] != ""
+    assert noticias_guardadas[0]["email_draft_ia"] != ""
 
 
 @patch("app.services.orquestacion.pipeline.extractor")

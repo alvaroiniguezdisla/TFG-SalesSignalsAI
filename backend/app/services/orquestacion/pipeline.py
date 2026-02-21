@@ -54,13 +54,25 @@ class NewsPipeline:
                     noticia['categoria_producto_ia'] = analisis.get('categoria_producto', 'Otros / No Aplica')
                     noticia['relevancia_ia'] = analisis.get('relevancia', 0)
                     noticia['resumen_comercial_ia'] = analisis.get('resumen_comercial', '')
-                    noticia['empresas_clave_ia'] = analisis.get('empresas', [])
+                    noticia['talk_track_ia'] = analisis.get('talk_track', '')
+                    noticia['email_draft_ia'] = analisis.get('email_draft', '')
+
+                    # Empresas: ahora la IA devuelve list[dict] con {nombre, tamano}
+                    empresas_raw = analisis.get('empresas', [])
+                    noticia['empresas_clave_ia'] = [
+                        e.get('nombre', e) if isinstance(e, dict) else e
+                        for e in empresas_raw
+                    ]
+                    noticia['empresas_detalle_ia'] = empresas_raw
                 else:
                     noticia['categoria_ia'] = "Error IA"
                     noticia['categoria_producto_ia'] = "Error IA"
                     noticia['relevancia_ia'] = 0
                     noticia['resumen_comercial_ia'] = "No se pudo analizar"
                     noticia['empresas_clave_ia'] = []
+                    noticia['empresas_detalle_ia'] = []
+                    noticia['talk_track_ia'] = ''
+                    noticia['email_draft_ia'] = ''
 
                 noticias_enriquecidas.append(noticia)
             

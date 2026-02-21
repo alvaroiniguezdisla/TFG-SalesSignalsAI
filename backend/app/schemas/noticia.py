@@ -17,6 +17,11 @@ class Noticia(BaseModel):
     empresas_clave_ia: List[str] = []
     categoria_ia: Optional[str] = None
     categoria_producto_ia: Optional[str] = None
+
+    # IA enriquecida
+    talk_track_ia: Optional[str] = None
+    email_draft_ia: Optional[str] = None
+    empresas_detalle_ia: Optional[List[dict]] = None
     
     published_at: Optional[str] = None
     scraped_at: Optional[str] = None

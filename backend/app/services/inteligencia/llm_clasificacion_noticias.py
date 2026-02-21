@@ -21,15 +21,22 @@ class SignalCategory(str, Enum):
     FUSIONES = "M&A / Fusiones" # Cambios organizativos -> OPORTUNIDAD CONSULTORÍA
     RUIDO = "Sin Interés Comercial " # Política, Sucesos -> DESCARTAR
 
-# 3. ESQUEMA DE SALIDA 
+# 3. MODELO DE EMPRESA ENRIQUECIDA
+class EmpresaDetectada(BaseModel):
+    nombre: str = Field(..., description="Nombre de la empresa detectada")
+    tamano: str = Field(default="Desconocido", description="Startup, PYME, Mediana Empresa, Gran Cuenta o Desconocido")
+
+# 4. ESQUEMA DE SALIDA
 class SalesSignal(BaseModel):
     categoria: SignalCategory = Field(..., description="Categoría de negocio a la que pertenece la noticia")
     categoria_producto: ProductCategory = Field(..., description="Línea de producto HP más adecuada para vender aquí")
     relevancia: int = Field(..., description="Puntuación 0-100 de interés para HP")
-    resumen_comercial: str = Field(..., description="Justificación breve para el vendedor")
-    empresas: list[str] = Field(..., description="Lista de empresas potenciales clientes")
+    resumen_comercial: str = Field(..., description="Resumen para el vendedor: qué vender, por qué, y contexto corporativo")
+    empresas: list[EmpresaDetectada] = Field(..., description="Empresas detectadas con su clasificación de tamaño")
+    talk_track: str = Field(default="", description="3-4 puntos clave para que el comercial inicie una conversación")
+    email_draft: str = Field(default="", description="Borrador de email profesional de primer contacto")
 
-# 4. EL SERVICIO DE IA
+# 5. EL SERVICIO DE IA
 class LlmService:
     def __init__(self, modelo: str = settings.OLLAMA_MODEL):
         self.modelo= modelo
@@ -39,32 +46,73 @@ class LlmService:
         Lee una noticia y extrae señales de venta para HP.
         """
 
-        #PROMT (Instrucciones para el LLM)
         promt_sistema = """
-        ACTÚA COMO: Un experto en ventas B2B de HP (Hewlett-Packard).
-        TU OBJETIVO: Analizar noticias para detectar oportunidades de venta de productos HP.
+        ACTUA COMO: Un analista senior de ventas B2B de HP (Hewlett-Packard) con 15 años de experiencia.
+        TU OBJETIVO: Analizar una noticia y generar inteligencia comercial accionable para el equipo de ventas.
 
-        PASO 1: DETECTAR LA SEÑAL DE NEGOCIO
-        - Expansión / Crecimiento: ¿Abren oficinas? (Oportunidad de vender PCs e Impresoras masivamente).
-        - Transformación Digital: ¿Modernizan tecnología? (Oportunidad de servicios y portátiles de alta gama).
-        - Resultados Financieros: ¿Ganan mucho dinero? (Tienen presupuesto).
-        - M&A / Fusiones: ¿Se unen empresas? (Renovación de flotas de equipos).
-        - Sin Interés Comercial: Política, leyes, cotilleos, sucesos. (RUIDO).
+        PASO 1: DETECTAR LA SENAL DE NEGOCIO
+        Clasifica la noticia en UNA de estas categorias:
+        - "Expansión / Crecimiento ": Abren oficinas, contratan, se expanden -> VENDER HARDWARE MASIVO.
+        - "Transformación Digital": Modernizan tecnología, IA, Cloud, Ciber -> VENDER SERVICIOS/SOFTWARE.
+        - "Resultados Financieros": Buenos resultados economicos -> TIENEN PRESUPUESTO.
+        - "M&A / Fusiones": Fusiones, adquisiciones, cambios organizativos -> RENOVACION DE FLOTAS.
+        - "Sin Interés Comercial ": Politica, leyes, sucesos, cotilleos -> RUIDO, DESCARTAR.
 
-        PASO 2: ASIGNAR PRODUCTO HP (¿QUÉ LES VENDEMOS?)
-        - "Gaming / OMEN": Si hablan de eSports, videojuegos, diseño gráfico potente.
-        - "Impresión y Escáner": Si abren oficinas físicas, gestión documental.
-        - "PC Consumo (Hogar/Estudiantes)": Si es para usuarios finales, educación, vuelta al cole.
-        - "Soluciones Empresariales (ProBook/Elite)": Si son empresas comprando portátiles para empleados.
-        - "Servicios y Soluciones IT": Ciberseguridad, nube, gestión de flotas.
-        - "Otros / No Aplica": Si es Ruido o no encaja claro.
+        PASO 2: ASIGNAR PRODUCTO HP
+        Elige la linea de producto MAS adecuada:
+        - "Gaming / OMEN": eSports, videojuegos, diseño gráfico.
+        - "Impresión y Escáner": Oficinas fisicas, gestion documental, logistica.
+        - "PC Consumo (Hogar/Estudiantes)": Usuarios finales, educación.
+        - "Soluciones Empresariales (ProBook/Elite)": Portatiles y PCs corporativos para empleados.
+        - "Servicios y Soluciones IT": Ciberseguridad, nube, gestion de flotas IT.
+        - "Otros / No Aplica": Si es ruido o no encaja.
 
-        FORMATO RESPUESTA (JSON):
-        Devuelve un JSON exacto con los campos: "categoria", "categoria_producto", "relevancia" (0-100), "resumen_comercial" (explica qué producto vender y por qué) y "empresas" (quién compra).
-        
+        PASO 3: IDENTIFICAR EMPRESAS Y CLASIFICAR SU TAMANO
+        Detecta las empresas mencionadas en la noticia (maximo 3). Para cada una, clasifica su tamano:
+        - "Startup": Menos de 50 empleados, rondas de financiacion, recien creada.
+        - "PYME": Entre 50 y 250 empleados, ambito local o regional.
+        - "Mediana Empresa": Entre 250 y 1000 empleados, presencia nacional.
+        - "Gran Cuenta": Mas de 1000 empleados, multinacionales, cotizadas en bolsa (Ej: Telefonica, BBVA, Repsol, Inditex).
+        - "Desconocido": Si no hay datos suficientes.
+
+        PASO 4: RESUMEN COMERCIAL (resumen_comercial)
+        Escribe un resumen de 3-5 frases para el vendedor que incluya:
+        1. Que esta ocurriendo en la noticia.
+        2. Por que es relevante para HP (oportunidad concreta).
+        3. Que producto o servicio HP encaja y por que.
+
+        PASO 5: ARGUMENTARIO COMERCIAL (talk_track)
+        Genera exactamente 3-4 puntos que el comercial puede usar al llamar al cliente.
+        Cada punto en una linea nueva, empezando con un guion "-".
+        Ejemplo:
+        - Felicitar por la expansion y preguntar por sus necesidades tecnologicas.
+        - Presentar HP Elite como solucion para entornos corporativos con gestion centralizada.
+        - Mencionar HP Device as a Service (DaaS) para optimizar costes.
+        - Proponer una demo personalizada en sus oficinas.
+
+        PASO 6: BORRADOR DE EMAIL (email_draft)
+        Escribe un email profesional de primer contacto (maximo 150 palabras).
+        Requisitos:
+        - Hacer referencia indirecta a la noticia (sin parecer invasivo).
+        - Proponer una reunion o llamada breve.
+        - Tono: cordial, directo y profesional.
+        - Incluir un "Asunto:" al inicio.
+
+        FORMATO DE RESPUESTA:
+        Devuelve un JSON con estos campos exactos:
+        - "categoria": una de las categorias del Paso 1
+        - "categoria_producto": una de las lineas del Paso 2
+        - "relevancia": numero entero de 0 a 100
+        - "resumen_comercial": texto del Paso 4
+        - "empresas": lista de objetos con "nombre" y "tamano" (Paso 3)
+        - "talk_track": texto con los puntos del Paso 5
+        - "email_draft": texto completo del email del Paso 6
+
         EJEMPLO DE RAZONAMIENTO:
-        "Empresa X abre nueva sede en Madrid" -> Expansión -> Necesitan PCs para empleados -> "Soluciones Empresariales".
-        "Torneo de LoL patrocinado por X" -> Marketing -> "Gaming / OMEN".
+        "Telefonica abre 15 nuevas oficinas en España"
+        -> Expansion -> Necesitan PCs, impresoras, monitores -> "Soluciones Empresariales"
+        -> empresas: [{"nombre": "Telefonica", "tamano": "Gran Cuenta"}]
+        -> relevancia: 85
         """
 
         promt_usuario = f"""

@@ -71,6 +71,32 @@ function NewsDetail() {
                         <p>{noticia.resumen_comercial_ia || "No hay análisis disponible."}</p>
                     </section>
 
+                    {/* Guía de Conversación */}
+                    {noticia.talk_track_ia && (
+                        <section className="analysis-box">
+                            <h3>Guía de Conversación</h3>
+                            <div className="talk-track-content">
+                                {noticia.talk_track_ia.split('\n').filter(Boolean).map((punto, i) => (
+                                    <p key={i}>{punto}</p>
+                                ))}
+                            </div>
+                        </section>
+                    )}
+
+                    {/* Borrador de Email */}
+                    {noticia.email_draft_ia && (
+                        <section className="analysis-box email-draft">
+                            <h3>Borrador de Email</h3>
+                            <pre className="email-content">{noticia.email_draft_ia}</pre>
+                            <button
+                                className="action-btn primary"
+                                onClick={() => navigator.clipboard.writeText(noticia.email_draft_ia)}
+                            >
+                                Copiar Email
+                            </button>
+                        </section>
+                    )}
+
                     {/* Resumen Original */}
                     <section className="full-text">
                         <h3>Resumen Original</h3>
@@ -96,11 +122,20 @@ function NewsDetail() {
                         </div>
                     </div>
 
-                    {/* 2. Empresas */}
+                    {/* 2. Empresas (con tamaño si disponible) */}
                     <div className="sidebar-section">
                         <h4>Empresas</h4>
                         <div className="tags-wrapper">
-                            {noticia.empresas_clave_ia && noticia.empresas_clave_ia.length > 0 ? (
+                            {noticia.empresas_detalle_ia && noticia.empresas_detalle_ia.length > 0 ? (
+                                noticia.empresas_detalle_ia.map((emp, i) => (
+                                    <span key={i} className="tag-pill">
+                                        {emp.nombre}
+                                        {emp.tamano && emp.tamano !== "Desconocido" && (
+                                            <span className="tag-size">{emp.tamano}</span>
+                                        )}
+                                    </span>
+                                ))
+                            ) : noticia.empresas_clave_ia && noticia.empresas_clave_ia.length > 0 ? (
                                 noticia.empresas_clave_ia.map((emp, i) => (
                                     <span key={i} className="tag-pill">{emp}</span>
                                 ))
