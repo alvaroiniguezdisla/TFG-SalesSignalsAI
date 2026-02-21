@@ -2,7 +2,6 @@
 .dashboard-container {
   max-width: 1200px;
   margin: 0 auto;
-  /* Centrado horizontal */
   padding: 2rem;
 }
 
@@ -15,16 +14,13 @@
 .header-top {
   display: flex;
   justify-content: space-between;
-  /* Separa los elementos al máximo */
   align-items: center;
-  /* Los centra verticalmente */
   margin-bottom: 1.5rem;
 }
 
 .dashboard-header h1 {
   font-size: 2.5rem;
   color: #1e293b;
-  /* Color oscuro profesional */
   margin-bottom: 0.5rem;
   font-weight: 800;
   letter-spacing: -1px;
@@ -32,7 +28,6 @@
 
 .dashboard-header p {
   color: #64748b;
-  /* Gris medio */
   font-size: 1.2rem;
   font-weight: 400;
 }
@@ -40,7 +35,6 @@
 /* ICONO PERFIL */
 .profile-icon {
   color: #3b82f6;
-  /* Azulito */
   transition: transform 0.2s, color 0.2s;
   display: flex;
   align-items: center;
@@ -48,18 +42,14 @@
 
 .profile-icon:hover {
   color: #2563eb;
-  /* Azul más oscuro al pasar ratón */
   transform: scale(1.1);
-  /* Efecto pop */
 }
 
-/* GRID DE NOTICIAS (Rejilla responsive) */
+/* GRID DE NOTICIAS */
 .news-grid {
   display: grid;
-  /* Crea columnas automáticamente de mín 320px */
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 2rem;
-  /* Espacio entre tarjetas */
   padding-bottom: 3rem;
 }
 
@@ -77,7 +67,6 @@
   height: 40px;
   border: 4px solid #f3f3f3;
   border-top: 4px solid #3b82f6;
-  /* Azul */
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: 1rem;
@@ -93,7 +82,7 @@
   }
 }
 
-/* BOTÓN REFRESCAR  */
+/* BOTÓN REFRESCAR */
 .refresh-btn {
   background-color: #3b82f6;
   color: white;
@@ -104,7 +93,6 @@
   font-weight: 600;
   transition: background 0.2s;
   margin-top: 0;
-  /* Reset margin */
 }
 
 .refresh-btn:hover {
@@ -116,78 +104,107 @@
   cursor: wait;
 }
 
-/* FILTROS */
-.filters {
+/* SECCION DE FILTROS */
+.filters-section {
   display: flex;
-  gap: 1rem;
-  align-items: center;
-  margin-top: 1rem;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
 }
 
-.view-selector {
-  padding: 0.6rem 1rem;
+.search-input {
+  width: 100%;
+  padding: 0.55rem 1rem;
   background-color: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
   font-size: 0.95rem;
-  color: #374151;
-  cursor: pointer;
+  color: #334155;
   outline: none;
-  transition: all 0.2s;
+  transition: border-color 0.2s;
 }
 
-.view-selector:hover {
+.search-input:focus {
   border-color: #3b82f6;
 }
 
-.view-selector:focus {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
-}
-
-.sort-selector {
-  padding: 0.6rem 1rem;
-  background-color: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  font-size: 0.95rem;
-  color: #374151;
-  cursor: pointer;
-  outline: none;
-  transition: all 0.2s;
-}
-
-.sort-selector:hover {
-  border-color: #3b82f6;
-}
-
-/* Toggle Ocultar Ruido (US08) */
-.noise-toggle {
+.filters-row {
   display: flex;
-  align-items: center;
   gap: 0.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.filter-select {
+  flex: 1;
+  min-width: 140px;
+  padding: 0.55rem 0.75rem;
+  background-color: white;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
   font-size: 0.9rem;
-  color: #64748b;
+  color: #334155;
   cursor: pointer;
-  padding: 0.5rem 1rem;
-  background: #f8fafc;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  transition: all 0.2s;
+  outline: none;
+  transition: border-color 0.2s;
 }
 
-.noise-toggle:hover {
+.filter-select:hover,
+.filter-select:focus {
   border-color: #3b82f6;
-  color: #374151;
 }
 
-.noise-toggle input {
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.9rem;
+  color: #475569;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.checkbox-label input {
   accent-color: #3b82f6;
-  width: 16px;
-  height: 16px;
+  width: 15px;
+  height: 15px;
 }
 
-/* Badge Notificaciones (US17) */
+.btn-refresh {
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  padding: 0.55rem 1.2rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: background 0.2s;
+  white-space: nowrap;
+}
+
+.btn-refresh:hover {
+  background-color: #2563eb;
+}
+
+.btn-clear {
+  background: none;
+  color: #64748b;
+  border: 1px solid #d1d5db;
+  padding: 0.55rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.btn-clear:hover {
+  background-color: #f1f5f9;
+  color: #334155;
+}
+
+/* BADGE NOTIFICACIONES */
 .notification-badge {
   display: inline-block;
   background: linear-gradient(135deg, #ef4444, #dc2626);
