@@ -86,7 +86,7 @@ function Dashboard() {
 
     const newHighPriority = (noticias || []).filter(n => {
         const isRecent = (new Date() - new Date(n.scraped_at)) < 24 * 60 * 60 * 1000;
-        return isRecent && (n.relevancia_ia || 0) >= 70;
+        return isRecent;
     }).length;
 
     if (loading) return <Spinner message="Sincronizando señales..." />;

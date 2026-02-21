@@ -3,7 +3,9 @@ import json
 from enum import Enum
 from pydantic import BaseModel, Field
 from app.core.config import settings
+import logging
 
+logger = logging.getLogger(__name__)
 # 1. CATEGORÍAS DE PRODUCTO HP 
 class ProductCategory(str, Enum):
     GAMING = "Gaming / OMEN"
@@ -137,7 +139,7 @@ class LlmService:
 
 
         except Exception as e:
-            print(f"Error en analizar noticia con LLM: {e}")
+            logger.error(f"Error en analizar noticia con LLM: {e}")
             return None
             
             

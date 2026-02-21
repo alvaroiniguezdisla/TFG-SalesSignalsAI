@@ -1,16 +1,16 @@
 import feedparser
-import hashlib
 import requests
 from bs4 import BeautifulSoup
 from typing import List, Dict, Any
 from datetime import datetime
+import re
+import logging
+from app.core.utils import hash_url
 
-
-def hash_url(url:str) -> str:
-    return hashlib.md5(url.encode('utf-8')).hexdigest()
+logger = logging.getLogger(__name__)
 
 def obtener_noticias_rss(url_feed: str, nombre_fuente: str="RSS Genérico") -> List[Dict[str, Any]]:
-    print(f"Leyendo RSS desde: {url_feed}")
+    logger.info(f"Leyendo RSS desde: {url_feed}")
     
     # 1. Descargamos el XML "disfrazados" de navegador para evitar bloqueos (El Economista)
     headers_feed = {
@@ -21,15 +21,21 @@ def obtener_noticias_rss(url_feed: str, nombre_fuente: str="RSS Genérico") -> L
     try:
         response_feed = requests.get(url_feed, headers=headers_feed, timeout=10)
         response_feed.raise_for_status()
-        # Pasamos el contenido binario a feedparser
-        feed = feedparser.parse(response_feed.content)
+        
+        # FIX para El Economista: El XML viene con <pubDate/><![CDATA[fecha]]>
+        # Feedparser no lee bien pubDate si está autocerrada. Usamos una regex para arreglarlo:
+        xml_content = response_feed.text
+        xml_cleaned = re.sub(r'<pubDate/>\s*<!\[CDATA\[(.*?)\]\]>', r'<pubDate>\1</pubDate>', xml_content)
+        
+        # Pasamos el string arreglado a feedparser
+        feed = feedparser.parse(xml_cleaned)
     except Exception as e:
-        print(f"Error descargando el feed {url_feed}: {e}")
+        logger.error(f"Error descargando el feed {url_feed}: {e}")
         return []
 
     #Si el feed falla o está vacío
     if not feed.entries:
-        print(f"No se encontraron entradas en el feed (posible error de parseo): {url_feed}")
+        logger.warning(f"No se encontraron entradas en el feed (posible error de parseo): {url_feed}")
         return []
 
     noticias = [] 
@@ -54,7 +60,7 @@ def obtener_noticias_rss(url_feed: str, nombre_fuente: str="RSS Genérico") -> L
                 else:
                     raw_content = entry.summary if 'summary' in entry else ""
             except Exception as e:
-                print(f"Error enriqueciendo noticia {url_noticia}: {e}")
+                logger.error(f"Error enriqueciendo noticia {url_noticia}: {e}")
                 raw_content = entry.summary if 'summary' in entry else ""
 
             noticias.append({
@@ -64,10 +70,11 @@ def obtener_noticias_rss(url_feed: str, nombre_fuente: str="RSS Genérico") -> L
                 "fuente": nombre_fuente,
                 "raw_content": raw_content,
                 "resumen": entry.summary if 'summary' in entry else "",
+                "published_at": entry.get('published') or None,
                 "scraped_at": datetime.now().isoformat()
             })
         except Exception as e:
-            print(f"Error procesando entrada RSS: {e}")
+            logger.error(f"Error procesando entrada RSS: {e}")
             continue
 
     return noticias

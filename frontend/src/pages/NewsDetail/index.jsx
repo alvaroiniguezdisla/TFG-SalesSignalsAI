@@ -51,10 +51,14 @@ function NewsDetail() {
 
                     <div className="dates-row">
                         <span className="meta-item date">
-                            Publicado: {noticia.published_at || "Fecha desconocida"}
+                            Publicado: {noticia.published_at
+                                ? new Date(noticia.published_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })
+                                : "Fecha desconocida"}
                         </span>
                         <span className="meta-item date-scraped">
-                            Detectado: {noticia.scraped_at ? new Date(noticia.scraped_at).toLocaleDateString() : "-"}
+                            Detectado: {noticia.scraped_at
+                                ? new Date(noticia.scraped_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })
+                                : "-"}
                         </span>
                     </div>
                 </div>
@@ -127,14 +131,21 @@ function NewsDetail() {
                         <h4>Empresas</h4>
                         <div className="tags-wrapper">
                             {noticia.empresas_detalle_ia && noticia.empresas_detalle_ia.length > 0 ? (
-                                noticia.empresas_detalle_ia.map((emp, i) => (
-                                    <span key={i} className="tag-pill">
-                                        {emp.nombre}
-                                        {emp.tamano && emp.tamano !== "Desconocido" && (
-                                            <span className="tag-size">{emp.tamano}</span>
-                                        )}
-                                    </span>
-                                ))
+                                noticia.empresas_detalle_ia.map((emp, i) => {
+                                    const sizeClass = emp.tamano === 'Gran Cuenta' ? 'tag-size-gran-cuenta'
+                                        : emp.tamano === 'Mediana Empresa' ? 'tag-size-mediana'
+                                            : emp.tamano === 'PYME' ? 'tag-size-pyme'
+                                                : emp.tamano === 'Startup' ? 'tag-size-startup'
+                                                    : '';
+                                    return (
+                                        <span key={i} className="tag-pill">
+                                            {emp.nombre}
+                                            {emp.tamano && (
+                                                <span className={`tag-size ${sizeClass}`}>{emp.tamano}</span>
+                                            )}
+                                        </span>
+                                    );
+                                })
                             ) : noticia.empresas_clave_ia && noticia.empresas_clave_ia.length > 0 ? (
                                 noticia.empresas_clave_ia.map((emp, i) => (
                                     <span key={i} className="tag-pill">{emp}</span>

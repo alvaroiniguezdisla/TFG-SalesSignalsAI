@@ -2,6 +2,9 @@ from app.services.extraccion.manager import extractor
 from bs4 import BeautifulSoup
 from app.services.inteligencia import LlmService
 from app.services.almacenamiento import SupabaseService
+import logging
+
+logger = logging.getLogger(__name__)
 
 class NewsPipeline:
     def __init__(self):
@@ -9,16 +12,16 @@ class NewsPipeline:
         self.llm= LlmService()
 
     def ejecutar(self):
-        print("[PIPELINE] Iniciando proceso de ingesta y categorización de noticias...")
+        logger.info("[PIPELINE] Iniciando proceso de ingesta y categorización de noticias...")
 
         #1. Hacemos ingesta de noticias 
         noticias_crudas= extractor.obtener_noticias()
 
         if not noticias_crudas:
-            print("[PIPELINE] No se han podido obtener noticias")
+            logger.warning("[PIPELINE] No se han podido obtener noticias")
             return
         
-        print(f"[PIPELINE] Se han obtenido {len(noticias_crudas)} noticias")
+        logger.info(f"[PIPELINE] Se han obtenido {len(noticias_crudas)} noticias")
 
         noticias_enriquecidas= []
 
@@ -39,12 +42,12 @@ class NewsPipeline:
                     texto_limpio = f"{titulo}. {resumen}".strip()
                     
                     if not texto_limpio or texto_limpio == ".":
-                        print(f"[PIPELINE] Saltando noticia: sin contenido, título ni resumen disponible")
+                        logger.warning("Saltando noticia: sin contenido, título ni resumen disponible")
                         continue
                     
-                    print(f"[PIPELINE] Usando fallback (título+resumen) para: {titulo[:40]}...")
+                    logger.info(f"Usando fallback (título+resumen) para: {titulo[:40]}...")
 
-                print(f"[PIPELINE] Analizando con IA: {noticia['titulo'][:50]}...") 
+                logger.info(f"Analizando con IA: {noticia['titulo'][:50]}...") 
                 
                 # Llamada protegida a la IA
                 analisis = self.llm.analizar_oportunidad(noticia['titulo'], texto_limpio)
@@ -77,15 +80,15 @@ class NewsPipeline:
                 noticias_enriquecidas.append(noticia)
             
             except Exception as e:
-                print(f"[PIPELINE] Error procesando noticia '{noticia.get('titulo', 'Unknown')[:30]}': {e}")
+                logger.error(f"Error procesando noticia '{noticia.get('titulo', 'Unknown')[:30]}': {e}")
                 continue
 
         #4. Guardamos en la base de datos
-        print("[PIPELINE] Guardando noticias en la base de datos...")
+        logger.info("Guardando noticias en la base de datos...")
         
         self.db.insert_news_deduplicacion(noticias_enriquecidas)
 
-        print(f"[PIPELINE] Se han guardado {len(noticias_enriquecidas)} noticias")
+        logger.info(f"Se han guardado {len(noticias_enriquecidas)} noticias")
 
 
 if __name__ == "__main__":

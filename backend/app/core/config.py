@@ -45,6 +45,9 @@ class Settings(BaseSettings):
     # LLM Settings
     OLLAMA_MODEL: str = "llama3.1"
     
+    # CORS Origins Permitidos
+    CORS_ORIGINS: list[str] = ["http://localhost:5173", "http://127.0.0.1:5173"]
+    
     class Config:
         # Le decimos que busque el .env relativo a este archivo (backend/app/core/../../.env)
         # Esto asegura que lo encuentre aunque lancemos el script desde otra carpeta

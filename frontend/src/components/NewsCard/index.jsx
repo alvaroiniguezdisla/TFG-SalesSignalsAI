@@ -138,11 +138,20 @@ function NewsCard({ noticia, userCompanies = [] }) {
                     </span>
                 </div>
 
-                {/* 3. Empresas Clave */}
+                {/* 3. Empresas Clave (con tamaño si disponible) */}
                 <div className="context-row">
                     <span className="context-label">Empresas:</span>
                     <div className="tags-list">
-                        {noticia.empresas_clave_ia && noticia.empresas_clave_ia.length > 0 ? (
+                        {noticia.empresas_detalle_ia && noticia.empresas_detalle_ia.length > 0 ? (
+                            noticia.empresas_detalle_ia.map((emp, idx) => (
+                                <span key={idx} className="company-tag">
+                                    #{emp.nombre}
+                                    {emp.tamano && (
+                                        <span className="company-size"> · {emp.tamano}</span>
+                                    )}
+                                </span>
+                            ))
+                        ) : noticia.empresas_clave_ia && noticia.empresas_clave_ia.length > 0 ? (
                             noticia.empresas_clave_ia.map((empresa, idx) => (
                                 <span key={idx} className="company-tag">#{empresa}</span>
                             ))

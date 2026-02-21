@@ -350,11 +350,44 @@
   margin-bottom: 1rem;
 }
 
-/* TAG TAMAÑO EMPRESA */
+/* TAG TAMAÑO EMPRESA (badges con color) */
 .tag-size {
   display: inline-block;
   margin-left: 0.4rem;
-  font-size: 0.75rem;
-  color: #6366f1;
+  font-size: 0.7rem;
   font-weight: 600;
+  padding: 0.1rem 0.5rem;
+  border-radius: 10px;
+  color: white;
+  background-color: #94a3b8;
+}
+
+.tag-pill {
+  display: inline-flex;
+  align-items: center;
+  background: #f1f5f9;
+  color: #1e293b;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-right: 0.5rem;
+  margin-bottom: 0.5rem;
+  border: 1px solid #e2e8f0;
+}
+
+.tag-size-gran-cuenta {
+  background-color: #7c3aed;
+}
+
+.tag-size-mediana {
+  background-color: #2563eb;
+}
+
+.tag-size-pyme {
+  background-color: #16a34a;
+}
+
+.tag-size-startup {
+  background-color: #ea580c;
 }

@@ -1,14 +1,11 @@
 import requests
-import hashlib
 from bs4 import BeautifulSoup
 from datetime import datetime
 from typing import List, Dict, Any
+import logging
+from app.core.utils import hash_url
 
-
-
-def hash_url(url:str) -> str:
-    "Crea una huella digital para cada URL para evitar duplicados"
-    return hashlib.md5(url.encode('utf-8')).hexdigest()
+logger = logging.getLogger(__name__)
 
 
 def scrape_noticias(target_url: str,nombre_fuente: str="Scraper Genérico") -> List[Dict[str, Any]]:
@@ -60,13 +57,13 @@ def scrape_noticias(target_url: str,nombre_fuente: str="Scraper Genérico") -> L
                     "fuente": nombre_fuente,
                     "raw_content": str(item),
                     "resumen": "",
+                    "published_at": None,
                     "scraped_at": datetime.now().isoformat()
-                    
                 })
 
 
         return noticias_limpias
 
     except Exception as e:
-        print(f"Error en scrape_elpais_portada: {e}")
+        logger.error(f"Error en scrape_elpais_portada: {e}")
         return []

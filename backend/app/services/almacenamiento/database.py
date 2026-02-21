@@ -2,6 +2,9 @@ from supabase import create_client, Client
 from app.core.config import settings
 from datetime import datetime, timedelta
 from app.core.deduplication import es_titulo_similar, fusionar_datos_noticia
+import logging
+
+logger = logging.getLogger(__name__)
 
 class SupabaseService:
     def __init__(self):
@@ -30,9 +33,9 @@ class SupabaseService:
 
             noticias_db_3dias = response.data if response.data else []
             if noticias_db_3dias:
-                print(f"Se han encontrado {len(noticias_db_3dias)} noticias recientes en la DB")
+                logger.info(f"Se han encontrado {len(noticias_db_3dias)} noticias recientes en la DB")
             else:
-                print("No se han encontrado noticias recientes en la base de datos")
+                logger.info("No se han encontrado noticias recientes en la base de datos")
 
             nuevas_para_insertar = []
             hashes_procesados_lote = set()
@@ -87,7 +90,7 @@ class SupabaseService:
                                 
                             # Actualizamos en DB
                             self.client.table("noticias").update(payload).eq("id", existente['id']).execute()
-                            print(f"    Fusión realizada en DB: {existente['titulo'][:30]}...")
+                            logger.info(f"    Fusión realizada en DB: {existente['titulo'][:30]}...")
                         
                         # Si encontramos duplicado, paramos de buscar en la DB para esta noticia
                         break 
@@ -100,11 +103,11 @@ class SupabaseService:
             if nuevas_para_insertar:
                 self.client.table("noticias").insert(nuevas_para_insertar).execute()
             
-            print(f"Resultado: {len(nuevas_para_insertar)} Nuevas | {len(news_list) - len(nuevas_para_insertar)} Fusionadas")
+            logger.info(f"Resultado: {len(nuevas_para_insertar)} Nuevas | {len(news_list) - len(nuevas_para_insertar)} Fusionadas")
             return True
 
         except Exception as e:
-            print(f"Error en insert_news_deduplicacion: {e}")
+            logger.error(f"Error en insert_news_deduplicacion: {e}")
             return None
             
     def obtener_usuarios_preferencias(self):
@@ -113,7 +116,7 @@ class SupabaseService:
             response = self.client.table("profiles").select("*").execute()
             return response.data or []
         except Exception as e:
-            print(f"Error obteniendo usuarios de DB: {e}")
+            logger.error(f"Error obteniendo usuarios de DB: {e}")
             return []
             
     def obtener_noticias_relevantes_recientes(self, horas=6, min_relevancia=40):
@@ -128,7 +131,7 @@ class SupabaseService:
                 .execute()
             return response.data or []
         except Exception as e:
-            print(f"Error obteniendo noticias recientes en DB: {e}")
+            logger.error(f"Error obteniendo noticias recientes en DB: {e}")
             return []
         
 # Instancia global para usar en el resto de la app

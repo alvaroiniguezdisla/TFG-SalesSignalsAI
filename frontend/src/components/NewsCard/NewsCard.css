@@ -35,7 +35,7 @@
     align-items: center;
 }
 
-/* Badges de Prioridad (US12) */
+/* Badges de Prioridad */
 .priority-badge {
     display: inline-block;
     padding: 4px 10px;
@@ -60,7 +60,7 @@
     color: white;
 }
 
-/* Badge NUEVO (US06) */
+/* Badge NUEVO */
 .new-badge {
     background: linear-gradient(135deg, #3b82f6, #2563eb);
     color: white;
@@ -83,7 +83,7 @@
     }
 }
 
-/* Badge TU CLIENTE (US10) */
+/* Badge TU CLIENTE */
 .client-badge {
     background: linear-gradient(135deg, #8b5cf6, #7c3aed);
     color: white;
@@ -235,6 +235,12 @@
     padding: 0.1rem 0.4rem;
     border: 1px solid #e2e8f0;
     border-radius: 3px;
+}
+
+.company-size {
+    color: #6366f1;
+    font-weight: 600;
+    font-size: 0.65rem;
 }
 
 /* --- 4. FOOTER --- */
@@ -459,6 +465,7 @@
     align-items: center;
     border-bottom: 1px dotted #f1f5f9;
 }
+
 /* --- NUEVO INDICADOR DE RELEVANCIA MINIMALISTA --- */
 .relevance-indicator {
     display: inline-flex;
@@ -478,9 +485,19 @@
     display: inline-block;
 }
 
-.relevance-dot.badge-high { background-color: var(--success); box-shadow: 0 0 5px var(--success); }
-.relevance-dot.badge-medium { background-color: var(--warning); box-shadow: 0 0 5px var(--warning); }
-.relevance-dot.badge-low { background-color: var(--text-tertiary); }
+.relevance-dot.badge-high {
+    background-color: var(--success);
+    box-shadow: 0 0 5px var(--success);
+}
+
+.relevance-dot.badge-medium {
+    background-color: var(--warning);
+    box-shadow: 0 0 5px var(--warning);
+}
+
+.relevance-dot.badge-low {
+    background-color: var(--text-tertiary);
+}
 
 .relevance-score {
     color: var(--text-primary);
@@ -491,6 +508,7 @@
     color: var(--text-tertiary);
     text-decoration: underline;
 }
+
 .extra-source-link:hover {
     color: var(--primary);
 }

@@ -3,16 +3,20 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.endpoints import noticias
 from contextlib import asynccontextmanager
 from app.core.scheduler import start_scheduler
+from app.core.config import settings
 
+import logging
+
+logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Inicio: Arrancar planificador
-    print("Iniciando Scheduler...")
+    logger.info("Iniciando Scheduler...")
     start_scheduler()
     yield
     # Fin de ejecución
-    print("Apagando servidor...")
+    logger.info("Apagando servidor...")
 
 app = FastAPI(
     title="SalesSignalsAI API",
@@ -22,9 +26,10 @@ app = FastAPI(
 )
 
 # Configuración CORS
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=settings.CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
