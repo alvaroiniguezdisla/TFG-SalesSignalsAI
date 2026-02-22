@@ -66,5 +66,10 @@ class EmailService:
             return False
 
 
-# Instancia global del servicio
-email_service = EmailService()
+_email_service_instance = None
+
+def get_email_service() -> EmailService:
+    global _email_service_instance
+    if _email_service_instance is None:
+        _email_service_instance = EmailService()
+    return _email_service_instance

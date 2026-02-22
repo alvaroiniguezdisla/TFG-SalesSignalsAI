@@ -1,7 +1,9 @@
-from app.services.extraccion.manager import extractor
+from app.services.extraccion.manager import get_extractor_manager
 from bs4 import BeautifulSoup
 from app.services.inteligencia import LlmService
 from app.services.almacenamiento import SupabaseService
+from pydantic import ValidationError
+from app.schemas.noticia import Noticia
 import logging
 
 logger = logging.getLogger(__name__)
@@ -15,7 +17,7 @@ class NewsPipeline:
         logger.info("[PIPELINE] Iniciando proceso de ingesta y categorización de noticias...")
 
         #1. Hacemos ingesta de noticias 
-        noticias_crudas= extractor.obtener_noticias()
+        noticias_crudas = get_extractor_manager().obtener_noticias()
 
         if not noticias_crudas:
             logger.warning("[PIPELINE] No se han podido obtener noticias")
@@ -23,10 +25,24 @@ class NewsPipeline:
         
         logger.info(f"[PIPELINE] Se han obtenido {len(noticias_crudas)} noticias")
 
+        noticias_validadas = []
+        for noti_dict in noticias_crudas:
+            try:
+                # Pydantic lanza excepcion si faltan campos obligatorios
+                noticia_obj = Noticia(**noti_dict)
+                noticias_validadas.append(noticia_obj.model_dump())
+            except ValidationError as e:
+                # Recopilar solo los campos que han fallado para no saturar el log
+                errores_campo = [err["loc"][0] for err in e.errors()]
+                logger.error(f"[PIPELINE] Noticia omitida por estructura inválida. Campos corruptos: {errores_campo}")
+                continue
+                
+        logger.info(f"[PIPELINE] {len(noticias_validadas)} noticias han pasado el filtro estricto de Pydantic")
+
         noticias_enriquecidas= []
 
         # 2. Analizamos una a una 
-        for noticia in noticias_crudas:
+        for noticia in noticias_validadas:
             try:
                 # Validacion de contenido: Intentar obtener texto para analizar
                 raw_content = noticia.get('raw_content', '')

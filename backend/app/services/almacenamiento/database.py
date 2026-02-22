@@ -134,6 +134,13 @@ class SupabaseService:
             logger.error(f"Error obteniendo noticias recientes en DB: {e}")
             return []
         
-# Instancia global para usar en el resto de la app
-supabase_service = SupabaseService()
-supabase = supabase_service.client
+_supabase_service_instance = None
+
+def get_supabase_service() -> SupabaseService:
+    global _supabase_service_instance
+    if _supabase_service_instance is None:
+        _supabase_service_instance = SupabaseService()
+    return _supabase_service_instance
+
+def get_supabase_client():
+    return get_supabase_service().client

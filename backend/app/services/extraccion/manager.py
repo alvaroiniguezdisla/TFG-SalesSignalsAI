@@ -96,5 +96,10 @@ class NewsExtractorManager:
         
         return unicas
 
-# Instacia global para usar en pipeline
-extractor = NewsExtractorManager()
+_extractor_manager_instance = None
+
+def get_extractor_manager() -> NewsExtractorManager:
+    global _extractor_manager_instance
+    if _extractor_manager_instance is None:
+        _extractor_manager_instance = NewsExtractorManager()
+    return _extractor_manager_instance

@@ -4,8 +4,8 @@ Filtra noticias por preferencias de usuario y envía emails personalizados.
 """
 import time
 import logging
-from app.services.almacenamiento.database import supabase_service
-from app.services.notificaciones.email_service import email_service
+from app.services.almacenamiento.database import get_supabase_service
+from app.services.notificaciones.email_service import get_email_service
 from app.core.config import settings
 
 logger = logging.getLogger(__name__)
@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 def obtener_usuarios_con_preferencias():
     """Obtiene todos los usuarios con sus preferencias desde Supabase."""
-    return supabase_service.obtener_usuarios_preferencias()
+    return get_supabase_service().obtener_usuarios_preferencias()
 
 
 def filtrar_noticias_para_usuario(noticias: list, perfil: dict) -> list:
@@ -67,7 +67,7 @@ def enviar_notificaciones_a_todos():
 
     try:
         # 1. Obtener noticias de las últimas 6 horas con relevancia >= 40
-        noticias_recientes = supabase_service.obtener_noticias_relevantes_recientes()
+        noticias_recientes = get_supabase_service().obtener_noticias_relevantes_recientes()
         
         logger.info(f"Noticias recientes (ultimas 6h, relevancia >= 40): {len(noticias_recientes)}")
 
@@ -102,7 +102,7 @@ def enviar_notificaciones_a_todos():
             
             if noticias_usuario:
                 logger.info(f"Enviando {len(noticias_usuario)} noticias a {email}")
-                if email_service.enviar_resumen(email, nombre, noticias_usuario):
+                if get_email_service().enviar_resumen(email, nombre, noticias_usuario):
                     enviados += 1
                     # Delay para evitar bloqueos de Gmail
                     if enviados < len(usuarios):

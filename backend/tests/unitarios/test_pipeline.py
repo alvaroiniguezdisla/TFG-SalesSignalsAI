@@ -31,7 +31,8 @@ NOTICIA_CON_HTML = {
                     "cincuenta caracteres para que pase el filtro.</p>"
                     "</body></html>",
     "fuente": "Diario Test",
-    "url": "http://example.com/noticia1"
+    "url": "http://example.com/noticia1",
+    "url_hash": "hash123456"
 }
 
 NOTICIA_SIN_CONTENIDO = {
@@ -39,6 +40,7 @@ NOTICIA_SIN_CONTENIDO = {
     "raw_content": "",
     "fuente": "Diario Test",
     "url": "http://example.com/noticia2",
+    "url_hash": "hash789012",
     "resumen": "Resumen de prueba para fallback"
 }
 
@@ -55,16 +57,16 @@ RESPUESTA_IA_FAKE = {
 
 # --- Tests ---
 
-@patch("app.services.orquestacion.pipeline.extractor")
+@patch("app.services.orquestacion.pipeline.get_extractor_manager")
 @patch("app.services.orquestacion.pipeline.LlmService")
 @patch("app.services.orquestacion.pipeline.SupabaseService")
-def test_ejecucion_completa(MockDB, MockLLM, MockExtractor):
+def test_ejecucion_completa(MockDB, MockLLM, MockGetExtractor):
     """
     Simula el pipeline con 2 noticias: una con HTML y otra sin contenido.
     Verifica que ambas pasan por la IA y se guardan en la base de datos
     con los campos enriquecidos correctamente.
     """
-    MockExtractor.obtener_noticias.return_value = [NOTICIA_CON_HTML, NOTICIA_SIN_CONTENIDO]
+    MockGetExtractor.return_value.obtener_noticias.return_value = [NOTICIA_CON_HTML, NOTICIA_SIN_CONTENIDO]
 
     mock_llm = MockLLM.return_value
     mock_llm.analizar_oportunidad.return_value = RESPUESTA_IA_FAKE
@@ -75,7 +77,7 @@ def test_ejecucion_completa(MockDB, MockLLM, MockExtractor):
     pipeline.ejecutar()
 
     # El extractor se llamo una vez
-    MockExtractor.obtener_noticias.assert_called_once()
+    MockGetExtractor.return_value.obtener_noticias.assert_called_once()
 
     # La IA analizo las 2 noticias (la vacia usa fallback titulo+resumen)
     assert mock_llm.analizar_oportunidad.call_count == 2
@@ -94,33 +96,33 @@ def test_ejecucion_completa(MockDB, MockLLM, MockExtractor):
     assert noticias_guardadas[0]["email_draft_ia"] != ""
 
 
-@patch("app.services.orquestacion.pipeline.extractor")
+@patch("app.services.orquestacion.pipeline.get_extractor_manager")
 @patch("app.services.orquestacion.pipeline.LlmService")
 @patch("app.services.orquestacion.pipeline.SupabaseService")
-def test_pipeline_sin_noticias(MockDB, MockLLM, MockExtractor):
+def test_pipeline_sin_noticias(MockDB, MockLLM, MockGetExtractor):
     """
     Si el scraper no encuentra noticias (internet caido, fuentes sin novedades),
     el pipeline debe detenerse inmediatamente sin llamar a la IA ni a la BD.
     """
-    MockExtractor.obtener_noticias.return_value = []
+    MockGetExtractor.return_value.obtener_noticias.return_value = []
 
     pipeline = NewsPipeline()
     pipeline.ejecutar()
 
-    MockExtractor.obtener_noticias.assert_called_once()
+    MockGetExtractor.return_value.obtener_noticias.assert_called_once()
     MockLLM.return_value.analizar_oportunidad.assert_not_called()
     MockDB.return_value.insert_news_deduplicacion.assert_not_called()
 
 
-@patch("app.services.orquestacion.pipeline.extractor")
+@patch("app.services.orquestacion.pipeline.get_extractor_manager")
 @patch("app.services.orquestacion.pipeline.LlmService")
 @patch("app.services.orquestacion.pipeline.SupabaseService")
-def test_pipeline_ia_falla(MockDB, MockLLM, MockExtractor):
+def test_pipeline_ia_falla(MockDB, MockLLM, MockGetExtractor):
     """
     Si la IA falla (Ollama caido, modelo no responde), el pipeline no debe
     romper. La noticia se guarda con campos de error ('Error IA', relevancia 0).
     """
-    MockExtractor.obtener_noticias.return_value = [NOTICIA_CON_HTML]
+    MockGetExtractor.return_value.obtener_noticias.return_value = [NOTICIA_CON_HTML]
 
     # La IA devuelve None (fallo)
     mock_llm = MockLLM.return_value

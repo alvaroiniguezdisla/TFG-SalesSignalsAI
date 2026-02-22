@@ -1,5 +1,6 @@
 import difflib
 import logging
+import json
 from app.core.config import settings
 
 logger = logging.getLogger(__name__)
@@ -24,7 +25,6 @@ def fusionar_datos_noticia(existente: dict, nueva: dict) -> bool:
     # Si viene vacía o nula, inicializamos como lista vacía
     if not isinstance(existente.get('urls_extra'), list):
         # Manejo de retrocompatibilidad para registros anteriores en formato string
-        import json
         try:
             val = existente.get('urls_extra')
             existente['urls_extra'] = json.loads(val) if isinstance(val, str) else []

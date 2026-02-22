@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 from typing import List
-from app.services.almacenamiento.database import supabase
+from app.services.almacenamiento.database import get_supabase_client
 from app.schemas.noticia import Noticia
 from app.services.orquestacion.pipeline import NewsPipeline
 from fastapi.exceptions import HTTPException
@@ -14,7 +14,7 @@ def get_noticias():
     Esta es la ruta que consumirá el Frontend.
     """
     # Consultamos Supabase, ordenamos por fecha (descendente)
-    response = supabase.table("noticias").select("*").order("scraped_at", desc=True).execute()
+    response = get_supabase_client().table("noticias").select("*").order("scraped_at", desc=True).execute()
     
     return response.data
 
@@ -52,7 +52,7 @@ def get_noticia_detalle(url_hash: str):
     Obtiene una noticia por su url_hash (que es el id de la noticia en Supabase).
     """
 
-    response= supabase.table("noticias").select("*").eq("url_hash", url_hash).execute()
+    response = get_supabase_client().table("noticias").select("*").eq("url_hash", url_hash).execute()
 
     # Validar si existe
     if not response.data:

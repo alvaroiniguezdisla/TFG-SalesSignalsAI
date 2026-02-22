@@ -44,8 +44,8 @@ NOTICIA_FAKE = {
 
 # --- Tests del endpoint GET /noticias ---
 
-@patch("app.api.endpoints.noticias.supabase")
-def test_obtener_noticias_devuelve_lista(mock_supabase):
+@patch("app.api.endpoints.noticias.get_supabase_client")
+def test_obtener_noticias_devuelve_lista(mock_get_supabase_client):
     """
     Verifica que GET /noticias devuelve una lista de noticias.
     Este es el endpoint principal que consume el frontend.
@@ -53,7 +53,7 @@ def test_obtener_noticias_devuelve_lista(mock_supabase):
     # Simulamos que Supabase devuelve una noticia
     mock_response = MagicMock()
     mock_response.data = [NOTICIA_FAKE]
-    mock_supabase.table.return_value.select.return_value.order.return_value.execute.return_value = mock_response
+    mock_get_supabase_client.return_value.table.return_value.select.return_value.order.return_value.execute.return_value = mock_response
 
     response = client.get("/noticias")
 
@@ -65,15 +65,15 @@ def test_obtener_noticias_devuelve_lista(mock_supabase):
     assert data[0]["relevancia_ia"] == 85
 
 
-@patch("app.api.endpoints.noticias.supabase")
-def test_obtener_noticias_lista_vacia(mock_supabase):
+@patch("app.api.endpoints.noticias.get_supabase_client")
+def test_obtener_noticias_lista_vacia(mock_get_supabase_client):
     """
     Verifica que GET /noticias devuelve una lista vacia
     cuando no hay noticias en la base de datos.
     """
     mock_response = MagicMock()
     mock_response.data = []
-    mock_supabase.table.return_value.select.return_value.order.return_value.execute.return_value = mock_response
+    mock_get_supabase_client.return_value.table.return_value.select.return_value.order.return_value.execute.return_value = mock_response
 
     response = client.get("/noticias")
 
@@ -105,15 +105,15 @@ def test_obtener_categorias():
 
 # --- Tests del endpoint GET /noticias/{url_hash} ---
 
-@patch("app.api.endpoints.noticias.supabase")
-def test_obtener_noticia_por_hash(mock_supabase):
+@patch("app.api.endpoints.noticias.get_supabase_client")
+def test_obtener_noticia_por_hash(mock_get_supabase_client):
     """
     Verifica que buscar una noticia por su hash devuelve
     la noticia correcta con codigo 200.
     """
     mock_response = MagicMock()
     mock_response.data = [NOTICIA_FAKE]
-    mock_supabase.table.return_value.select.return_value.eq.return_value.execute.return_value = mock_response
+    mock_get_supabase_client.return_value.table.return_value.select.return_value.eq.return_value.execute.return_value = mock_response
 
     response = client.get("/noticias/abc123hash")
 
@@ -123,15 +123,15 @@ def test_obtener_noticia_por_hash(mock_supabase):
     assert data["titulo"] == "Empresa X abre nueva sede en Madrid"
 
 
-@patch("app.api.endpoints.noticias.supabase")
-def test_noticia_no_encontrada(mock_supabase):
+@patch("app.api.endpoints.noticias.get_supabase_client")
+def test_noticia_no_encontrada(mock_get_supabase_client):
     """
     Verifica que buscar una noticia con un hash inexistente
     devuelve un error 404 con mensaje descriptivo.
     """
     mock_response = MagicMock()
     mock_response.data = []
-    mock_supabase.table.return_value.select.return_value.eq.return_value.execute.return_value = mock_response
+    mock_get_supabase_client.return_value.table.return_value.select.return_value.eq.return_value.execute.return_value = mock_response
 
     response = client.get("/noticias/hash_que_no_existe")
 
