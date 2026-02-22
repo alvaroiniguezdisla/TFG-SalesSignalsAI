@@ -66,7 +66,9 @@ def test_fusion_combina_fuentes():
     cambios = fusionar_datos_noticia(existente, nueva)
 
     assert cambios is True
-    assert existente["fuente"] == "El Pais, El Economista"
+    assert existente["fuente"] == "El Pais"
+    assert len(existente.get("urls_extra", [])) == 1
+    assert existente["urls_extra"][0]["fuente"] == "El Economista"
 
 
 def test_fusion_guarda_url_extra():
@@ -79,7 +81,7 @@ def test_fusion_guarda_url_extra():
 
     fusionar_datos_noticia(existente, nueva)
 
-    assert "url2" in existente["urls_extra"]
+    assert any(obj.get("url") == "url2" for obj in existente["urls_extra"])
 
 
 def test_fusion_no_duplica_misma_fuente():
@@ -93,9 +95,7 @@ def test_fusion_no_duplica_misma_fuente():
 
     fusionar_datos_noticia(existente, nueva)
 
-    # La fuente NO se duplica
-    assert existente["fuente"] == "El Pais"
-    assert existente["fuente"].count("El Pais") == 1
+    assert "url1" not in [obj.get("url") for obj in existente.get("urls_extra", [])]
 
 
 # -----------------------------------------------------------------------
@@ -122,8 +122,9 @@ def test_deduplicacion_completa_reduce_duplicados():
 
     # La noticia fusionada debe tener ambas fuentes
     santander = [n for n in resultado if "Santander" in n["titulo"]][0]
-    assert "Fuente A" in santander["fuente"]
-    assert "Fuente B" in santander["fuente"]
+    assert santander["fuente"] == "Fuente A"
+    assert len(santander.get("urls_extra", [])) == 1
+    assert santander["urls_extra"][0]["fuente"] == "Fuente B"
 
     # La noticia del Madrid se mantiene intacta
     madrid = [n for n in resultado if "Madrid" in n["titulo"]][0]

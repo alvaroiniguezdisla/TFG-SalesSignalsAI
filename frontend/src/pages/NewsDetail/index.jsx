@@ -34,15 +34,23 @@ function NewsDetail() {
 
                 <div className="meta-row">
                     <div className="source-column">
+                        {/* Fuente de origen principal */}
                         <span className="meta-item source">
                             Fuente: <strong>{noticia.fuente}</strong>
                         </span>
-                        {noticia.urls_extra && noticia.urls_extra.length > 0 && (
+                        {/* Fuentes secundarias estructuradas desde JSON */}
+                        {noticia.urls_extra && Array.isArray(noticia.urls_extra) && noticia.urls_extra.length > 0 && (
                             <div className="extra-sources">
                                 <span className="extra-label">También en:</span>
-                                {noticia.urls_extra.map((url, i) => (
-                                    <a key={i} href={url} target="_blank" rel="noreferrer" className="extra-source-link">
-                                        Fuente {i + 1}
+                                {noticia.urls_extra.map((fuente_secundaria, i) => (
+                                    <a
+                                        key={i}
+                                        href={fuente_secundaria.url || fuente_secundaria} // Soporte de retrocompatibilidad para registros anteriores
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="extra-source-link"
+                                    >
+                                        {fuente_secundaria.fuente || `Fuente ${i + 1}`}
                                     </a>
                                 ))}
                             </div>

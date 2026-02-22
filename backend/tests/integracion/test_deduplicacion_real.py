@@ -115,6 +115,9 @@ def test_deduplicacion_real_en_supabase(db):
     assert len(original.data) == 1, "La noticia original debe seguir existiendo"
 
     item = original.data[0]
-    assert "El Economista" in item["fuente"], (
-        f"La fuente fusionada deberia incluir 'El Economista', pero es: {item['fuente']}"
-    )
+    # Comprobar que la fuente principal se mantiene intacta
+    assert item["fuente"] == "Cinco Dias"
+    # Comprobar que el array JSON de urls_extra contiene a la fuente secundaria
+    urls_extra = item.get("urls_extra", [])
+    assert len(urls_extra) == 1, f"Debería haber 1 url extra, pero es {urls_extra}"
+    assert urls_extra[0]["fuente"] == "El Economista", f"La fuente secundaria debería ser 'El Economista', pero es {urls_extra[0]}"

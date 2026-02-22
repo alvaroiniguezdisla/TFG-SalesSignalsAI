@@ -97,30 +97,39 @@ function NewsCard({ noticia, userCompanies = [] }) {
             {/* 3. CONTEXTO DE VENTA */}
             <div className="card-context">
 
-                {/* -1. Relevancia */}
+                {/* Indicador de Relevancia del contenido */}
                 <div className="context-row">
                     <span className="context-label">Relevancia:</span>
                     {getRelevanceBadge(noticia.relevancia_ia)}
                 </div>
 
-                {/* 0. Fuentes (Solicitud Usuario) */}
+                {/* Origen principal de la noticia */}
                 <div className="context-row">
                     <span className="context-label">Fuente Principal:</span>
                     <span className="source-tag">{noticia.fuente || 'Desconocida'}</span>
                 </div>
 
-                {noticia.urls_extra && noticia.urls_extra.length > 0 && (
+                {/* Fuentes adicionales detectadas (Deduplicación estructurada) */}
+                {noticia.urls_extra && Array.isArray(noticia.urls_extra) && noticia.urls_extra.length > 0 && (
                     <div className="context-row">
                         <span className="context-label">Otras Fuentes:</span>
                         <div className="tags-list">
-                            {noticia.urls_extra.map((url, idx) => (
-                                <a key={idx} href={url} target="_blank" rel="noopener noreferrer" className="extra-source-link">Source {idx + 1}</a>
+                            {noticia.urls_extra.map((fuente_secundaria, idx) => (
+                                <a
+                                    key={idx}
+                                    href={fuente_secundaria.url || fuente_secundaria}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="extra-source-link"
+                                >
+                                    {fuente_secundaria.fuente || `Fuente ${idx + 1}`}
+                                </a>
                             ))}
                         </div>
                     </div>
                 )}
 
-                {/* 1. Categoria  */}
+                {/* Categoría de negocio asignada */}
                 <div className="context-row">
                     <span className="context-label">Categoría:</span>
                     <span className="badge-category">

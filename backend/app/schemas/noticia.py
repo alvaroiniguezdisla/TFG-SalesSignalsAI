@@ -14,7 +14,7 @@ class Noticia(BaseModel):
     # Campos enriquecidos por IA
     relevancia_ia: int = 0
     resumen_comercial_ia: Optional[str] = None
-    empresas_clave_ia: List[str] = []
+    empresas_clave_ia: Optional[List[str]] = []
     categoria_ia: Optional[str] = None
     categoria_producto_ia: Optional[str] = None
 
@@ -27,4 +27,4 @@ class Noticia(BaseModel):
     scraped_at: Optional[str] = None
     
     # URLs adicionales (si hay duplicados)
-    urls_extra: List[str] = []
+    urls_extra: Optional[List[dict]] = []
