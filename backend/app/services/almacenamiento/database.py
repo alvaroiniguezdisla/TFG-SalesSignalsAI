@@ -101,6 +101,10 @@ class SupabaseService:
             
             # 3. Insertamos de golpe solo las nuevas
             if nuevas_para_insertar:
+                # Limpiar IDs si son None para dejar que Supabase los genere
+                for n in nuevas_para_insertar:
+                    if 'id' in n and n['id'] is None:
+                        del n['id']
                 self.client.table("noticias").insert(nuevas_para_insertar).execute()
             
             logger.info(f"Resultado: {len(nuevas_para_insertar)} Nuevas | {len(news_list) - len(nuevas_para_insertar)} Fusionadas")
@@ -133,7 +137,28 @@ class SupabaseService:
         except Exception as e:
             logger.error(f"Error obteniendo noticias recientes en DB: {e}")
             return []
-        
+            
+    # --- CONFIGURACIÓN DINÁMICA (SaaS Admin) ---
+    def get_app_config(self) -> dict:
+        """Obtiene la configuración global de la aplicación desde la base de datos."""
+        try:
+            response = self.client.table("app_config").select("*").eq("id", 1).single().execute()
+            return response.data if response.data else {}
+        except Exception as e:
+            logger.error(f"Error obteniendo app_config de DB: {e}")
+            return {}
+
+    def update_app_config(self, config_data: dict) -> dict:
+        """Actualiza la configuración global de la aplicación en la base de datos."""
+        try:
+            # Aseguramos que siempre actualizamos la fila id=1
+            config_data['updated_at'] = datetime.utcnow().isoformat()
+            response = self.client.table("app_config").update(config_data).eq("id", 1).execute()
+            return response.data[0] if response.data else {}
+        except Exception as e:
+            logger.error(f"Error actualizando app_config de DB: {e}")
+            raise e
+            
 _supabase_service_instance = None
 
 def get_supabase_service() -> SupabaseService:

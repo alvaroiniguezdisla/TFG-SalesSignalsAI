@@ -37,12 +37,12 @@ def test_fallback_rss_a_scraper():
     mock_scraper = MagicMock(return_value=noticia_scraper)
     mock_browser = MagicMock(return_value=[])
 
-    with patch("app.services.extraccion.manager.settings") as mock_settings, \
+    with patch("app.services.extraccion.manager.get_supabase_service") as mock_db, \
             patch("app.services.extraccion.manager.obtener_noticias_rss", mock_rss), \
             patch("app.services.extraccion.manager.scrape_noticias", mock_scraper), \
             patch("app.services.extraccion.manager.obtener_noticias_browser", mock_browser):
 
-        mock_settings.RSS_SOURCES = FUENTE_TEST
+        mock_db.return_value.get_app_config.return_value = {"rss_sources": FUENTE_TEST}
 
         extractor = NewsExtractorManager()
         noticias = extractor.obtener_noticias()
@@ -68,12 +68,12 @@ def test_fallback_completo_rss_scraper_a_browser():
     mock_scraper = MagicMock(return_value=[])
     mock_browser = MagicMock(return_value=noticia_browser)
 
-    with patch("app.services.extraccion.manager.settings") as mock_settings, \
+    with patch("app.services.extraccion.manager.get_supabase_service") as mock_db, \
             patch("app.services.extraccion.manager.obtener_noticias_rss", mock_rss), \
             patch("app.services.extraccion.manager.scrape_noticias", mock_scraper), \
             patch("app.services.extraccion.manager.obtener_noticias_browser", mock_browser):
 
-        mock_settings.RSS_SOURCES = FUENTE_TEST
+        mock_db.return_value.get_app_config.return_value = {"rss_sources": FUENTE_TEST}
 
         extractor = NewsExtractorManager()
         noticias = extractor.obtener_noticias()
@@ -99,12 +99,12 @@ def test_rss_funciona_no_activa_fallback():
     mock_scraper = MagicMock(return_value=[])
     mock_browser = MagicMock(return_value=[])
 
-    with patch("app.services.extraccion.manager.settings") as mock_settings, \
+    with patch("app.services.extraccion.manager.get_supabase_service") as mock_db, \
             patch("app.services.extraccion.manager.obtener_noticias_rss", mock_rss), \
             patch("app.services.extraccion.manager.scrape_noticias", mock_scraper), \
             patch("app.services.extraccion.manager.obtener_noticias_browser", mock_browser):
 
-        mock_settings.RSS_SOURCES = FUENTE_TEST
+        mock_db.return_value.get_app_config.return_value = {"rss_sources": FUENTE_TEST}
 
         extractor = NewsExtractorManager()
         noticias = extractor.obtener_noticias()
@@ -130,12 +130,12 @@ def test_excepcion_en_rss_no_rompe_sistema():
     mock_scraper = MagicMock(return_value=noticia_scraper)
     mock_browser = MagicMock(return_value=[])
 
-    with patch("app.services.extraccion.manager.settings") as mock_settings, \
+    with patch("app.services.extraccion.manager.get_supabase_service") as mock_db, \
             patch("app.services.extraccion.manager.obtener_noticias_rss", mock_rss), \
             patch("app.services.extraccion.manager.scrape_noticias", mock_scraper), \
             patch("app.services.extraccion.manager.obtener_noticias_browser", mock_browser):
 
-        mock_settings.RSS_SOURCES = FUENTE_TEST
+        mock_db.return_value.get_app_config.return_value = {"rss_sources": FUENTE_TEST}
 
         extractor = NewsExtractorManager()
         noticias = extractor.obtener_noticias()
@@ -143,3 +143,29 @@ def test_excepcion_en_rss_no_rompe_sistema():
         # El sistema no se rompio, obtuvo noticias del Scraper
         assert len(noticias) == 1
         assert noticias[0]["titulo"] == "Noticia Rescatada"
+
+
+def test_fuente_caida_se_registra_sin_bloquear():
+    """
+    Si una fuente no devuelve noticias por ningun metodo, el manager
+    debe registrar la incidencia y continuar sin lanzar excepcion.
+    """
+    mock_rss = MagicMock(return_value=[])
+    mock_scraper = MagicMock(return_value=[])
+    mock_browser = MagicMock(return_value=[])
+
+    with patch("app.services.extraccion.manager.get_supabase_service") as mock_db, \
+            patch("app.services.extraccion.manager.obtener_noticias_rss", mock_rss), \
+            patch("app.services.extraccion.manager.scrape_noticias", mock_scraper), \
+            patch("app.services.extraccion.manager.obtener_noticias_browser", mock_browser):
+
+        mock_db.return_value.get_app_config.return_value = {"rss_sources": FUENTE_TEST}
+
+        extractor = NewsExtractorManager()
+        noticias = extractor.obtener_noticias()
+        fuentes_caidas = extractor.get_ultimas_fuentes_caidas()
+
+        assert noticias == []
+        assert len(fuentes_caidas) == 1
+        assert fuentes_caidas[0]["fuente"] == "Diario Test"
+        assert len(fuentes_caidas[0]["errores"]) >= 1

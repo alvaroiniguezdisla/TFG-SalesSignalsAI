@@ -2,7 +2,7 @@ import ollama
 import json
 from enum import Enum
 from pydantic import BaseModel, Field
-from app.core.config import settings
+from app.services.almacenamiento.database import get_supabase_service
 import logging
 
 logger = logging.getLogger(__name__)
@@ -40,8 +40,13 @@ class SalesSignal(BaseModel):
 
 # 5. EL SERVICIO DE IA
 class LlmService:
-    def __init__(self, modelo: str = settings.OLLAMA_MODEL):
-        self.modelo= modelo
+    def __init__(self, modelo: str = None):
+        if modelo:
+            self.modelo = modelo
+        else:
+            db = get_supabase_service()
+            app_config = db.get_app_config()
+            self.modelo = app_config.get("ollama_model", "llama3.1")
     
     def analizar_oportunidad(self, titulo: str ,contenido: str ) ->dict:
         """

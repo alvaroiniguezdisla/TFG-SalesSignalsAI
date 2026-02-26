@@ -3,47 +3,14 @@ from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = "SalesSignalsAI"
-    
-    # Esta variable buscará automáticamente "SCRAPER_TARGET_URL" en el .env
-    SCRAPER_TARGET_URL: str = "https://cincodias.elpais.com/companias/"
-    
-    #URL del feed RSS
-    RSS_SOURCES: list[dict] = [
-        # Fuente 1: Cinco Días
-        {
-            "name": "Cinco Días (Compañías)",
-            "url": "https://feeds.elpais.com/mrss-s/list/ep/site/cincodias.elpais.com/section/companias", # RSS (XML)
-            "scraper_url": "https://cincodias.elpais.com/companias/", # FALLBACK (HTML)
-            "type": "rss"
-        },
-        # Fuente 2: El Economista 
-        {
-            "name": "El Economista (Mercados)",
-            "url": "https://www.eleconomista.es/rss/rss-mercados.php", 
-            "scraper_url": "https://www.eleconomista.es/empresas-finanzas/", # HTML SOLICITADO
-            "type": "rss"
-        }
-    ]
-    #economismta, bolsa española
 
-
-    # Supabase Credentials
+    # Supabase Credentials (requeridos para conectar con la config dinámica)
     SUPABASE_URL: str = ""
     SUPABASE_KEY: str = ""
     
     # Email Notifications (Gmail SMTP)
     GMAIL_USER: str = ""
     GMAIL_APP_PASSWORD: str = ""
-    
-    # Configuración de envíos
-    MAX_EMAILS_POR_EJECUCION: int = 50
-    DELAY_ENTRE_EMAILS: int = 1
-    
-    # Configuración Deduplicación
-    UMBRAL_SIMILITUD_TITULOS: float = 0.82
-    
-    # LLM Settings
-    OLLAMA_MODEL: str = "llama3.1"
     
     # CORS Origins Permitidos
     CORS_ORIGINS: list[str] = ["http://localhost:5173", "http://127.0.0.1:5173"]

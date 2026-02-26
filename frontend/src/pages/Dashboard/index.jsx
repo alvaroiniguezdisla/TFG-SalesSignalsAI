@@ -106,12 +106,19 @@ function Dashboard() {
                         <p>Monitorización Inteligente de Oportunidades</p>
                     </div>
 
-                    <Link to="/profile" className="profile-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                            <circle cx="12" cy="7" r="4"></circle>
-                        </svg>
-                    </Link>
+                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                        {profile?.role === 'admin' && (
+                            <Link to="/admin" className="btn-secondary" style={{ padding: '0.5rem 1rem', fontSize: '0.9rem' }}>
+                                Panel Admin
+                            </Link>
+                        )}
+                        <Link to="/profile" className="profile-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="12" cy="7" r="4"></circle>
+                            </svg>
+                        </Link>
+                    </div>
                 </div>
 
                 <div className="filters-section">

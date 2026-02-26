@@ -6,7 +6,7 @@ import './Profile.css';
 import Spinner from '../../components/Spinner';
 function Profile() {
     const navigate = useNavigate();
-    const { user, profile, signOut, updateProfile } = useAuth()
+    const { user, profile, signOut, updateProfile, resetPassword } = useAuth()
     // Estado de carga y datos
     const [loading, setLoading] = useState(true);
     const [isEditingInfo, setIsEditingInfo] = useState(false);
@@ -196,7 +196,19 @@ function Profile() {
                                 <span className="value">{user?.email}</span>
                             </div>
                             <div className="security-actions">
-                                <button className="btn-outline-danger" disabled title="Próximamente">
+                                <button
+                                    className="btn-outline-danger"
+                                    onClick={async () => {
+                                        if (window.confirm(`¿Enviar enlace de recuperación a ${user.email}?`)) {
+                                            try {
+                                                await resetPassword(user.email);
+                                                alert("¡Enlace enviado! Revisa tu bandeja de entrada.");
+                                            } catch (error) {
+                                                alert("Error: " + error.message);
+                                            }
+                                        }
+                                    }}
+                                >
                                     Cambiar Contraseña
                                 </button>
                             </div>

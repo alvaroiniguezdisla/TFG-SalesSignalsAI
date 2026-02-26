@@ -10,12 +10,13 @@ from app.core.utils import hash_url
 logger = logging.getLogger(__name__)
 
 def obtener_noticias_rss(url_feed: str, nombre_fuente: str="RSS Genérico") -> List[Dict[str, Any]]:
-    logger.info(f"Leyendo RSS desde: {url_feed}")
+    logger.info(f"[EXTRACCION_RSS] Evaluando feed RSS: {url_feed} ({nombre_fuente})")
     
-    # 1. Descargamos el XML "disfrazados" de navegador para evitar bloqueos (El Economista)
     headers_feed = {
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept': 'application/rss+xml, application/xml, text/xml, */*'
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+        'Accept-Language': 'es-ES,es;q=0.9,en;q=0.8',
+        'Referer': 'https://www.google.com/'
     }
     
     try:
@@ -30,12 +31,12 @@ def obtener_noticias_rss(url_feed: str, nombre_fuente: str="RSS Genérico") -> L
         # Pasamos el string arreglado a feedparser
         feed = feedparser.parse(xml_cleaned)
     except Exception as e:
-        logger.error(f"Error descargando el feed {url_feed}: {e}")
+        logger.error(f"[EXTRACCION_RSS] Error critico descargando el feed {url_feed}: {e}")
         return []
 
     #Si el feed falla o está vacío
     if not feed.entries:
-        logger.warning(f"No se encontraron entradas en el feed (posible error de parseo): {url_feed}")
+        logger.warning(f"[EXTRACCION_RSS] No se encontraron entradas validas en el feed de {nombre_fuente}")
         return []
 
     noticias = [] 
@@ -74,7 +75,7 @@ def obtener_noticias_rss(url_feed: str, nombre_fuente: str="RSS Genérico") -> L
                 "scraped_at": datetime.now().isoformat()
             })
         except Exception as e:
-            logger.error(f"Error procesando entrada RSS: {e}")
+            logger.error(f"[EXTRACCION_RSS] Error iterando sobre entrada RSS de {nombre_fuente}: {e}")
             continue
 
     return noticias

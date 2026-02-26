@@ -6,7 +6,6 @@ import time
 import logging
 from app.services.almacenamiento.database import get_supabase_service
 from app.services.notificaciones.email_service import get_email_service
-from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -66,8 +65,13 @@ def enviar_notificaciones_a_todos():
     logger.info("Iniciando envío de notificaciones por email...")
 
     try:
+        db = get_supabase_service()
+        app_config = db.get_app_config()
+        max_emails = app_config.get("max_emails_ejecucion", 50)
+        delay_emails = app_config.get("delay_entre_emails", 1)
+
         # 1. Obtener noticias de las últimas 6 horas con relevancia >= 40
-        noticias_recientes = get_supabase_service().obtener_noticias_relevantes_recientes()
+        noticias_recientes = db.obtener_noticias_relevantes_recientes()
         
         logger.info(f"Noticias recientes (ultimas 6h, relevancia >= 40): {len(noticias_recientes)}")
 
@@ -87,8 +91,8 @@ def enviar_notificaciones_a_todos():
         enviados = 0
         for usuario in usuarios:
             # Limite de emails por ejecucion
-            if enviados >= settings.MAX_EMAILS_POR_EJECUCION:
-                logger.warning(f"Limite de {settings.MAX_EMAILS_POR_EJECUCION} emails alcanzado")
+            if enviados >= max_emails:
+                logger.warning(f"Limite de {max_emails} emails alcanzado")
                 break
                 
             email = usuario.get("email")
@@ -106,7 +110,7 @@ def enviar_notificaciones_a_todos():
                     enviados += 1
                     # Delay para evitar bloqueos de Gmail
                     if enviados < len(usuarios):
-                        time.sleep(settings.DELAY_ENTRE_EMAILS)
+                        time.sleep(delay_emails)
 
         logger.info(f"Notificaciones enviadas: {enviados}")
         return enviados
@@ -114,3 +118,4 @@ def enviar_notificaciones_a_todos():
     except Exception as e:
         logger.error(f"Error en envío de notificaciones: {e}")
         return 0
+

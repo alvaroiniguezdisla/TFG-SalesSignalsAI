@@ -45,7 +45,7 @@ export const AuthProvider = ({ children }) => {
         return () => subscription.unsubscribe();
     }, []);
 
-    //Funcion auxiliar para cargar el perfil de la tabla 'profiles'
+    // Obtiene el perfil del usuario desde Supabase
     const fetchProfile = async (userId) => {
         try {
             const { data, error } = await supabase
@@ -96,9 +96,25 @@ export const AuthProvider = ({ children }) => {
         await fetchProfile(user.id);
     };
 
+    //Funcion para recuperar contrasena
+    const resetPassword = async (email) => {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+            redirectTo: `${window.location.origin}/actualizar-contrasena`,
+        });
+        if (error) throw error;
+    };
+
+    //Funcion para actualizar contrasena
+    const updatePassword = async (newPassword) => {
+        const { error } = await supabase.auth.updateUser({
+            password: newPassword
+        });
+        if (error) throw error;
+    };
+
     //Exportamos todo para que la app lo use
     return (
-        <AuthContext.Provider value={{ user, profile, loading, signIn, signOut, signUp, updateProfile }}>
+        <AuthContext.Provider value={{ user, profile, loading, signIn, signOut, signUp, updateProfile, resetPassword, updatePassword }}>
             {children}
         </AuthContext.Provider>
     );

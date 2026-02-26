@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.api.endpoints import noticias
+from app.api.endpoints import noticias, admin
 from contextlib import asynccontextmanager
 from app.core.scheduler import start_scheduler
 from app.core.config import settings
@@ -37,6 +37,7 @@ app.add_middleware(
 
 # Incluimos routers
 app.include_router(noticias.router)
+app.include_router(admin.router, prefix="/api/admin", tags=["admin"])
 
 @app.get("/")
 def root():

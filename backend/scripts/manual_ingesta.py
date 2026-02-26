@@ -12,15 +12,22 @@
 #   - Fuentes RSS configuradas en config.py
 # ----------------------------------------------------------------------------------
 
-from app.services.extraccion.manager import extractor
-
+from app.services.extraccion.manager import get_extractor_manager
 
 def ejecutar():
     print("Conectando con fuentes configuradas...")
 
     try:
+        extractor = get_extractor_manager()
         noticias = extractor.obtener_noticias()
         print(f"\nResultado: {len(noticias)} noticias obtenidas.")
+
+        fuentes_caidas = extractor.get_ultimas_fuentes_caidas()
+        if fuentes_caidas:
+            print(f"\n[FUENTES_CAIDAS] {len(fuentes_caidas)} fuente(s) con incidencias:")
+            for item in fuentes_caidas:
+                detalle = "; ".join(item.get("errores", []))
+                print(f"  - {item.get('fuente', 'Desconocida')}: {detalle}")
 
         if noticias:
             print(f"\nDetalle de las primeras {min(5, len(noticias))} noticias:\n")

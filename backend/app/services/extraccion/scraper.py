@@ -9,11 +9,14 @@ logger = logging.getLogger(__name__)
 
 
 def scrape_noticias(target_url: str,nombre_fuente: str="Scraper Genérico") -> List[Dict[str, Any]]:
-
+    logger.info(f"[EXTRACCION_SCRAPER] Iniciando volcado HTML de {target_url} ({nombre_fuente})")
     try:
         # Añadimos cabeceras para parecer un navegador real y evitar el error 403
         headers = {
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+            'Accept-Language': 'es-ES,es;q=0.9,en;q=0.8',
+            'Referer': 'https://www.google.com/'
         }
         response = requests.get(target_url, headers=headers, timeout=10)
         response.raise_for_status() # Lanza error si no es 200
@@ -26,10 +29,10 @@ def scrape_noticias(target_url: str,nombre_fuente: str="Scraper Genérico") -> L
         if not contenedor: 
             contenedor = soup # Fallback por si acaso
 
-        articulos = contenedor.find_all('article')
+        # El Economista no usa <article> semántico, usa divs con clases específicas
+        articulos = contenedor.find_all(['article', 'div'], class_=['articleContent', 'articleHeadline'])
         
-        # SI NO HAY ARTICULOS ( El Economista no usa <article> semántico)
-        # Buscamos directamente los contenedores típicos de noticias o iteramos sobre h2/h3
+        # SI NO HAY ARTICULOS 
         if not articulos:
             # Estrategia alternativa: Buscar h2 dentro del main y tratar su padre como artículo
             titulares = contenedor.find_all(['h2', 'h3'])
@@ -65,5 +68,5 @@ def scrape_noticias(target_url: str,nombre_fuente: str="Scraper Genérico") -> L
         return noticias_limpias
 
     except Exception as e:
-        logger.error(f"Error en scrape_elpais_portada: {e}")
+        logger.error(f"[EXTRACCION_SCRAPER] Error procesando el HTML de {target_url}: {e}")
         return []

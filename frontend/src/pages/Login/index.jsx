@@ -1,18 +1,18 @@
-import {useState } from 'react';
-import {useAuth} from '../../context/AuthContext';
-import {useNavigate, Link} from 'react-router-dom';
+import { useState } from 'react';
+import { useAuth } from '../../context/AuthContext';
+import { useNavigate, Link } from 'react-router-dom';
 import './Login.css';
 
 function Login() {
     const [email, setEmail] = useState('');
-    const [password, setPassword] =useState('');
+    const [password, setPassword] = useState('');
     const [errorMsg, setErrorMsg] = useState('');
     const [loading, setLoading] = useState(false);
 
-    const {signIn } = useAuth();
+    const { signIn } = useAuth();
     const navigate = useNavigate();
 
-    const handleSubmit = async (e) =>{
+    const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
         setErrorMsg('');
@@ -20,12 +20,12 @@ function Login() {
         try {
             // Intentamos entrar con Supabase
             await signIn(email, password);
-            
+
             // Si todo va bien, nos vamos al Dashboard
             navigate('/');
-        }catch(error){
+        } catch (error) {
             setErrorMsg('Error al iniciar sesion: ' + error.message);
-        }finally{
+        } finally {
             setLoading(false);
         }
     };
@@ -62,7 +62,10 @@ function Login() {
                     </button>
                 </form>
                 <div className="auth-link">
-                    ¿No tienes cuenta?<Link to="/register">Regístrate aquí</Link>
+                    ¿No tienes cuenta? <Link to="/register">Regístrate aquí</Link>
+                </div>
+                <div className="auth-link" style={{ marginTop: '10px' }}>
+                    ¿Has olvidado tu contraseña? <Link to="/forgot-password">Recupérala aquí</Link>
                 </div>
             </div>
         </div>
