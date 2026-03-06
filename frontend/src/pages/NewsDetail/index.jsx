@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';// Para leer el ID de la URL
 import { getNoticiaById } from '../../services/api';
+import useFeedback from '../../hooks/useFeedback';
 import './NewsDetail.css';
 import Spinner from '../../components/Spinner';
 function NewsDetail() {
     const { id } = useParams(); //sacamos el id de la URL
     const navigate = useNavigate(); //para el boton de volver
+    const { feedbacks, toggleFeedback } = useFeedback();
+
     const [noticia, setNoticia] = useState(null);
     const [loading, setLoading] = useState(true);
 
@@ -181,6 +184,25 @@ function NewsDetail() {
                                     <span className="value">{noticia.categoria_producto_ia}</span>
                                 </div>
                             )}
+                        </div>
+                    </div>
+
+                    {/* Botones Feedback */}
+                    <div className="sidebar-section feedback-section">
+                        <h4>¿Te ha resultado útil?</h4>
+                        <div className="feedback-controls large">
+                            <button
+                                className={`feedback-btn like-btn ${feedbacks?.[noticia.url_hash] === 'like' ? 'active' : ''}`}
+                                onClick={() => toggleFeedback(noticia.url_hash, 'like')}
+                            >
+                                👍 Me gusta
+                            </button>
+                            <button
+                                className={`feedback-btn dislike-btn ${feedbacks?.[noticia.url_hash] === 'dislike' ? 'active' : ''}`}
+                                onClick={() => toggleFeedback(noticia.url_hash, 'dislike')}
+                            >
+                                👎 No me gusta
+                            </button>
                         </div>
                     </div>
 

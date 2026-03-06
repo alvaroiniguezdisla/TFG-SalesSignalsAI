@@ -391,3 +391,56 @@
 .tag-size-startup {
   background-color: #ea580c;
 }
+/* --- FEEDBACK CONTROLS (Detail view) --- */
+.feedback-section {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e2e8f0;
+}
+
+.feedback-controls.large {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: space-between;
+}
+
+.feedback-controls.large .feedback-btn {
+    flex: 1;
+    padding: 0.6rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    transition: all 0.2s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.3rem;
+    filter: grayscale(100%);
+    opacity: 0.6;
+}
+
+.feedback-controls.large .feedback-btn:hover {
+    filter: grayscale(0%);
+    opacity: 1;
+    background: #e2e8f0;
+    transform: translateY(-1px);
+}
+
+.feedback-controls.large .feedback-btn.active.like-btn {
+    filter: grayscale(0%);
+    opacity: 1;
+    background-color: #dcfce7;
+    border-color: #22c55e;
+    color: #166534;
+}
+
+.feedback-controls.large .feedback-btn.active.dislike-btn {
+    filter: grayscale(0%);
+    opacity: 1;
+    background-color: #fee2e2;
+    border-color: #ef4444;
+    color: #991b1b;
+}

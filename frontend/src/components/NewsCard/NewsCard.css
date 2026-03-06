@@ -512,3 +512,47 @@
 .extra-source-link:hover {
     color: var(--primary);
 }
+/* --- 5. FEEDBACK CONTROLS --- */
+.feedback-controls {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.feedback-btn {
+    background: transparent;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 0.35rem 0.6rem;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    filter: grayscale(100%);
+    opacity: 0.6;
+}
+
+.feedback-btn:hover {
+    filter: grayscale(0%);
+    opacity: 1;
+    transform: scale(1.05);
+    background-color: #f8fafc;
+}
+
+.feedback-btn.active.like-btn {
+    filter: grayscale(0%);
+    opacity: 1;
+    background-color: #dcfce7;
+    border-color: #22c55e;
+    box-shadow: 0 0 5px rgba(34, 197, 94, 0.3);
+}
+
+.feedback-btn.active.dislike-btn {
+    filter: grayscale(0%);
+    opacity: 1;
+    background-color: #fee2e2;
+    border-color: #ef4444;
+    box-shadow: 0 0 5px rgba(239, 68, 68, 0.3);
+}

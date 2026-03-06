@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import useFeedback from '../../hooks/useFeedback';
 import './NewsCard.css';
 
 /**
@@ -8,6 +9,9 @@ import './NewsCard.css';
  */
 function NewsCard({ noticia, userCompanies = [] }) {
     const navigate = useNavigate();
+    const { feedbacks, toggleFeedback } = useFeedback();
+    const currentFeedback = feedbacks ? feedbacks[noticia.url_hash] : undefined;
+
     const getPriorityLevel = (relevancia) => {
         if (relevancia >= 70) return { label: 'Alta', class: 'priority-high' };
         if (relevancia >= 40) return { label: 'Media', class: 'priority-medium' };
@@ -171,8 +175,25 @@ function NewsCard({ noticia, userCompanies = [] }) {
                 </div>
             </div>
 
-            {/* 4. ACCIÓN */}
+            {/* 4. ACCIÓN y FEEDBACK */}
             <div className="card-footer">
+                <div className="feedback-controls" onClick={(e) => e.stopPropagation()}>
+                    <button
+                        className={`feedback-btn like-btn ${currentFeedback === 'like' ? 'active' : ''}`}
+                        onClick={(e) => { e.stopPropagation(); toggleFeedback(noticia.url_hash, 'like'); }}
+                        title="Me parece útil"
+                    >
+                        👍
+                    </button>
+                    <button
+                        className={`feedback-btn dislike-btn ${currentFeedback === 'dislike' ? 'active' : ''}`}
+                        onClick={(e) => { e.stopPropagation(); toggleFeedback(noticia.url_hash, 'dislike'); }}
+                        title="No me parece útil"
+                    >
+                        👎
+                    </button>
+                </div>
+
                 <a
                     href={noticia.url || noticia.link}
                     target="_blank"
