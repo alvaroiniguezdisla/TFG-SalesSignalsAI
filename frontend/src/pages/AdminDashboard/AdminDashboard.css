@@ -341,4 +341,212 @@
     .add-source-form {
         grid-template-columns: 1fr;
     }
+
+    .metrics-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+/* --- KPIS --- */
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.metric-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 1.5rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    box-shadow: 0 4px 6px var(--shadow-color);
+    transition: transform 0.2s;
+}
+
+.metric-card:hover {
+    transform: translateY(-4px);
+}
+
+.metric-icon {
+    font-size: 2rem;
+    padding: 0.75rem;
+    border-radius: 12px;
+    background: var(--bg-input);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.metric-icon.users-icon {
+    background: rgba(59, 130, 246, 0.1);
+}
+
+.metric-icon.news-icon {
+    background: rgba(16, 185, 129, 0.1);
+}
+
+.metric-icon.feedback-icon {
+    background: rgba(245, 158, 11, 0.1);
+}
+
+.metric-icon.sources-icon {
+    background: rgba(139, 92, 246, 0.1);
+}
+
+.metric-content h3 {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-secondary);
+    margin: 0 0 0.5rem 0;
+}
+
+.metric-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 0.25rem 0;
+    line-height: 1;
+}
+
+.metric-subtext {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+/* --- FASE 3: GESTIÓN DE USUARIOS (TABLE) --- */
+.users-section {
+    padding-bottom: 0;
+    overflow: hidden;
+}
+
+.table-responsive {
+    overflow-x: auto;
+    margin: 0 -2rem;
+
+}
+
+.users-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.users-table th {
+    background: var(--bg-input);
+    padding: 1rem 1.5rem;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid var(--border-color);
+    border-top: 1px solid var(--border-color);
+}
+
+.users-table td {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    vertical-align: middle;
+}
+
+.users-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.users-table tbody tr:hover {
+    background: rgba(0, 0, 0, 0.01);
+}
+
+.user-name-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-weight: 500;
+}
+
+.badge-you {
+    font-size: 0.7rem;
+    background: linear-gradient(135deg, #0070f3, #00c6ff);
+    color: white;
+    padding: 0.15rem 0.5rem;
+    border-radius: 12px;
+    font-weight: bold;
+}
+
+.role-select {
+    padding: 0.5rem;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-input);
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.role-select:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(0, 112, 243, 0.2);
+}
+
+.role-select.admin {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: #059669;
+    border-color: rgba(16, 185, 129, 0.2);
+}
+
+.role-select.user {
+    background-color: rgba(100, 116, 139, 0.1);
+    color: #475569;
+}
+
+.role-select:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn-delete-user {
+    background: transparent;
+    color: #ef4444;
+    border: none;
+    padding: 0.5rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+}
+
+.btn-delete-user:hover:not(:disabled) {
+    background: rgba(239, 68, 68, 0.1);
+}
+
+.btn-delete-user:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    color: var(--text-secondary);
+}
+
+.btn-add-mini {
+    background: rgba(0, 112, 243, 0.1);
+    color: #0070f3;
+    border: 1px dashed #0070f3;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-add-mini:hover {
+    background: #0070f3;
+    color: white;
 }

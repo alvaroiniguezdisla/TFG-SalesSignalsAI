@@ -14,3 +14,21 @@ class AppConfig(BaseModel):
     ollama_model: str
     ai_prompt: str = ""
     rss_sources: List[RssSource]
+
+class UserRoleUpdate(BaseModel):
+    role: str
+
+class UserCreate(BaseModel):
+    email: str
+    password: str
+    role: str = "user"
+
+class AdminMetricsResponse(BaseModel):
+    total_users: int
+    active_users_30d: int
+    total_news: int
+    news_7d: int
+    total_feedbacks: int
+    likes_count: int
+    dislikes_count: int
+    active_sources: int

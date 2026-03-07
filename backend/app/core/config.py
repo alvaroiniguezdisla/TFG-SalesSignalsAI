@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     # Supabase Credentials (requeridos para conectar con la config dinámica)
     SUPABASE_URL: str = ""
     SUPABASE_KEY: str = ""
+    SUPABASE_SERVICE_ROLE_KEY: str = ""
     
     # Email Notifications (Gmail SMTP)
     GMAIL_USER: str = ""
