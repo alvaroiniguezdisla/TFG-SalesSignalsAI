@@ -12,4 +12,5 @@ class AppConfig(BaseModel):
     max_emails_ejecucion: int
     delay_entre_emails: int
     ollama_model: str
+    ai_prompt: str = ""
     rss_sources: List[RssSource]

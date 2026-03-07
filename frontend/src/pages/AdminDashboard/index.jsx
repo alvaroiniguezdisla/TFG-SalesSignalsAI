@@ -239,6 +239,45 @@ function AdminDashboard() {
                     )}
                 </div>
 
+                {/* SECCIÓN INFERIOR: Prompt de Inteligencia Artificial */}
+                <div className="admin-section full-width-section">
+                    <h2>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v20"></path><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                        Personalización de Inteligencia Artificial
+                    </h2>
+
+                    <div className="prompt-editor-container">
+                        <div className="prompt-info-header">
+                            <p className="prompt-description">
+                                <strong>Instrucciones de Análisis (Editable):</strong> Define cómo debe actuar la IA, qué reglas de negocio seguir y qué tono utilizar.
+                            </p>
+                            <button
+                                className="btn-outline-danger"
+                                onClick={() => {
+                                    if (window.confirm('¿Seguro que quieres restaurar el prompt por defecto de fábrica? Perderás los cambios actuales.')) {
+                                        setConfig({ ...config, ai_prompt: '' });
+                                    }
+                                }}
+                                title="Borra el prompt actual y devuelve el control al código fuente del sistema (Fallback)."
+                            >
+                                Restaurar Prompt por Defecto
+                            </button>
+                        </div>
+
+                        <textarea
+                            className="prompt-textarea"
+                            value={config.ai_prompt || ''}
+                            onChange={(e) => setConfig({ ...config, ai_prompt: e.target.value })}
+                            placeholder="Escribe aquí las instrucciones de análisis para la IA. Si dejas este campo vacío, se usará el prompt de fábrica del sistema."
+                        />
+
+                        <div className="prompt-security-warning">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                            <span><strong>Protección Activa:</strong> El formato de salida JSON y los tipos de datos están sellados por código en el backend y <strong>NO pueden ser alterados</strong> desde este panel. Esto garantiza que la aplicación no sufra caídas por un mal formato.</span>
+                        </div>
+                    </div>
+                </div>
+
                 <div className="save-section">
                     <button className="btn-primary" onClick={handleSave} disabled={saving} style={{ width: 'auto' }}>
                         {saving ? 'Guardando en Base de Datos...' : 'Guardar y Desplegar Cambios'}
