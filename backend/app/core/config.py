@@ -9,9 +9,13 @@ class Settings(BaseSettings):
     SUPABASE_KEY: str = ""
     SUPABASE_SERVICE_ROLE_KEY: str = ""
     
-    # Email Notifications (Gmail SMTP)
-    GMAIL_USER: str = ""
-    GMAIL_APP_PASSWORD: str = ""
+
+
+    # Microsoft Graph API Notifications
+    GRAPH_TENANT_ID: str = "e3a928ca-e35f-46e2-af28-49ded1ea69a9"
+    GRAPH_CLIENT_ID: str = "c0349479-afbb-4040-96cd-6b1e1219d9ac"
+    GRAPH_SCOPES: str = "User.Read Chat.ReadWrite ChatMessage.Send"
+    TEAMS_TARGET_USER_EMAIL: str = "alvaro@ww5dl.onmicrosoft.com"
     
     # CORS Origins Permitidos
     CORS_ORIGINS: list[str] = ["http://localhost:5173", "http://127.0.0.1:5173"]

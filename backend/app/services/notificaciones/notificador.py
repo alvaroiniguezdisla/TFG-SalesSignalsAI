@@ -1,11 +1,12 @@
 """
 Servicio de notificaciones.
-Filtra noticias por preferencias de usuario y envía emails personalizados.
+Filtra noticias por preferencias de usuario y envía mensajes a Teams.
 """
 import time
 import logging
 from app.services.almacenamiento.database import get_supabase_service
-from app.services.notificaciones.email_service import get_email_service
+from app.services.notificaciones.teams_graph_service import get_teams_graph_service
+from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -62,13 +63,13 @@ def enviar_notificaciones_a_todos():
     Proceso principal: envía notificaciones a todos los usuarios.
     Se ejecuta después de cada ingesta del pipeline.
     """
-    logger.info("Iniciando envío de notificaciones por email...")
+    logger.info("Iniciando envío de notificaciones por Teams...")
 
     try:
         db = get_supabase_service()
         app_config = db.get_app_config()
-        max_emails = app_config.get("max_emails_ejecucion", 50)
-        delay_emails = app_config.get("delay_entre_emails", 1)
+        max_notifs = app_config.get("max_notificaciones_ejecucion", 50)
+        delay_notifs = app_config.get("delay_entre_notificaciones", 1)
 
         # 1. Obtener noticias de las últimas 6 horas con relevancia >= 40
         noticias_recientes = db.obtener_noticias_relevantes_recientes()
@@ -90,9 +91,9 @@ def enviar_notificaciones_a_todos():
         # 3. Enviar a cada usuario (con límite y delay)
         enviados = 0
         for usuario in usuarios:
-            # Limite de emails por ejecucion
-            if enviados >= max_emails:
-                logger.warning(f"Limite de {max_emails} emails alcanzado")
+            # Limite de notificaciones por ejecucion
+            if enviados >= max_notifs:
+                logger.warning(f"Limite de {max_notifs} notificaciones alcanzado")
                 break
                 
             email = usuario.get("email")
@@ -105,12 +106,16 @@ def enviar_notificaciones_a_todos():
             noticias_usuario = filtrar_noticias_para_usuario(noticias_recientes, usuario)
             
             if noticias_usuario:
-                logger.info(f"Enviando {len(noticias_usuario)} noticias a {email}")
-                if get_email_service().enviar_resumen(email, nombre, noticias_usuario):
-                    enviados += 1
-                    # Delay para evitar bloqueos de Gmail
-                    if enviados < len(usuarios):
-                        time.sleep(delay_emails)
+                
+                if email.lower() == settings.TEAMS_TARGET_USER_EMAIL.lower():
+                    logger.info(f"Enviando {len(noticias_usuario)} noticias vía Teams a {email}")
+                    if get_teams_graph_service().enviar_notificacion(email, nombre, noticias_usuario):
+                        enviados += 1
+                        # Delay para evitar rate limits
+                        if enviados < len(usuarios):
+                            time.sleep(delay_notifs)
+                else:
+                    logger.info(f"Omitiendo notificación a {email} (solo se alerta al usuario configurado en TFG).")
 
         logger.info(f"Notificaciones enviadas: {enviados}")
         return enviados
@@ -118,4 +123,24 @@ def enviar_notificaciones_a_todos():
     except Exception as e:
         logger.error(f"Error en envío de notificaciones: {e}")
         return 0
+
+if __name__ == "__main__":
+    # Forzamos que se vea el output por consola en la ejecución manual
+    print("==================================================")
+    print("   INICIANDO ENVÍO MANUAL DE NOTIFICACIONES...    ")
+    print("==================================================")
+    
+    logger.setLevel(logging.INFO)
+    if not logger.handlers:
+        ch = logging.StreamHandler()
+        ch.setLevel(logging.INFO)
+        formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+        ch.setFormatter(formatter)
+        logger.addHandler(ch)
+
+    enviados = enviar_notificaciones_a_todos()
+    
+    print("==================================================")
+    print(f"   ✅ PROCESO TERMINADO. Bucle completado.       ")
+    print("==================================================")
 

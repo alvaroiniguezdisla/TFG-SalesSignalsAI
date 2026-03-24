@@ -28,3 +28,4 @@ uvicorn==0.38.0
 supabase
 ollama
 apscheduler==3.11.2
+msal>=1.31.0

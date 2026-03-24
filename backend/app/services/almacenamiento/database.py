@@ -32,18 +32,35 @@ class SupabaseService:
             return 
 
         try:
-            #1. Obtenemos las noticias de la DB de los 3 ultimos dias 
+            # 1. Obtenemos las noticias de la DB de los 3 ultimos dias para la busqueda difusa
             fecha_3_dias_atras = (datetime.now() - timedelta(days=3)).isoformat()
             response = self.client.table("noticias")\
                 .select("id, titulo, fuente, urls_extra, url, url_hash")\
                 .gt("scraped_at", fecha_3_dias_atras)\
                 .execute()
 
-            noticias_db_3dias = response.data if response.data else []
+            # 1.5. Y TAMBIEN forzamos la obtención de cualquier noticia (sin importar si tiene 5 años)
+            # que coincida exactamente con los hashes de las noticias que vienen ahora, para que NO se escapen.
+            hashes_entrada = [n.get('url_hash') for n in news_list if n.get('url_hash')]
+            res_hashes = None
+            if hashes_entrada:
+                res_hashes = self.client.table("noticias")\
+                    .select("id, titulo, fuente, urls_extra, url, url_hash")\
+                    .in_("url_hash", hashes_entrada)\
+                    .execute()
+
+            # Unificamos ambos arrays de la base de datos sin duplicados
+            dic_noticias = {n['url_hash']: n for n in (response.data or [])}
+            if res_hashes and res_hashes.data:
+                for n in res_hashes.data:
+                    dic_noticias[n['url_hash']] = n
+                    
+            noticias_db_3dias = list(dic_noticias.values())
+
             if noticias_db_3dias:
-                logger.info(f"Se han encontrado {len(noticias_db_3dias)} noticias recientes en la DB")
+                logger.info(f"Se han encontrado {len(noticias_db_3dias)} noticias en la DB para deduplicar")
             else:
-                logger.info("No se han encontrado noticias recientes en la base de datos")
+                logger.info("No se han encontrado noticias en la base de datos")
 
             nuevas_para_insertar = []
             hashes_procesados_lote = set()
@@ -113,9 +130,10 @@ class SupabaseService:
                 for n in nuevas_para_insertar:
                     if 'id' in n and n['id'] is None:
                         del n['id']
+                        
                 self.client.table("noticias").insert(nuevas_para_insertar).execute()
             
-            logger.info(f"Resultado: {len(nuevas_para_insertar)} Nuevas | {len(news_list) - len(nuevas_para_insertar)} Fusionadas")
+            logger.info(f"Resultado: {len(nuevas_para_insertar)} Nuevas procesadas | {len(news_list) - len(nuevas_para_insertar)} Fusionadas/Descartadas")
             return True
 
         except Exception as e:
