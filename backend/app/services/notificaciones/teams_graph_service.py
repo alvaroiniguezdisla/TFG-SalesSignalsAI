@@ -127,7 +127,7 @@ class TeamsGraphService:
             payload = {
                 "body": {
                     "contentType": "html",
-                    "content": f"<h3>[TFG] SalesSignals Alert</h3><p>Hola {nombre}, tienes <b>{len(noticias)} nuevas señales</b> identificadas por la Inteligencia Artificial.</p><ul>{lista_html}</ul><p><em>(Ve al dashboard local para gestionarlas).</em></p>"
+                    "content": f"<h3>SalesSignals Alert</h3><p>Hola {nombre}, hemos procesado tus alertas y detectado <b>{len(noticias)} señales comerciales nuevas</b> para ti.</p><p>A continuación se muestra el <b>Top {min(len(noticias), 5)} más relevante</b>:</p><ul>{lista_html}</ul><br><p><small>Por favor, accede a tu panel de SalesSignals para gestionar el listado completo y ver los detalles.</small></p>"
                 }
             }
 

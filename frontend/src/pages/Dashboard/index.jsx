@@ -183,7 +183,13 @@ function Dashboard() {
                         <NewsCard key={index} noticia={noticia} userCompanies={profile?.favorite_companies || []} />
                     ))
                 ) : (
-                    <p>No hay noticias disponibles. Ejecuta el pipeline</p>
+                    <div className="empty-state" style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '4rem 2rem', color: '#64748b' }}>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" style={{ marginBottom: '1rem', color: '#94a3b8' }}>
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                        <p style={{ fontSize: '1.1rem' }}>No hay señales nuevas en este momento. La IA sigue analizando el mercado...</p>
+                    </div>
                 )}
             </div>
 

@@ -1,11 +1,11 @@
 from pydantic import BaseModel
-from typing import List
+from typing import List, Optional
 
 class RssSource(BaseModel):
     name: str
     url: str
-    scraper_url: str
-    type: str
+    scraper_url: Optional[str] = ""
+    type: str = "rss"
 
 class AppConfig(BaseModel):
     umbral_similitud: float
@@ -13,6 +13,7 @@ class AppConfig(BaseModel):
     delay_entre_emails: int
     ollama_model: str
     ai_prompt: str = ""
+    ai_prompt_default: str = ""
     rss_sources: List[RssSource]
 
 class UserRoleUpdate(BaseModel):

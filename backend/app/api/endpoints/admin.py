@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends
 from app.schemas.admin import AppConfig, UserCreate
 from app.services.almacenamiento.database import get_supabase_service, SupabaseService
+from app.services.inteligencia.llm_clasificacion_noticias import PROMPT_DEFAULT
 import logging
 
 logger = logging.getLogger(__name__)
@@ -15,6 +16,11 @@ def get_admin_config(db: SupabaseService = Depends(get_supabase_service)):
         if not config_data:
             # Fallback en caso de que la tabla esté vacía (no debería ocurrir en SaaS estable)
             raise HTTPException(status_code=404, detail="Configuración no encontrada en base de datos.")
+            
+        config_data['ai_prompt_default'] = PROMPT_DEFAULT.strip()
+        current_prompt = config_data.get('ai_prompt') or ""
+        if not current_prompt.strip():
+            config_data['ai_prompt'] = config_data['ai_prompt_default']
         
         return config_data
     except Exception as e:
@@ -28,11 +34,13 @@ def update_admin_config(new_config: AppConfig, db: SupabaseService = Depends(get
         # Pydantic valida new_config. Lo pasamos a dict para Supabase.
         # Excluimos valores por defecto que no apliquen o metadatos extras.
         config_dict = new_config.model_dump()
+        config_dict.pop("ai_prompt_default", None)
         
         updated_data = db.update_app_config(config_dict)
         if not updated_data:
             raise HTTPException(status_code=400, detail="No se pudo actualizar la configuración en BD.")
             
+        updated_data['ai_prompt_default'] = PROMPT_DEFAULT.strip()
         logger.info("Configuración global actualizada con éxito.")
         return updated_data
     except Exception as e:

@@ -141,6 +141,6 @@ if __name__ == "__main__":
     enviados = enviar_notificaciones_a_todos()
     
     print("==================================================")
-    print(f"   ✅ PROCESO TERMINADO. Bucle completado.       ")
+    print(f"    PROCESO TERMINADO. Bucle completado.       ")
     print("==================================================")
 

@@ -39,17 +39,13 @@ function AdminDashboard() {
 
     const fetchConfig = async () => {
         try {
-            const { data, error } = await supabase
-                .from('app_config')
-                .select('*')
-                .eq('id', 1)
-                .single();
-
-            if (error) throw error;
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/config`);
+            if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
+            const data = await response.json();
             setConfig(data);
         } catch (error) {
             console.error('Error cargando configuración:', error);
-            setMessage({ text: 'Error al cargar la configuración de la base de datos.', type: 'error' });
+            setMessage({ text: 'Error al cargar la configuración de la base de datos (Backend inalcanzable u otro).', type: 'error' });
         }
     };
 
@@ -202,12 +198,16 @@ function AdminDashboard() {
                 updated_at: new Date().toISOString()
             };
 
-            const { error } = await supabase
-                .from('app_config')
-                .update(configToSave)
-                .eq('id', 1);
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/config`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(configToSave)
+            });
 
-            if (error) throw error;
+            if (!response.ok) {
+                const errData = await response.json();
+                throw new Error(errData.detail || 'Error al guardar configuración.');
+            }
 
             setMessage({ text: 'Configuración global guardada correctamente.', type: 'success' });
             setTimeout(() => setMessage({ text: '', type: '' }), 3000);
@@ -288,7 +288,7 @@ function AdminDashboard() {
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
                         </div>
                         <div className="metric-content">
-                            <h3>Noticias Rascadas</h3>
+                            <h3>Noticias Ingestadas</h3>
                             <p className="metric-value">{metrics.total_news}</p>
                             <p className="metric-subtext">+{metrics.news_7d} (últimos 7 días)</p>
                         </div>
@@ -544,19 +544,19 @@ function AdminDashboard() {
                 <div className="admin-section full-width-section">
                     <h2>
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v20"></path><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
-                        Personalización de Inteligencia Artificial
+                        Instrucciones Base de IA
                     </h2>
 
                     <div className="prompt-editor-container">
                         <div className="prompt-info-header">
                             <p className="prompt-description">
-                                <strong>Instrucciones de Análisis (Editable):</strong> Define cómo debe actuar la IA, qué reglas de negocio seguir y qué tono utilizar.
+                                <strong>Configuración de Análisis (Editable):</strong> Define cómo debe actuar la IA, qué reglas de negocio seguir y qué tono utilizar.
                             </p>
                             <button
                                 className="btn-outline-danger"
                                 onClick={() => {
                                     if (window.confirm('¿Seguro que quieres restaurar el prompt por defecto de fábrica? Perderás los cambios actuales.')) {
-                                        setConfig({ ...config, ai_prompt: '' });
+                                        setConfig({ ...config, ai_prompt: config.ai_prompt_default });
                                     }
                                 }}
                                 title="Borra el prompt actual y devuelve el control al código fuente del sistema (Fallback)."
