@@ -4,6 +4,7 @@ __pycache__/
 *$py.class
 venv/
 .env
+backend/app/services/notificaciones/msal_cache.bin
 
 # Node / Frontend
 node_modules/

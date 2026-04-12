@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../../supabase/client';
 import { useAuth } from '../../context/AuthContext';
 import Spinner from '../../components/Spinner';
+import { API_URL } from '../../services/api';
 import './AdminDashboard.css';
 
 function AdminDashboard() {
@@ -39,7 +40,7 @@ function AdminDashboard() {
 
     const fetchConfig = async () => {
         try {
-            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/config`);
+            const response = await fetch(`${API_URL}/api/admin/config`);
             if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
             const data = await response.json();
             setConfig(data);
@@ -51,7 +52,7 @@ function AdminDashboard() {
 
     const fetchMetrics = async () => {
         try {
-            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/metrics`);
+            const response = await fetch(`${API_URL}/api/admin/metrics`);
             if (!response.ok) throw new Error('Error fetcheando métricas');
             const data = await response.json();
             setMetrics(data);
@@ -62,7 +63,7 @@ function AdminDashboard() {
 
     const fetchUsers = async () => {
         try {
-            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/users`);
+            const response = await fetch(`${API_URL}/api/admin/users`);
             if (!response.ok) throw new Error('Error fetcheando usuarios');
             const data = await response.json();
             setUsers(data);
@@ -74,7 +75,7 @@ function AdminDashboard() {
     const handleRoleChange = async (userId, newRole) => {
         try {
             setLoadingUsers(true);
-            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/users/${userId}/role`, {
+            const response = await fetch(`${API_URL}/api/admin/users/${userId}/role`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ role: newRole })
@@ -107,7 +108,7 @@ function AdminDashboard() {
 
         try {
             setLoadingUsers(true);
-            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/users/${userId}`, {
+            const response = await fetch(`${API_URL}/api/admin/users/${userId}`, {
                 method: 'DELETE',
             });
 
@@ -148,7 +149,7 @@ function AdminDashboard() {
 
         try {
             setLoadingUsers(true);
-            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/users`, {
+            const response = await fetch(`${API_URL}/api/admin/users`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(newUser)
@@ -198,7 +199,7 @@ function AdminDashboard() {
                 updated_at: new Date().toISOString()
             };
 
-            const response = await fetch(`${import.meta.env.VITE_API_URL}/api/admin/config`, {
+            const response = await fetch(`${API_URL}/api/admin/config`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(configToSave)
