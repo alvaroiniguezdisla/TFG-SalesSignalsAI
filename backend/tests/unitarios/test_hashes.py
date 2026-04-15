@@ -15,7 +15,7 @@
 # la misma noticia varias veces en la base de datos.
 # ----------------------------------------------------------------------------------
 
-from app.services.extraccion.scraper import hash_url
+from app.core.utils import hash_url
 
 
 def test_hash_consistencia():

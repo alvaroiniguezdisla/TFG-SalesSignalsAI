@@ -1,3 +1,19 @@
+# ----------------------------------------------------------------------------------
+# TEST DE INTEGRACION: EXTRACCION REAL VIA SCRAPER HTML
+#
+# Objetivo: Verificar que el scraper HTML basado en requests + BeautifulSoup
+# sigue encontrando noticias reales en las fuentes configuradas en la base de datos.
+#
+# IMPORTANTE: Este test requiere conexion a internet y acceso a Supabase real
+# para cargar las URLs de scraping configuradas en la aplicacion.
+#
+# Que comprueba:
+#   1. Que cada fuente con scraper_url puede procesarse sin errores fatales.
+#   2. Que los articulos extraidos contienen titulo, URL y hash validos.
+#   3. Que la estructura devuelta mantiene los campos esperados por el pipeline.
+#   4. Que una URL invalida no rompe la aplicacion y devuelve lista vacia.
+# ----------------------------------------------------------------------------------
+
 import pytest
 from app.services.extraccion.scraper import scrape_noticias
 

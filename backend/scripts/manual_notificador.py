@@ -7,10 +7,11 @@
 #   1. Busca noticias recientes (ultimas 6h) con relevancia >= 40.
 #   2. Obtiene los usuarios registrados y sus preferencias.
 #   3. Filtra noticias por preferencias de cada usuario.
-#   4. Envia emails personalizados a los que tienen coincidencias.
+#   4. Envia notificaciones a Teams al usuario objetivo configurado.
 #
 # Requisitos:
-#   - Credenciales Supabase y Gmail configuradas en .env
+#   - Credenciales Supabase configuradas en .env
+#   - Credenciales de Microsoft Graph si se quiere probar el envio real a Teams
 #   - Noticias recientes en la base de datos
 # ----------------------------------------------------------------------------------
 
@@ -29,7 +30,7 @@ def ejecutar():
     enviados = enviar_notificaciones_a_todos()
 
     print("=" * 50)
-    print(f"Resultado: {enviados} emails enviados")
+    print(f"Resultado: {enviados} notificaciones enviadas")
     print("=" * 50)
 
 

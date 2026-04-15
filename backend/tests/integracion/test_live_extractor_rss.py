@@ -1,3 +1,19 @@
+# ----------------------------------------------------------------------------------
+# TEST DE INTEGRACION: EXTRACCION REAL VIA RSS
+#
+# Objetivo: Verificar que los feeds RSS reales configurados en la base de datos
+# siguen siendo compatibles con nuestro extractor y mantienen la estructura esperada.
+#
+# IMPORTANTE: Este test requiere conexion a internet y acceso a Supabase real
+# para recuperar las fuentes RSS configuradas en la aplicacion.
+#
+# Que comprueba:
+#   1. Que cada feed RSS configurado puede consultarse correctamente.
+#   2. Que los articulos extraidos contienen los campos minimos esperados.
+#   3. Que published_at llega informado en las fuentes RSS reales.
+#   4. Que una URL RSS invalida no rompe la aplicacion y devuelve lista vacia.
+# ----------------------------------------------------------------------------------
+
 import pytest
 from app.services.extraccion.rss import obtener_noticias_rss
 
@@ -18,7 +34,7 @@ fuentes_rss = get_db_rss_sources()
 def test_rss_extrae_noticias_reales(fuente):
     """
     Prueba de integración REAL paramétrica. 
-    Itera sobre todos los feeds RSS configurados en .env y comprueba
+    Itera sobre todos los feeds RSS configurados en la base de datos y comprueba
     que la estructura del XML de las webs no ha cambiado.
     """
     resultados = obtener_noticias_rss(fuente["url"], fuente["name"])

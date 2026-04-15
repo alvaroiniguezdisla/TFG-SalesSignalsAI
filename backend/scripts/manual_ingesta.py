@@ -9,7 +9,7 @@
 #
 # Requisitos:
 #   - Internet activo
-#   - Fuentes RSS configuradas en config.py
+#   - Fuentes configuradas en la tabla app_config de la base de datos
 # ----------------------------------------------------------------------------------
 
 from app.services.extraccion.manager import get_extractor_manager

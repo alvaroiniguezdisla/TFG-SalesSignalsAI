@@ -1,3 +1,19 @@
+# ----------------------------------------------------------------------------------
+# TEST DE INTEGRACION: EXTRACCION REAL VIA BROWSER (PLAYWRIGHT)
+#
+# Objetivo: Verificar que el extractor basado en navegador real (Playwright)
+# sigue funcionando contra fuentes reales configuradas en la base de datos.
+#
+# IMPORTANTE: Este test requiere conexion a internet, acceso a Supabase real
+# y que Playwright/Chromium esten instalados en el entorno.
+#
+# Que comprueba:
+#   1. Que cada fuente con scraper_url puede procesarse con Browser.
+#   2. Que el extractor devuelve articulos con estructura valida.
+#   3. Que las URLs relativas se normalizan como URLs absolutas.
+#   4. Que una URL invalida no rompe la aplicacion y devuelve lista vacia.
+# ----------------------------------------------------------------------------------
+
 import pytest
 from app.services.extraccion.browser import obtener_noticias_browser
 

@@ -44,7 +44,7 @@ def test_job_ejecuta_pipeline_y_notificaciones(MockPipeline, MockNotificador):
     Verifica que la tarea programada ejecuta los 2 pasos en orden:
     primero el pipeline de ingesta, luego el envio de notificaciones.
     """
-    MockNotificador.return_value = 3  # Simula que se enviaron 3 emails
+    MockNotificador.return_value = 3  # Simula que se enviaron 3 notificaciones
 
     job_ejecutar_pipeline()
 

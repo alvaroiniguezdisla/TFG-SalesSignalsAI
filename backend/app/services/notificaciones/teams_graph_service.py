@@ -1,6 +1,7 @@
 """
 Servicio de envío de notificaciones mediante Microsoft Graph API (Delegated Flow).
-Utiliza Device Code Flow para autenticar localmente y notificar a un chat 1:1 en Teams.
+Utiliza Device Code Flow para autenticar localmente y publicar alertas en un chat
+propio de Teams usado como buzón de notificaciones del TFG.
 """
 import os
 import logging
@@ -48,7 +49,7 @@ class TeamsGraphService:
                 return result["access_token"]
         
         # Si no hay token guardado o caducó, se lanza interactivo por consola
-        logger.info("🔐 ¡ATENCIÓN! Revisa la consola: necesitas iniciar sesión en Microsoft para interactuar con Teams.")
+        logger.info("Revisa la consola: necesitas iniciar sesion en Microsoft para interactuar con Teams.")
         flow = self.app.initiate_device_flow(scopes=self.scopes)
         if "user_code" not in flow:
             raise ValueError(f"Fallo al crear inicialización Device FLow: {flow}")
