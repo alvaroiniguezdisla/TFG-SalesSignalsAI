@@ -103,13 +103,13 @@ function Dashboard() {
                                 <span className="notification-badge">{newHighPriority} nuevas</span>
                             )}
                         </h1>
-                        <p>Monitorización Inteligente de Oportunidades</p>
+                        <p>Monitorización de oportunidades comerciales</p>
                     </div>
 
                     <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
                         {profile?.role === 'admin' && (
                             <Link to="/admin" className="btn-secondary" style={{ padding: '0.5rem 1rem', fontSize: '0.9rem' }}>
-                                Panel Admin
+                                Panel de administración
                             </Link>
                         )}
                         <Link to="/profile" className="profile-icon">
@@ -160,9 +160,9 @@ function Dashboard() {
                                 checked={hideNoise}
                                 onChange={(e) => setHideNoise(e.target.checked)}
                             />
-                            Ocultar ruido
+                            Ocultar noticias de baja relevancia
                         </label>
-                        <button onClick={handleRefresh} className="btn-refresh">Refrescar</button>
+                        <button onClick={handleRefresh} className="btn-refresh">Actualizar</button>
                         {(selectedCategory || selectedProduct || selectedCompany || searchTerm) && (
                             <button
                                 onClick={() => {
@@ -180,7 +180,11 @@ function Dashboard() {
             <div className="news-grid">
                 {sortedNoticias.length > 0 ? (
                     sortedNoticias.map((noticia, index) => (
-                        <NewsCard key={index} noticia={noticia} userCompanies={profile?.favorite_companies || []} />
+                        <NewsCard
+                            key={noticia.url_hash || noticia.url || noticia.id || index}
+                            noticia={noticia}
+                            userCompanies={profile?.favorite_companies || []}
+                        />
                     ))
                 ) : (
                     <div className="empty-state" style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '4rem 2rem', color: '#64748b' }}>

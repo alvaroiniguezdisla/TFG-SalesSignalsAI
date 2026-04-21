@@ -63,7 +63,10 @@ def test_rss_extrae_noticias_reales(fuente):
     assert isinstance(primer_articulo["published_at"], str)
 
 def test_rss_maneja_url_invalida_gracefully():
-    # Probar que no rompe la app si le damos un RSS malo
+    """
+    Verifica que el extractor RSS no lanza una excepcion si la URL es invalida
+    o el servidor no existe. Debe devolver una lista vacia sin romper la app.
+    """
     target_url = "https://esta-url-absolutamente-no-existe-12345.com/rss.xml"
     resultados = obtener_noticias_rss(target_url, "Bad RSS")
     

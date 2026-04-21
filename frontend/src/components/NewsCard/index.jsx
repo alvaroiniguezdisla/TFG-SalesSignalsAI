@@ -86,7 +86,7 @@ function NewsCard({ noticia, userCompanies = [] }) {
                 {/* Resumen: Solo si existe. Si es IA, estilo destacado. Si es raw, texto simple. */}
                 {summaryText && summaryText !== "Sin resumen disponible." && (
                     <div className={`analysis-box ${isAiSummary ? 'ai-style' : 'raw-style'}`}>
-                        {isAiSummary && <span className="analysis-label">Análisis IA</span>}
+                        {isAiSummary && <span className="analysis-label">Análisis de IA</span>}
                         <p className="analysis-text">{summaryText}</p>
                     </div>
                 )}
@@ -109,7 +109,7 @@ function NewsCard({ noticia, userCompanies = [] }) {
 
                 {/* Origen principal de la noticia */}
                 <div className="context-row">
-                    <span className="context-label">Fuente Principal:</span>
+                    <span className="context-label">Fuente principal:</span>
                     <span className="source-tag">{noticia.fuente || 'Desconocida'}</span>
                 </div>
 

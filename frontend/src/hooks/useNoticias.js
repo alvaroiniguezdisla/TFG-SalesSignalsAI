@@ -8,11 +8,11 @@ function useNoticias() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    const loadNews = useCallback(async (metodo = 'html') => {
+    const loadNews = useCallback(async () => {
         try {
             setLoading(true);
             setError(null); // Limpiamos errores previos
-            const data = await getNoticias(metodo);
+            const data = await getNoticias();
             setNoticias(data);
         } catch (err) {
             setError("No se pudieron cargar las noticias. ¿Está el backend encendido?");

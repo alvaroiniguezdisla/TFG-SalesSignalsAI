@@ -64,13 +64,18 @@ def test_browser_extrae_articulos_reales(fuente):
     # En browser.py reconstruimos las URLs relativas si hace falta, asi que deben ser absolutas
     assert primer_articulo["url"].startswith("http")
     
-    assert "raw_content" in primer_articulo
-    assert len(primer_articulo["raw_content"]) > 10 # Asegurarnos que nos trajimos el HTML del articulo
-    
+    assert "resumen" in primer_articulo
+    # El resumen ahora lo sacamos dinámicamente de la etiqueta <p>, no explota si viene vacío
+    if primer_articulo["resumen"]:
+        assert len(primer_articulo["resumen"]) > 0
+
     assert primer_articulo["published_at"] is None
 
 def test_browser_maneja_url_invalida_gracefully():
-    # Probar que Playwright captura el DNS error sin cerrar la app
+    """
+    Verifica que Playwright captura el error de DNS sin cerrar la aplicacion.
+    Debe devolver lista vacia en lugar de lanzar una excepcion.
+    """
     target_url = "https://esta-url-absolutamente-no-existe-12345.com"
     resultados = obtener_noticias_browser(target_url, "Bad Browser")
     

@@ -7,23 +7,8 @@
   min-height: 100vh;
 }
 
-/* BOTÓN VOLVER */
-.back-btn {
-  background: white;
-  border: 1px solid #e2e8f0;
-  color: #64748b;
+.detail-container > .back-to-dashboard-btn {
   margin-bottom: 2rem;
-  font-size: 0.9rem;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.back-btn:hover {
-  background: #f1f5f9;
-  color: #0f172a;
-  border-color: #cbd5e1;
 }
 
 /* CABECERA */

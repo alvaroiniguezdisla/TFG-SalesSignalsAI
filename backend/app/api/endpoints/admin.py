@@ -23,6 +23,8 @@ def get_admin_config(db: SupabaseService = Depends(get_supabase_service)):
             config_data['ai_prompt'] = config_data['ai_prompt_default']
         
         return config_data
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error en GET /config: {e}")
         raise HTTPException(status_code=500, detail="Error interno al obtener configuración.")
@@ -43,11 +45,13 @@ def update_admin_config(new_config: AppConfig, db: SupabaseService = Depends(get
         updated_data['ai_prompt_default'] = PROMPT_DEFAULT.strip()
         logger.info("Configuración global actualizada con éxito.")
         return updated_data
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error en PUT /config: {e}")
         raise HTTPException(status_code=500, detail="Error interno al actualizar configuración.")
 
-# --- PHASE 3: USERS & METRICS ENDPOINTS ---
+# --- GESTION DE USUARIOS Y METRICAS ---
 
 @router.get("/users")
 def get_all_users(db: SupabaseService = Depends(get_supabase_service)):
@@ -74,6 +78,8 @@ def change_user_role(user_id: str, payload: dict, db: SupabaseService = Depends(
         logger.info(f"Usuario {user_id} actualizado a rol {new_role}")
         return {"message": "Rol actualizado con éxito", "profile": updated_profile}
         
+    except HTTPException:
+        raise
     except ValueError as ve:
         raise HTTPException(status_code=400, detail=str(ve))
     except Exception as e:
@@ -114,6 +120,8 @@ def delete_existing_user(user_id: str, db: SupabaseService = Depends(get_supabas
             logger.info(f"Usuario eliminado con éxito: {user_id}")
             return {"message": "Usuario eliminado permanentemente"}
         raise HTTPException(status_code=400, detail="No se pudo eliminar el usuario.")
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error en DELETE /users/{user_id}: {e}")
         raise HTTPException(status_code=500, detail="Error al intentar eliminar el usuario.")

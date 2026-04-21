@@ -10,13 +10,13 @@ Plataforma de monitorización de noticias para ventas B2B. Extrae noticias de fu
 
 ## Arquitectura
 
-| Componente | Tecnología |
-|---|---|
-| Backend (API) | FastAPI + Python |
-| Frontend (interfaz web) | React + Vite |
+| Componente                     | Tecnología                      |
+| ------------------------------ | -------------------------------- |
+| Backend (API)                  | FastAPI + Python                 |
+| Frontend (interfaz web)        | React + Vite                     |
 | Base de datos y autenticación | Supabase (PostgreSQL en la nube) |
-| IA local | Ollama con modelo LLaMA 3.1 |
-| Notificaciones | Microsoft Graph / Teams |
+| IA local                       | Ollama con modelo LLaMA 3.1      |
+| Notificaciones                 | Microsoft Graph / Teams          |
 
 ## Estructura del proyecto
 
@@ -24,9 +24,11 @@ Plataforma de monitorización de noticias para ventas B2B. Extrae noticias de fu
 ceu-salessignalsai/
 ├── backend/               # API REST (FastAPI)
 │   ├── app/               # Código fuente del backend
-│   │   ├── core/          # Pipeline de extracción y scheduler
-│   │   ├── routers/       # Endpoints de la API
-│   │   └── services/      # Lógica de negocio (extracción, IA, almacenamiento)
+│   │   ├── api/           # Endpoints de la API
+│   │   ├── core/          # Configuración y scheduler
+│   │   ├── schemas/       # Modelos de datos (Pydantic)
+│   │   └── services/      # Lógica de negocio (extracción, IA, almacenamiento, notificaciones)
+│   ├── scripts/           # Utilidades manuales de apoyo y demostración
 │   ├── tests/             # Tests unitarios y de integración
 │   ├── Dockerfile
 │   └── requirements.txt
@@ -51,7 +53,7 @@ Para ejecutar el proyecto hace falta:
 
 ### Ollama
 
-Ollama se ejecuta fuera de Docker, directamente en el sistema operativo. Si se quiere probar la clasificación con IA, hay que instalarlo e descargar el modelo:
+Ollama se ejecuta fuera de Docker, directamente en el sistema operativo. Si se quiere probar la clasificación con IA, hay que instalarlo y descargar el modelo:
 
 ```bash
 ollama pull llama3.1
@@ -89,34 +91,36 @@ Las credenciales reales de Supabase se entregan junto con la memoria del TFG en 
 
 **`backend/.env`** — Variables del backend:
 
-| Variable | Descripción |
-|---|---|
-| `SUPABASE_URL` | URL del proyecto en Supabase (se proporciona) |
-| `SUPABASE_KEY` | Clave anon/service de Supabase (se proporciona) |
+| Variable                      | Descripción                                             |
+| ----------------------------- | -------------------------------------------------------- |
+| `SUPABASE_URL`              | URL del proyecto en Supabase (se proporciona)            |
+| `SUPABASE_KEY`              | Clave anon/service de Supabase (se proporciona)          |
 | `SUPABASE_SERVICE_ROLE_KEY` | Clave de servicio con permisos elevados (se proporciona) |
-| `GRAPH_TENANT_ID` | Tenant de Azure para Teams (opcional) |
-| `GRAPH_CLIENT_ID` | Client ID de Azure para Teams (opcional) |
-| `GRAPH_SCOPES` | Permisos de Microsoft Graph (opcional) |
-| `TEAMS_TARGET_USER_EMAIL` | Email del destinatario de Teams (opcional) |
+| `GRAPH_TENANT_ID`           | Tenant de Azure para Teams (opcional)                    |
+| `GRAPH_CLIENT_ID`           | Client ID de Azure para Teams (opcional)                 |
+| `GRAPH_SCOPES`              | Permisos de Microsoft Graph (opcional)                   |
+| `TEAMS_TARGET_USER_EMAIL`   | Email del destinatario de Teams (opcional)               |
 
 **`frontend/.env`** — Variables del frontend:
 
-| Variable | Descripción |
-|---|---|
-| `VITE_API_URL` | URL del backend, por defecto `http://localhost:8000` |
-| `VITE_SUPABASE_URL` | URL del proyecto en Supabase (se proporciona) |
-| `VITE_SUPABASE_ANON_KEY` | Clave pública (anon) de Supabase (se proporciona) |
+| Variable                   | Descripción                                           |
+| -------------------------- | ------------------------------------------------------ |
+| `VITE_API_URL`           | URL del backend, por defecto `http://localhost:8000` |
+| `VITE_SUPABASE_URL`      | URL del proyecto en Supabase (se proporciona)          |
+| `VITE_SUPABASE_ANON_KEY` | Clave pública (anon) de Supabase (se proporciona)     |
 
 > Las variables marcadas como "opcional" son para las notificaciones de Teams y se pueden dejar vacías sin afectar al funcionamiento general.
 
 ## Credenciales de acceso a la aplicación
 
-Una vez arrancada la aplicación, la pantalla inicial es un login. Para acceder se pueden usar estas credenciales de prueba:
+Una vez arrancada la aplicación, la pantalla inicial es un login. El acceso real se hace con **correo electrónico y contraseña**, no con un alias corto de usuario.
 
-| Campo | Valor |
-|---|---|
-| Usuario | `alvaro` |
-| Contraseña | `1234567` |
+Las credenciales exactas de la cuenta de prueba se entregan junto con el TFG. Al iniciar sesión hay que introducir el **correo completo** de esa cuenta.
+
+| Campo       | Valor       |
+| ----------- | ----------- |
+| Correo electrónico | Cuenta de prueba entregada junto con el TFG |
+| Contraseña | Contraseña entregada junto con el TFG |
 
 ## Método 1: arranque en local (sin Docker)
 
@@ -141,6 +145,8 @@ source venv/bin/activate        # En macOS / Linux
 pip install -r requirements.txt
 uvicorn app.main:app --reload
 ```
+
+> Este arranque inicia también el scheduler en segundo plano dentro del backend.
 
 Para comprobar que funciona, abrir en el navegador `http://localhost:8000`. Debería devolver:
 
@@ -219,7 +225,7 @@ Con esto queda comprobado que el backend responde, el frontend carga y la autent
 
 ### Verificación del pipeline de IA (opcional)
 
-Para lanzar el pipeline de extracción y clasificación de noticias:
+Para ejecutar manualmente un ciclo completo del scheduler (ingesta, IA, almacenamiento y notificaciones opcionales):
 
 ```bash
 cd backend
@@ -227,7 +233,7 @@ source venv/bin/activate
 python -m app.core.scheduler
 ```
 
-Requiere:
+Este comando ejecuta **una pasada completa** y termina. Requiere:
 
 - Archivos `.env` configurados
 - Ollama corriendo en el sistema con el modelo `llama3.1`
@@ -238,10 +244,10 @@ Las notificaciones de Teams son opcionales y se pueden omitir en la demostració
 
 El proyecto incluye tests automatizados en el backend:
 
-| Tipo | Cantidad | Comando |
-|---|---|---|
-| Unitarios | 33 | `pytest tests/unitarios` |
-| Integración | 23 | `pytest tests/integracion -rs -vv` |
+| Tipo         | Cantidad | Comando                              |
+| ------------ | -------- | ------------------------------------ |
+| Unitarios    | 33       | `pytest tests/unitarios`           |
+| Integración | 23       | `pytest tests/integracion -rs -vv` |
 
 Los tests se organizan en dos bloques claramente diferenciados:
 
@@ -265,9 +271,7 @@ pytest
 
 ### Interpretación de los resultados
 
-En los tests unitarios, el resultado esperado es que todos los casos pasen correctamente.
-
-En los tests de integración, pueden aparecer casos marcados como `SKIPPED` sin que esto implique un fallo del backend. Esto ocurre cuando una fuente externa:
+En los tests unitarios, el resultado esperado es que todos los casos pasen correctamente. En los tests de integración, pueden aparecer casos marcados como `SKIPPED` sin que esto implique un fallo del backend. Esto ocurre cuando una fuente externa:
 
 - no devuelve artículos en ese momento,
 - cambia su estructura HTML/XML,
@@ -280,9 +284,9 @@ La estrategia recomendada de explotación prioriza **RSS** por su mayor estabili
 
 ## Resolución de problemas
 
-| Problema | Solución |
-|---|---|
-| Los puertos `8000` o `5173` están ocupados | Cerrar la aplicación que los está usando antes de arrancar |
-| `ollama: command not found` | Instalar Ollama desde https://ollama.com/ |
-| El frontend no conecta con el backend | Comprobar que `VITE_API_URL` en `frontend/.env` apunta a `http://localhost:8000` |
-| Error de credenciales de Supabase | Verificar que los valores en los `.env` coinciden con los proporcionados |
+| Problema                                        | Solución                                                                              |
+| ----------------------------------------------- | -------------------------------------------------------------------------------------- |
+| Los puertos `8000` o `5173` están ocupados | Cerrar la aplicación que los está usando antes de arrancar                           |
+| `ollama: command not found`                   | Instalar Ollama desde https://ollama.com/                                              |
+| El frontend no conecta con el backend           | Comprobar que `VITE_API_URL` en `frontend/.env` apunta a `http://localhost:8000` |
+| Error de credenciales de Supabase               | Verificar que los valores en los `.env` coinciden con los proporcionados             |

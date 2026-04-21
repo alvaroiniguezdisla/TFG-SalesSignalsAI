@@ -1,28 +1,26 @@
 import os
-from pydantic_settings import BaseSettings
-from pydantic_settings import SettingsConfigDict
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = "SalesSignalsAI"
 
-    # Supabase Credentials (requeridos para conectar con la config dinámica)
+    # Credenciales de Supabase necesarias para cargar la configuracion dinamica.
     SUPABASE_URL: str = ""
     SUPABASE_KEY: str = ""
     SUPABASE_SERVICE_ROLE_KEY: str = ""
-    
 
-
-    # Microsoft Graph API Notifications
+    # Configuracion opcional para notificaciones por Teams.
     GRAPH_TENANT_ID: str = ""
     GRAPH_CLIENT_ID: str = ""
     GRAPH_SCOPES: str = "User.Read Chat.ReadWrite ChatMessage.Send"
     TEAMS_TARGET_USER_EMAIL: str = ""
-    
-    # CORS Origins Permitidos
+
+    # Origenes permitidos para el frontend en desarrollo.
     CORS_ORIGINS: list[str] = ["http://localhost:5173", "http://127.0.0.1:5173"]
 
-    # Le decimos que busque el .env relativo a este archivo (backend/app/core/../../.env)
-    # Esto asegura que lo encuentre aunque lancemos el script desde otra carpeta.
+    # El .env se resuelve desde la raiz del backend para que funcione igual
+    # aunque la app se arranque desde carpetas distintas.
     model_config = SettingsConfigDict(
         env_file=os.path.join(
             os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
@@ -30,5 +28,5 @@ class Settings(BaseSettings):
         )
     )
 
-# Instanciamos la configuración para poder importarla en otros sitios
+# Instancia compartida para importar la configuracion en el resto del backend.
 settings = Settings()

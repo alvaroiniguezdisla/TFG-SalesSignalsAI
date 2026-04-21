@@ -1,3 +1,4 @@
+import logging
 from fastapi import APIRouter
 from typing import List
 from app.services.almacenamiento.database import get_supabase_client
@@ -6,6 +7,7 @@ from app.services.orquestacion.pipeline import NewsPipeline
 from fastapi.exceptions import HTTPException
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 @router.get("/noticias", response_model=List[Noticia])
 def get_noticias():
@@ -43,7 +45,8 @@ def refrescar_noticias():
         return {"status":"ok", "message":"Pipeline ejecutado. Nuevas noticias disponibles."}
 
     except Exception as e:
-        return {"status":"error", "message":str(e)}
+        logger.error(f"Error en POST /refrescar: {e}")
+        raise HTTPException(status_code=500, detail=f"Error ejecutando el pipeline: {e}")
 
 
 @router.get("/noticias/{url_hash}", response_model= Noticia)

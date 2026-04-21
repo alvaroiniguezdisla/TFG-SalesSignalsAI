@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { getCategories } from '../../services/api';
 import './Profile.css';
 import Spinner from '../../components/Spinner';
+import BackToDashboardButton from '../../components/BackToDashboardButton';
+
 function Profile() {
-    const navigate = useNavigate();
     const { user, profile, signOut, updateProfile, resetPassword } = useAuth()
     // Estado de carga y datos
     const [loading, setLoading] = useState(true);
@@ -114,9 +114,7 @@ function Profile() {
     return (
         <div className="profile-layout">
             <header className="profile-header">
-                <button onClick={() => navigate('/')} className="back-link">
-                    &larr; Volver al Dashboard
-                </button>
+                <BackToDashboardButton />
                 <div className="header-content">
                     <div className="avatar-circle">
                         {getInitials()}

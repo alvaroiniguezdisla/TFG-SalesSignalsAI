@@ -1,8 +1,10 @@
-FROM python:3.9-slim
+# Imagen base oficial de Playwright — incluye Python 3.9 y Chromium preinstalado.
+# Evita tener que instalar el navegador manualmente y garantiza compatibilidad.
+FROM mcr.microsoft.com/playwright/python:v1.56.0-jammy
 
 WORKDIR /app
 
-# Instalar dependencias
+# Instalar dependencias Python
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 

@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';// Para leer el ID de la URL
+import { useParams } from 'react-router-dom';// Para leer el ID de la URL
 import { getNoticiaById } from '../../services/api';
 import useFeedback from '../../hooks/useFeedback';
 import './NewsDetail.css';
 import Spinner from '../../components/Spinner';
+import BackToDashboardButton from '../../components/BackToDashboardButton';
+
 function NewsDetail() {
     const { id } = useParams(); //sacamos el id de la URL
-    const navigate = useNavigate(); //para el boton de volver
     const { feedbacks, toggleFeedback } = useFeedback();
 
     const [noticia, setNoticia] = useState(null);
@@ -27,9 +28,7 @@ function NewsDetail() {
 
     return (
         <div className="detail-container">
-            <button onClick={() => navigate('/')} className="back-btn">
-                &larr; Volver al Dashboard
-            </button>
+            <BackToDashboardButton />
 
             {/* CABECERA: Título y Categorías */}
             <header className="detail-header">
@@ -101,7 +100,7 @@ function NewsDetail() {
                     {/* Borrador de Email */}
                     {noticia.email_draft_ia && (
                         <section className="analysis-box email-draft">
-                            <h3>Borrador de Email</h3>
+                            <h3>Borrador de correo</h3>
                             <pre className="email-content">{noticia.email_draft_ia}</pre>
                             <button
                                 className="action-btn primary"

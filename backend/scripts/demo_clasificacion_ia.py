@@ -10,7 +10,9 @@
 #
 # Requisitos:
 #   - Ollama instalado y funcionando (ollama serve)
-#   - Modelo configurado en OLLAMA_MODEL (.env)
+#   - Modelo disponible en Ollama
+#   - Configuracion `ollama_model` accesible desde la tabla `app_config`
+#     (o modelo forzado manualmente al instanciar `LlmService`)
 # ----------------------------------------------------------------------------------
 
 from app.services.inteligencia.llm_clasificacion_noticias import LlmService

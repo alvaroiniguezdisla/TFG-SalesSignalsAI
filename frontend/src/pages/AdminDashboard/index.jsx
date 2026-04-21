@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '../../supabase/client';
 import { useAuth } from '../../context/AuthContext';
 import Spinner from '../../components/Spinner';
+import BackToDashboardButton from '../../components/BackToDashboardButton';
 import { API_URL } from '../../services/api';
 import './AdminDashboard.css';
 
@@ -260,9 +260,10 @@ function AdminDashboard() {
 
     return (
         <div className="admin-container">
+            <BackToDashboardButton />
             <header className="admin-header">
-                <h1>Panel de Control del Sistema</h1>
-                <p>Configuración global de la IA, Deduplicación y Motor de Scraping.</p>
+                <h1>Panel de administración</h1>
+                <p>Configuración de usuarios, fuentes y parámetros del sistema.</p>
             </header>
 
             {message.text && (
@@ -299,7 +300,7 @@ function AdminDashboard() {
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
                         </div>
                         <div className="metric-content">
-                            <h3>Interacción (Feedback)</h3>
+                            <h3>Valoraciones de usuarios</h3>
                             <p className="metric-value">{metrics.total_feedbacks}</p>
                             <p className="metric-subtext">Valoraciones Positivas: {metrics.likes_count} | Negativas: {metrics.dislikes_count}</p>
                         </div>
@@ -424,7 +425,7 @@ function AdminDashboard() {
                 <div className="admin-section">
                     <h2>
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-                        Parámetros Core
+                        Parámetros principales
                     </h2>
 
                     <div className="config-form">
@@ -481,7 +482,7 @@ function AdminDashboard() {
                 <div className="admin-section">
                     <h2>
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12h20"></path><path d="M12 2v20"></path><path d="m4.93 4.93 14.14 14.14"></path><path d="m19.07 4.93-14.14 14.14"></path></svg>
-                        Fuentes de Extracción (Periódicos)
+                        Fuentes de noticias
                     </h2>
 
                     <div className="sources-list">
@@ -582,7 +583,7 @@ function AdminDashboard() {
 
                 <div className="save-section">
                     <button className="btn-primary" onClick={handleSave} disabled={saving} style={{ width: 'auto' }}>
-                        {saving ? 'Guardando en Base de Datos...' : 'Guardar y Desplegar Cambios'}
+                        {saving ? 'Guardando en base de datos...' : 'Guardar configuración'}
                     </button>
                 </div>
             </div>

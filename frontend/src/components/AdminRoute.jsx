@@ -3,9 +3,11 @@ import { useAuth } from '../context/AuthContext';
 import Spinner from './Spinner';
 
 const AdminRoute = ({ children }) => {
-    const { user, profile, loading } = useAuth();
+    const { user, profile, loading, profileResolved } = useAuth();
 
-    if (loading) return <Spinner message="Verificando permisos de administrador..." />;
+    if (loading || (user && !profileResolved)) {
+        return <Spinner message="Verificando permisos de administrador..." />;
+    }
 
     if (!user) return <Navigate to="/login" />;
 

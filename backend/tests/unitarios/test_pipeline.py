@@ -32,7 +32,8 @@ NOTICIA_CON_HTML = {
                     "</body></html>",
     "fuente": "Diario Test",
     "url": "http://example.com/noticia1",
-    "url_hash": "hash123456"
+    "url_hash": "hash123456",
+    "published_at": "2026-02-10T09:00:00"
 }
 
 NOTICIA_SIN_CONTENIDO = {
@@ -79,8 +80,22 @@ def test_ejecucion_completa(MockDB, MockLLM, MockGetExtractor):
     # El extractor se llamo una vez
     MockGetExtractor.return_value.obtener_noticias.assert_called_once()
 
-    # La IA analizo las 2 noticias (la vacia usa fallback titulo+resumen)
+    # La IA analizo las 2 noticias
     assert mock_llm.analizar_oportunidad.call_count == 2
+
+    # Primera noticia: titulo correcto, fuente y fecha pasados como kwargs.
+    # raw_content no llega aqui porque Pydantic lo elimina en la fase de validacion
+    # (no esta definido en el schema Noticia).
+    primera_llamada = mock_llm.analizar_oportunidad.call_args_list[0]
+    assert primera_llamada.args[0] == "Noticia Con Contenido HTML"
+    assert primera_llamada.kwargs["fuente"] == "Diario Test"
+    assert primera_llamada.kwargs["published_at"] == "2026-02-10T09:00:00"
+
+    # Segunda noticia: resumen disponible y pasado correctamente.
+    segunda_llamada = mock_llm.analizar_oportunidad.call_args_list[1]
+    assert segunda_llamada.args[0] == "Noticia Sin Contenido"
+    assert segunda_llamada.kwargs["fuente"] == "Diario Test"
+    assert segunda_llamada.kwargs["resumen"] == "Resumen de prueba para fallback"
 
     # Se guardo en base de datos una vez
     mock_db.insert_news_deduplicacion.assert_called_once()
@@ -88,6 +103,8 @@ def test_ejecucion_completa(MockDB, MockLLM, MockGetExtractor):
     # Verificar que las noticias tienen los campos de IA
     noticias_guardadas = mock_db.insert_news_deduplicacion.call_args[0][0]
     assert len(noticias_guardadas) == 2
+    assert "raw_content" not in noticias_guardadas[0]
+    assert "raw_content" not in noticias_guardadas[1]
     assert noticias_guardadas[0]["categoria_ia"] == "Expansion / Crecimiento"
     assert noticias_guardadas[0]["relevancia_ia"] == 90
     assert noticias_guardadas[0]["empresas_clave_ia"] == ["Empresa Test"]

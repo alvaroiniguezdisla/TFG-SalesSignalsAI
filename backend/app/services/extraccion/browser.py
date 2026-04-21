@@ -22,63 +22,86 @@ def obtener_noticias_browser(target_url: str, nombre_fuente: str="Browser Genér
             # Usamos wait_until="networkidle" para asegurar que carguen los scripts de Akamai/Cloudflare
             page.goto(target_url, wait_until="networkidle", timeout=60000)
             
-            # 4. Esperamos a que cargue el main
-            page.wait_for_selector("main")
+            # 4. Esperamos a que el cuerpo de la página esté disponible
+            page.wait_for_selector("body")
             
             noticias = []
-            # Seleccionamos todos los artículos DENTRO DE MAIN
-            # Primero buscamos el main
-            main_element = page.query_selector("main")
-            if main_element:
-                # El Economista usa 'div.articleContent' o 'div.articleHeadline' en lugar de 'article'
-                articulos = main_element.query_selector_all("article, .articleContent, .articleHeadline")
-                # FALLBACK: Si no hay artículos en main, buscamos contenedores de títulos
-                if not articulos:
-                    # Buscamos h2 directamente que tengan enlace
-                    titulos_h2 = main_element.query_selector_all("h2:has(a), h3:has(a)")
-                    articulos = [h2 for h2 in titulos_h2]
-            else:
-                articulos = page.query_selector_all("article, .articleContent")
+            
+            # BUSCAMOS SOLO EN <main> PARA EVITAR EL "TICKER" DE POLITICA DEL HEADER
+            contenedor = page.query_selector("main")
+            if not contenedor:
+                contenedor = page.query_selector("body") # Fallback por si acaso
+                
+            # Búsqueda semántica universal de artículos
+            articulos = contenedor.query_selector_all("article")
+            
+            # SI NO HAY ARTICULOS SEMÁNTICOS (Estrategia Fallback interna)
+            if not articulos:
+                # Estrategia alternativa: Buscar encabezados y tratar a su contenedor padre como artículo
+                titulares = contenedor.query_selector_all("h2, h3")
+                articulos = []
+                for t in titulares:
+                    # Filtramos los que tengan enlace y subimos a su contenedor padre (emulando t.parent de BeautifulSoup)
+                    if t.query_selector("a"):
+                        padre = t.evaluate_handle("el => el.parentElement").as_element()
+                        if padre:
+                            articulos.append(padre)
             
             for articulo in articulos[:15]:
-                # Si es un <article> o div, buscamos h2/h3 dentro. Si ya es un h2, usamos ese mismo.
-                tagName = articulo.evaluate("el => el.tagName")
-                if tagName == "H2":
-                    titulo_element = articulo
+                # 1. Buscamos el nodo del título (Prioridad h1/h2/h3/h4)
+                # Si entramos por el fallback interno, 'articulo' podría ser el propio H2
+                tagName = articulo.evaluate("el => el.tagName").upper()
+                if tagName in ["H1", "H2", "H3", "H4"]:
+                    titulo_nodo = articulo
                 else:
-                    titulo_element = articulo.query_selector("h2") or articulo.query_selector("h3")
+                    titulo_nodo = articulo.query_selector("h1, h2, h3, h4")
                 
-                if titulo_element:
-                    titulo = titulo_element.inner_text()
+                etiqueta_link = None
+                titulo = ""
+
+                # 2. Localización del elemento de hipervínculo (<a>)
+                if titulo_nodo and titulo_nodo.query_selector("a"):
+                    # Estructura estándar: El enlace se encuentra anidado en el titular (ej. <h2><a>Titular</a></h2>)
+                    etiqueta_link = titulo_nodo.query_selector("a")
+                elif titulo_nodo and articulo.evaluate("(el) => el.parentElement && el.parentElement.tagName === 'A'", arg=titulo_nodo):
+                    # Estructura invertida: El titular está envuelto por el enlace (ej. <a><h2>Titular</h2></a>)
+                    # Mediante evaluate_handle se accede al elemento padre en el DOM
+                    etiqueta_link = articulo.evaluate_handle("(el) => el.parentElement", arg=titulo_nodo).as_element()
+                else:
+                    # Estrategia de Fallback: Selección del primer enlace genérico del contenedor si carece de estructura estándar
+                    etiqueta_link = articulo.query_selector("a")
+
+                # 3. Extracción de atributos textuales y construcción del objeto
+                if etiqueta_link:
+                    href = etiqueta_link.get_attribute("href")
+                    titulo = etiqueta_link.inner_text().strip()
                     
-                    # Buscamos el link interno al titulo
-                    link_element = titulo_element.query_selector("a")
-                    link = link_element.get_attribute("href") if link_element else ""
-                    
-                    # FALLBACK: A veces el titulo (h2) esta envuelto por el tag <a> (ej. Expansion)
-                    if not link:
-                        parent_is_a = titulo_element.evaluate("el => el.parentElement && el.parentElement.tagName === 'A'")
-                        if parent_is_a:
-                            link = titulo_element.evaluate("el => el.parentElement.getAttribute('href')")
-                    
-                    # Arreglamos links relativos 
-                    if link and link.startswith("/"):
-                        # Reconstruimos dominio base: protocol://domain.com
-                        domain = "/".join(target_url.split("/")[:3])
-                        link = f"{domain}{link}"
-                    
-                    url_completa = link
-                    
-                    noticias.append({
-                        "url": url_completa,
-                        "url_hash": hash_url(url_completa),
-                        "titulo": titulo,
-                        "fuente": nombre_fuente,
-                        "raw_content": str(articulo.inner_html()),
-                        "resumen": "Extraído con Navegador Real (Playwright)",
-                        "published_at": None,
-                        "scraped_at": datetime.now().isoformat()
-                    })
+                    # A veces el <a> es bloque estructural e inner_text falla, pillamos el texto del H2 si lo hay
+                    if not titulo and titulo_nodo:
+                        titulo = titulo_nodo.inner_text().strip()
+                        
+                    # Validación de seguridad: tiene que ser un enlace real con texto viable
+                    if href and titulo and len(titulo) > 5:
+                        # Arreglamos links relativos 
+                        if href.startswith("/"):
+                            domain = "/".join(target_url.split("/")[:3])
+                            href = f"{domain}{href}"
+                        
+                        url_completa = href
+                        
+                        # Intento de extraer resumen buscando la primera etiqueta de párrafo (<p>)
+                        p_element = articulo.query_selector("p")
+                        resumen_texto = p_element.inner_text().strip() if p_element else ""
+                        
+                        noticias.append({
+                            "url": url_completa,
+                            "url_hash": hash_url(url_completa),
+                            "titulo": titulo,
+                            "fuente": nombre_fuente,
+                            "resumen": resumen_texto,
+                            "published_at": None,
+                            "scraped_at": datetime.now().isoformat()
+                        })
             
             # 5. Cerramos el navegador para liberar memoria
             browser.close()

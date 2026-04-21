@@ -29,41 +29,50 @@ def scrape_noticias(target_url: str,nombre_fuente: str="Scraper Genérico") -> L
         if not contenedor: 
             contenedor = soup # Fallback por si acaso
 
-        # El Economista no usa <article> semántico, usa divs con clases específicas
-        articulos = contenedor.find_all(['article', 'div'], class_=['articleContent', 'articleHeadline'])
+        # Buscamos de forma genérica contenedores semánticos de tipo artículo
+        articulos = contenedor.find_all('article')
         
-        # SI NO HAY ARTICULOS 
+        # SI NO HAY ARTICULOS SEMÁNTICOS (Estrategia Fallback interna)
         if not articulos:
-            # Estrategia alternativa: Buscar h2 dentro del main y tratar su padre como artículo
+            # Estrategia alternativa: Buscar encabezados dentro del main y tratar a su contenedor padre como el artículo general
             titulares = contenedor.find_all(['h2', 'h3'])
-            # Filtramos solo los que tienen enlace
+            # Filtramos solo los encabezados que contengan un enlace (<a>) para evitar coger subtítulos basura
             articulos = [t.parent for t in titulares if t.find('a')]
 
-        for item in articulos[:10]: # Aumentamos un poco por si acaso
-            # Si es un <article>, buscamos h2. Si es un div padre, el h2/h3 ya está ahí
-            h2 = item.find(['h2', 'h3'])
-            if h2 and h2.find('a'):
-                etiqueta_link= h2.find('a')
-                href =etiqueta_link['href']
+        for item in articulos[:15]: 
+            # 1. Búsqueda del nodo de título (Prioridad heurística: h2, h3)
+            # Para soportar medios que emplean estructuras semánticas heterogéneas (ej. h1, h4, o <a> directo)
+            titulo_nodo = item.find(['h2', 'h3'])
+            
+            if titulo_nodo and titulo_nodo.find('a'):
+                etiqueta_link = titulo_nodo.find('a')
+            else:
+                # Estrategia de Fallback: Extracción del primer enlace disponible en el contenedor
+                etiqueta_link = item.find('a')
 
-                #Normalizamos la URL de forma genérica
+            # Validación del elemento: Confirmación de hipervínculo y longitud mínima del texto para descartar iconos o imágenes
+            if etiqueta_link and etiqueta_link.get('href') and len(etiqueta_link.text.strip()) > 5:
+                href = etiqueta_link['href']
+
+                #Normalizamos la URL de forma genérica (por si son rutas relativas)
                 url_completa= href
                 if href.startswith("/"):
-                    # Reconstruimos dominio base: protocol://domain.com
                     domain = "/".join(target_url.split("/")[:3])
                     url_completa= f"{domain}{href}"
 
+                # Intento de extraer resumen buscando la primera etiqueta de párrafo (<p>)
+                p_tag = item.find('p')
+                resumen_html = p_tag.text.strip() if p_tag else ""
+
                 noticias_limpias.append({
-                    "url":url_completa,
+                    "url": url_completa,
                     "url_hash": hash_url(url_completa),
                     "titulo": etiqueta_link.text.strip(),
                     "fuente": nombre_fuente,
-                    "raw_content": str(item),
-                    "resumen": "",
+                    "resumen": resumen_html,
                     "published_at": None,
                     "scraped_at": datetime.now().isoformat()
                 })
-
 
         return noticias_limpias
 

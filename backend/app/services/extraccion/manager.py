@@ -7,7 +7,6 @@ from app.services.almacenamiento.database import get_supabase_service
 from app.core.deduplication import es_titulo_similar, fusionar_datos_noticia
 
 # Configuración de logs
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class NewsExtractorManager:
@@ -115,12 +114,13 @@ class NewsExtractorManager:
 
         # 4. Deduplicación Semántica
         logger.info(f"Total noticias crudas: {len(todas_las_noticias)}")
-        noticias_unicas = self.deduplicar_por_titulo(todas_las_noticias)
+        umbral_similitud = app_config.get("umbral_similitud", 0.85)
+        noticias_unicas = self.deduplicar_por_titulo(todas_las_noticias, umbral_similitud)
         logger.info(f"Total tras deduplicación: {len(noticias_unicas)}")
 
         return noticias_unicas
     
-    def deduplicar_por_titulo(self, lista_noticias: List[Dict])-> List[Dict]:
+    def deduplicar_por_titulo(self, lista_noticias: List[Dict], umbral: float = 0.85)-> List[Dict]:
         """
         Refactorizado para usar app.core.deduplication (lógica compartida).
         """
@@ -129,7 +129,7 @@ class NewsExtractorManager:
             es_duplicada = False
             for existente in unicas:
                 # Usamos la función compartida
-                if es_titulo_similar(nueva['titulo'], existente['titulo']):
+                if es_titulo_similar(nueva['titulo'], existente['titulo'], umbral):
                     es_duplicada = True
                     
                     # Usamos la función de fusión compartida

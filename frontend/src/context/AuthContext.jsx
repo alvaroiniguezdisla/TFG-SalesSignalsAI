@@ -8,6 +8,7 @@ export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);//Datos técnicos(email,id)
     const [profile, setProfile] = useState(null);//Datos humanos(nombre,empresa)
     const [loading, setLoading] = useState(true);//Para saber si está cargando
+    const [profileResolved, setProfileResolved] = useState(false);//Para no bloquear toda la app al leer profiles
 
     useEffect(() => {
         // Nada mas entrar preguntamos si hay alguien conectado
@@ -18,11 +19,16 @@ export const AuthProvider = ({ children }) => {
 
                 setUser(session?.user ?? null);
                 if (session?.user) {
-                    // Cargamos perfil en segundo plano (sin await) para no bloquear la UI
-                    fetchProfile(session.user.id);
+                    setProfileResolved(false);
+                    fetchProfile(session.user.id).finally(() => setProfileResolved(true));
+                } else {
+                    setProfile(null);
+                    setProfileResolved(true);
                 }
             } catch (error) {
                 console.error('Error inicializando auth:', error);
+                setProfile(null);
+                setProfileResolved(true);
             } finally {
                 setLoading(false);
             }
@@ -31,13 +37,14 @@ export const AuthProvider = ({ children }) => {
         getSession();
 
         // Escuchar cambios (Login, Logout, etc.)
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
             setUser(session?.user ?? null);
             if (session?.user) {
-                // Cargamos perfil en segundo plano (sin await)
-                fetchProfile(session.user.id);
+                setProfileResolved(false);
+                fetchProfile(session.user.id).finally(() => setProfileResolved(true));
             } else {
                 setProfile(null);
+                setProfileResolved(true);
             }
             setLoading(false);
         });
@@ -56,6 +63,7 @@ export const AuthProvider = ({ children }) => {
 
             if (error) {
                 // Si no existe perfil, no bloqueamos
+                setProfile(null);
                 return;
             }
             setProfile(data);
@@ -114,7 +122,7 @@ export const AuthProvider = ({ children }) => {
 
     //Exportamos todo para que la app lo use
     return (
-        <AuthContext.Provider value={{ user, profile, loading, signIn, signOut, signUp, updateProfile, resetPassword, updatePassword }}>
+        <AuthContext.Provider value={{ user, profile, loading, profileResolved, signIn, signOut, signUp, updateProfile, resetPassword, updatePassword }}>
             {children}
         </AuthContext.Provider>
     );

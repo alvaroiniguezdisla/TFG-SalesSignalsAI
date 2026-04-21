@@ -70,6 +70,14 @@ def enviar_notificaciones_a_todos():
         app_config = db.get_app_config()
         max_notifs = app_config.get("max_notificaciones_ejecucion", 50)
         delay_notifs = app_config.get("delay_entre_notificaciones", 1)
+        target_email = (settings.TEAMS_TARGET_USER_EMAIL or "").strip().lower()
+
+        if not target_email:
+            logger.warning(
+                "TEAMS_TARGET_USER_EMAIL no está configurado. "
+                "No se enviarán notificaciones de Teams en esta ejecución."
+            )
+            return 0
 
         # 1. Obtener noticias de las últimas 6 horas con relevancia >= 40
         noticias_recientes = db.obtener_noticias_relevantes_recientes()
@@ -107,7 +115,7 @@ def enviar_notificaciones_a_todos():
             
             if noticias_usuario:
                 
-                if email.lower() == settings.TEAMS_TARGET_USER_EMAIL.lower():
+                if email.lower() == target_email:
                     logger.info(f"Enviando {len(noticias_usuario)} noticias vía Teams a {email}")
                     if get_teams_graph_service().enviar_notificacion(email, nombre, noticias_usuario):
                         enviados += 1
@@ -115,7 +123,7 @@ def enviar_notificaciones_a_todos():
                         if enviados < len(usuarios):
                             time.sleep(delay_notifs)
                 else:
-                    logger.info(f"Omitiendo notificación a {email} (solo se alerta al usuario configurado en TFG).")
+                    logger.info(f"Omitiendo notificación a {email} (solo se alerta al usuario configurado ).")
 
         logger.info(f"Notificaciones enviadas: {enviados}")
         return enviados
@@ -143,4 +151,3 @@ if __name__ == "__main__":
     print("==================================================")
     print(f"    PROCESO TERMINADO. Bucle completado.       ")
     print("==================================================")
-

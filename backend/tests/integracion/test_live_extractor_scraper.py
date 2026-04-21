@@ -69,7 +69,10 @@ def test_scraper_extrae_articulos_reales(fuente):
     assert "scraped_at" in primer_articulo
 
 def test_scraper_maneja_url_invalida_gracefully():
-    # Probar que no rompe la app si le damos una URL que no existe
+    """
+    Verifica que el scraper no lanza una excepcion si la URL es invalida
+    o el servidor no existe. Debe capturar el error y devolver lista vacia.
+    """
     target_url = "https://esta-url-absolutamente-no-existe-12345.com"
     resultados = scrape_noticias(target_url, "Bad Scraper")
     

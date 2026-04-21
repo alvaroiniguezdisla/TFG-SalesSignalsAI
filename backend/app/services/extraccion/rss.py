@@ -1,9 +1,7 @@
 import feedparser
 import requests
-from bs4 import BeautifulSoup
 from typing import List, Dict, Any
 from datetime import datetime
-import re
 import logging
 from app.core.utils import hash_url
 
@@ -12,6 +10,7 @@ logger = logging.getLogger(__name__)
 def obtener_noticias_rss(url_feed: str, nombre_fuente: str="RSS Genérico") -> List[Dict[str, Any]]:
     logger.info(f"[EXTRACCION_RSS] Evaluando feed RSS: {url_feed} ({nombre_fuente})")
     
+    # Fakeamos ser un navegador real para que el servidor no bloquee a feedparser
     headers_feed = {
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
@@ -21,15 +20,10 @@ def obtener_noticias_rss(url_feed: str, nombre_fuente: str="RSS Genérico") -> L
     
     try:
         response_feed = requests.get(url_feed, headers=headers_feed, timeout=10)
-        response_feed.raise_for_status()
+        response_feed.raise_for_status() # Verifica si hubo error HTTP (ej: 404, 503)
         
-        # FIX para El Economista: El XML viene con <pubDate/><![CDATA[fecha]]>
-        # Feedparser no lee bien pubDate si está autocerrada. Usamos una regex para arreglarlo:
-        xml_content = response_feed.text
-        xml_cleaned = re.sub(r'<pubDate/>\s*<!\[CDATA\[(.*?)\]\]>', r'<pubDate>\1</pubDate>', xml_content)
-        
-        # Pasamos el string arreglado a feedparser
-        feed = feedparser.parse(xml_cleaned)
+        # Pasamos el XML a feedparser
+        feed = feedparser.parse(response_feed.text)
     except Exception as e:
         logger.error(f"[EXTRACCION_RSS] Error critico descargando el feed {url_feed}: {e}")
         return []
@@ -44,33 +38,14 @@ def obtener_noticias_rss(url_feed: str, nombre_fuente: str="RSS Genérico") -> L
         try:
             url_noticia = entry.link
             titulo = entry.title
-            
-
-            raw_content = ""
-            try:
-                headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)'}
-                response = requests.get(url_noticia, headers=headers, timeout=5)
-                
-                if response.status_code == 200:
-                    soup = BeautifulSoup(response.text, 'html.parser')
-                    article_body = soup.find('article')
-                    if article_body:
-                        raw_content = str(article_body)
-                    else:
-                        raw_content = str(soup.body)
-                else:
-                    raw_content = entry.summary if 'summary' in entry else ""
-            except Exception as e:
-                logger.error(f"Error enriqueciendo noticia {url_noticia}: {e}")
-                raw_content = entry.summary if 'summary' in entry else ""
+            resumen_texto = entry.summary if 'summary' in entry else ""
 
             noticias.append({
                 "url": url_noticia,
                 "url_hash": hash_url(url_noticia),
                 "titulo": titulo,
                 "fuente": nombre_fuente,
-                "raw_content": raw_content,
-                "resumen": entry.summary if 'summary' in entry else "",
+                "resumen": resumen_texto,
                 "published_at": entry.get('published') or None,
                 "scraped_at": datetime.now().isoformat()
             })

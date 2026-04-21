@@ -14,22 +14,6 @@
     gap: 1.5rem;
 }
 
-.back-link {
-    background: none;
-    border: none;
-    color: #64748b;
-    font-size: 0.95rem;
-    font-weight: 500;
-    cursor: pointer;
-    align-self: flex-start;
-    padding: 0;
-    transition: color 0.2s;
-}
-
-.back-link:hover {
-    color: #2563eb;
-}
-
 .header-content {
     display: flex;
     align-items: center;

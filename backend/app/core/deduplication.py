@@ -4,16 +4,11 @@ import json
 
 logger = logging.getLogger(__name__)
 
-def es_titulo_similar(titulo1: str, titulo2: str) -> bool:
+def es_titulo_similar(titulo1: str, titulo2: str, umbral: float = 0.85) -> bool:
     """Devuelve True si los títulos son 'iguales' (>Umbral Configurado similitud)."""
     if not titulo1 or not titulo2:
         return False
         
-    from app.services.almacenamiento.database import get_supabase_service
-    db = get_supabase_service()
-    app_config = db.get_app_config()
-    umbral = app_config.get("umbral_similitud", 0.85) # Fallback seguro
-    
     ratio = difflib.SequenceMatcher(None, titulo1, titulo2).ratio()
     
     return ratio > umbral

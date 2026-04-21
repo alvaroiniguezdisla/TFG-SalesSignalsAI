@@ -8,6 +8,11 @@ import time
 logger = logging.getLogger(__name__)
 
 class SupabaseService:
+
+    # ------------------------------------------------------------------ #
+    #                         INICIALIZACION                              #
+    # ------------------------------------------------------------------ #
+
     def __init__(self):
         #Leemos las credenciales del .env
         url: str =settings.SUPABASE_URL
@@ -21,7 +26,10 @@ class SupabaseService:
         else:
             self.admin_client = None
 
-    
+    # ------------------------------------------------------------------ #
+    #                NOTICIAS: Insercion y Consulta                       #
+    # ------------------------------------------------------------------ #
+
     def insert_news_deduplicacion(self, news_list: list):
         """
         Version inteligente: antes de insertar datos en la DB 
@@ -30,8 +38,12 @@ class SupabaseService:
         """
         if not news_list:
             return 
-
+            
         try:
+            # Obtenemos dinámicamente el umbral configurado por el SaaS admin
+            app_config = self.get_app_config()
+            umbral_similitud = app_config.get("umbral_similitud", 0.85)
+            
             # 1. Obtenemos las noticias de la DB de los 3 ultimos dias para la busqueda difusa
             fecha_3_dias_atras = (datetime.now() - timedelta(days=3)).isoformat()
             response = self.client.table("noticias")\
@@ -85,7 +97,7 @@ class SupabaseService:
                     mismo_hash = (existente.get('url_hash') == current_hash)
                     
                     # Check 2: Titulo Similar
-                    titulo_similar = es_titulo_similar(nueva['titulo'], existente['titulo'])
+                    titulo_similar = es_titulo_similar(nueva['titulo'], existente['titulo'], umbral_similitud)
 
                     if mismo_hash or titulo_similar:
                         es_duplicada_db = True
@@ -140,6 +152,10 @@ class SupabaseService:
             logger.error(f"Error en insert_news_deduplicacion: {e}")
             return None
             
+    # ------------------------------------------------------------------ #
+    #                USUARIOS: Perfiles y Roles                          #
+    # ------------------------------------------------------------------ #
+
     def obtener_usuarios_preferencias(self):
         """Devuelve todos los perfiles de la base de datos."""
         try:
@@ -149,8 +165,7 @@ class SupabaseService:
         except Exception as e:
             logger.error(f"Error obteniendo usuarios de DB: {e}")
             return []
-            
-    # --- ADMIN ENDPOINTS (Metrics & Roles) ---
+
     def create_user(self, email: str, password: str, role: str) -> dict:
         """
         Registra un nuevo usuario en la plataforma utilizando la API de administración de Supabase Auth.
@@ -240,6 +255,10 @@ class SupabaseService:
             logger.error(f"Error actualizando rol del usuario {user_id}: {e}")
             raise e
 
+    # ------------------------------------------------------------------ #
+    #                METRICAS: KPIs del Admin Dashboard                   #
+    # ------------------------------------------------------------------ #
+
     def get_admin_metrics(self) -> dict:
         """Recopila KPIs clave estadísticos sobre el uso de la plataforma."""
         metrics = {
@@ -292,6 +311,10 @@ class SupabaseService:
             logger.error(f"Error recopilando métricas de Admin: {e}")
             return metrics
             
+    # ------------------------------------------------------------------ #
+    #                NOTIFICACIONES: Noticias para Teams                  #
+    # ------------------------------------------------------------------ #
+
     def obtener_noticias_relevantes_recientes(self, horas=6, min_relevancia=40):
         """Devuelve noticias con relevancia mínima extraídas en las últimas X horas."""
         hace_x_horas = (datetime.utcnow() - timedelta(hours=horas)).isoformat()
@@ -307,7 +330,10 @@ class SupabaseService:
             logger.error(f"Error obteniendo noticias recientes en DB: {e}")
             return []
             
-    # --- CONFIGURACIÓN DINÁMICA (SaaS Admin) ---
+    # ------------------------------------------------------------------ #
+    #                CONFIGURACION: Parametros Globales SaaS              #
+    # ------------------------------------------------------------------ #
+
     def get_app_config(self) -> dict:
         """Obtiene la configuración global de la aplicación desde la base de datos."""
         try:
@@ -328,6 +354,10 @@ class SupabaseService:
             logger.error(f"Error actualizando app_config de DB: {e}")
             raise e
             
+# ------------------------------------------------------------------ #
+#                SINGLETON: Punto de Acceso Global                    #
+# ------------------------------------------------------------------ #
+
 _supabase_service_instance = None
 
 def get_supabase_service() -> SupabaseService:

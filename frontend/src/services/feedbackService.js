@@ -26,7 +26,6 @@ export async function getUserFeedbacks(userId) {
 // 2. Guardar o actualizar un feedback (Upsert)
 export async function saveFeedback(userId, urlHash, type) {
     try {
-        console.log("-> feedbackService.saveFeedback llamando a DB:", { userId, urlHash, type });
         const { error } = await supabase
             .from('news_feedback')
             .upsert({
@@ -38,13 +37,12 @@ export async function saveFeedback(userId, urlHash, type) {
             });
 
         if (error) {
-            console.error("<- Supabase falló en Upsert:", JSON.stringify(error, null, 2));
+            console.error("Error en feedbackService.saveFeedback:", error);
             throw error;
         }
-        console.log("<- Upsert correcto en Supabase");
         return true;
     } catch (error) {
-        console.error("Error en feedbackService.saveFeedback (CATCH):", error);
+        console.error("Error en feedbackService.saveFeedback:", error);
         throw error;
     }
 }

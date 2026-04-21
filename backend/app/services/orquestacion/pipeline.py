@@ -1,5 +1,5 @@
 from app.services.extraccion.manager import get_extractor_manager
-from bs4 import BeautifulSoup
+
 from app.services.inteligencia import LlmService
 from app.services.almacenamiento import SupabaseService
 from pydantic import ValidationError
@@ -55,7 +55,8 @@ class NewsPipeline:
             try:
                 # Pydantic lanza excepcion si faltan campos obligatorios
                 noticia_obj = Noticia(**noti_dict)
-                noticias_validadas.append(noticia_obj.model_dump())
+                noticia_validada = noticia_obj.model_dump()
+                noticias_validadas.append(noticia_validada)
             except ValidationError as e:
                 # Recopilar solo los campos que han fallado para no saturar el log
                 errores_campo = [err["loc"][0] for err in e.errors()]
@@ -70,29 +71,21 @@ class NewsPipeline:
         logger.info("[PIPELINE] Fase 3: Analisis de Inteligencia Artificial (LLM)")
         for idx, noticia in enumerate(noticias_validadas, 1):
             try:
-                # Validacion de contenido: Intentar obtener texto para analizar
-                raw_content = noticia.get('raw_content', '')
+                titulo = noticia.get('titulo', '')
+                resumen = noticia.get('resumen', '')
                 
-                if raw_content:
-                    # --- LIMPIEZA DE TEXTO (si hay raw_content) ---
-                    soup = BeautifulSoup(raw_content, 'html.parser')
-                    texto_limpio = soup.get_text(separator=' ', strip=True)
-                else:
-                    # --- FALLBACK: usar título + resumen ---
-                    titulo = noticia.get('titulo', '')
-                    resumen = noticia.get('resumen', '')
-                    texto_limpio = f"{titulo}. {resumen}".strip()
-                    
-                    if not texto_limpio or texto_limpio == ".":
-                        logger.warning(f"[IA_SKIP] - [{idx}/{len(noticias_validadas)}] Sin contenido extraible.")
-                        continue
-                    
-                    logger.debug("[IA_FALLBACK] - Extraccion alternativa empleada.")
+                if not titulo and not resumen:
+                    logger.warning(f"[IA_SKIP] - [{idx}/{len(noticias_validadas)}] Sin contenido extraible.")
+                    continue
 
-                logger.info(f"[IA_ANALISIS] Procesando [{idx}/{len(noticias_validadas)}]: {noticia['titulo'][:60]}...") 
+                logger.info(f"[IA_ANALISIS] Procesando [{idx}/{len(noticias_validadas)}]: {titulo[:60]}...") 
                 
-                # Llamada protegida a la IA
-                analisis = self.llm.analizar_oportunidad(noticia['titulo'], texto_limpio)
+                analisis = self.llm.analizar_oportunidad(
+                    titulo,
+                    fuente=noticia.get('fuente', ''),
+                    resumen=resumen,
+                    published_at=noticia.get('published_at', ''),
+                )
 
                 if analisis:
                     noticia['categoria_ia'] = analisis.get('categoria', 'Sin clasificar')
@@ -130,7 +123,7 @@ class NewsPipeline:
 
         # 4. Guardamos en la base de datos
         logger.info("[PIPELINE] Fase 4: Deduplicacion y Almacenamiento BD")
-        
+
         self.db.insert_news_deduplicacion(noticias_enriquecidas)
 
         logger.info("[PIPELINE] ===============================================")

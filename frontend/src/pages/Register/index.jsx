@@ -43,8 +43,8 @@ function Register() {
     return (
         <div className="auth-container">
             <div className="auth-card">
-                <h2>Crear Cuenta</h2>
-                <p>Únete para ver las últimas noticias</p>
+                <h2>Crear cuenta</h2>
+                <p>Regístrate para acceder al panel de señales</p>
                 {errorMsg && <div className="error-message">{errorMsg}</div>}
                 <form onSubmit={handleSubmit} className="auth-form">
                     {/* Nombre y Apellido */}
