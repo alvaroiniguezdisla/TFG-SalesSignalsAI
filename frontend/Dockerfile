@@ -12,18 +12,12 @@ COPY . .
 # Compilar la app React a archivos estáticos
 RUN npm run build
 
-# --- Fase 2: Servir con un servidor ligero ---
-FROM node:20-alpine
-
-WORKDIR /app
-
-# Instalar un servidor estático mínimo
-RUN npm install -g serve
+# --- Fase 2: Servir con Nginx ---
+FROM nginx:alpine
 
 # Copiar los archivos compilados desde la fase anterior
-COPY --from=build /app/dist ./dist
+COPY --from=build /app/dist /usr/share/nginx/html
 
-EXPOSE 5173
+EXPOSE 80
 
-# Servir la carpeta dist en el puerto 5173
-CMD ["serve", "-s", "dist", "-l", "5173"]
+CMD ["nginx", "-g", "daemon off;"]

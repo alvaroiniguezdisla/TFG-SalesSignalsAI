@@ -68,8 +68,8 @@ def enviar_notificaciones_a_todos():
     try:
         db = get_supabase_service()
         app_config = db.get_app_config()
-        max_notifs = app_config.get("max_notificaciones_ejecucion", 50)
-        delay_notifs = app_config.get("delay_entre_notificaciones", 1)
+        max_notifs = app_config.get("max_emails_ejecucion", 50)
+        delay_notifs = app_config.get("delay_entre_emails", 1)
         target_email = (settings.TEAMS_TARGET_USER_EMAIL or "").strip().lower()
 
         if not target_email:

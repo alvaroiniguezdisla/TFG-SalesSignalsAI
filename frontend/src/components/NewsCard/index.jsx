@@ -1,16 +1,9 @@
-import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import useFeedback from '../../hooks/useFeedback';
 import './NewsCard.css';
 
-/**
- * Componente Tarjeta Inteligente (Smart Card) 
- * Aprovecha todas las columnas disponibles y mejora la legibilidad.
- */
-function NewsCard({ noticia, userCompanies = [] }) {
+function NewsCard({ noticia, userCompanies = [], feedbacks = {}, toggleFeedback }) {
     const navigate = useNavigate();
-    const { feedbacks, toggleFeedback } = useFeedback();
-    const currentFeedback = feedbacks ? feedbacks[noticia.url_hash] : undefined;
+    const currentFeedback = feedbacks[noticia.url_hash];
 
     const getPriorityLevel = (relevancia) => {
         if (relevancia >= 70) return { label: 'Alta', class: 'priority-high' };

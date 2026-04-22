@@ -1,8 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { Link } from 'react-router-dom';
-import './ForgotPassword.css';
-// Reutilizamos también los estilos de Login.css que son globales para estas vistas
 import '../Login/Login.css';
 
 function ForgotPassword() {

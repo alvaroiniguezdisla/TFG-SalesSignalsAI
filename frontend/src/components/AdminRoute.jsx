@@ -9,11 +9,11 @@ const AdminRoute = ({ children }) => {
         return <Spinner message="Verificando permisos de administrador..." />;
     }
 
-    if (!user) return <Navigate to="/login" />;
+    if (!user) return <Navigate to="/login" replace />;
 
     // Solo permitir acceso si el usuario tiene el rol de admin
     if (profile?.role !== 'admin') {
-        return <Navigate to="/" />; // Redirigir al dashboard normal si no es admin
+        return <Navigate to="/" replace />;
     }
 
     return children;

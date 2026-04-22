@@ -32,13 +32,18 @@ ceu-salessignalsai/
 │   ├── tests/             # Tests unitarios y de integración
 │   ├── Dockerfile
 │   └── requirements.txt
-├── frontend/              # Interfaz web (React)
+├── frontend/              # Interfaz web (React + Vite)
 │   ├── src/
-│   │   ├── pages/         # Páginas (Login, Dashboard, Admin, etc.)
-│   │   ├── components/    # Componentes reutilizables
-│   │   └── hooks/         # Hooks personalizados
+│   │   ├── context/       # AuthContext — estado global de sesión
+│   │   ├── routes/        # AppRouter, ProtectedRoute, AdminRoute
+│   │   ├── pages/         # Login, Register, Dashboard, NewsDetail, Profile, AdminDashboard
+│   │   ├── components/    # NewsCard, Spinner, BackToDashboardButton
+│   │   ├── hooks/         # useNoticias, useFeedback
+│   │   ├── services/      # api.js (backend), feedbackService.js (Supabase)
+│   │   └── supabase/      # Cliente de Supabase
 │   └── Dockerfile
 ├── docker-compose.yml     # Orquestación de contenedores
+├── GUIA_USUARIO.md        # Guía de uso para el usuario final
 └── README.md
 ```
 
@@ -197,7 +202,7 @@ docker compose ps
 Deberían aparecer dos servicios en estado `Up`:
 
 - Backend → `http://localhost:8000`
-- Frontend → `http://localhost:5173`
+- Frontend → `http://localhost:5173` (servido por Nginx dentro del contenedor en el puerto 80)
 
 ### Ver logs
 

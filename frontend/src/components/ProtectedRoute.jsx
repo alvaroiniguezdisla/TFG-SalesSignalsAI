@@ -8,7 +8,7 @@ const ProtectedRoute = ({ children }) => {
     if (loading) return <Spinner message="Validando sesión..." />
 
     //Si no hay usuario, lo mandamos a login
-    if (!user) return <Navigate to="/login" />;
+    if (!user) return <Navigate to="/login" replace />;
 
     //Si hay usuario, mostramos la página
     return children;

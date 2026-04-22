@@ -4,7 +4,7 @@ import logging
 from app.services.notificaciones.notificador import enviar_notificaciones_a_todos
 
 #Configuramos el logger
-logger= logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 def job_ejecutar_pipeline():
     """

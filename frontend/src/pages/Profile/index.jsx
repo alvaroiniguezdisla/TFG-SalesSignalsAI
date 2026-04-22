@@ -106,8 +106,6 @@ function Profile() {
     // Filtrar mis categorías para mostrar separadas en UI
     const mySignals = formData.favorite_categories.filter(c => availableSignals.includes(c));
     const myProducts = formData.favorite_categories.filter(c => availableProducts.includes(c));
-    // Las que no encajan en ninguna (por si acaso cambian las listas backend)
-    const myOthers = formData.favorite_categories.filter(c => !availableSignals.includes(c) && !availableProducts.includes(c));
 
     if (loading) return <Spinner message="Cargando perfil..." />;
 

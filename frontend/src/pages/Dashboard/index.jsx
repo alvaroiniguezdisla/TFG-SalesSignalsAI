@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import useNoticias from '../../hooks/useNoticias';
+import useFeedback from '../../hooks/useFeedback';
 import NewsCard from '../../components/NewsCard';
 import './Dashboard.css';
 import { Link } from 'react-router-dom';
@@ -9,6 +10,7 @@ import Spinner from '../../components/Spinner';
 
 function Dashboard() {
     const { noticias, loading, error, forceRefresh } = useNoticias();
+    const { feedbacks, toggleFeedback } = useFeedback();
     const { profile } = useAuth();
     const [viewMode, setViewMode] = useState(() => sessionStorage.getItem('dashboard_viewMode') || 'preferences');
     const [sortMode, setSortMode] = useState(() => sessionStorage.getItem('dashboard_sortMode') || 'relevance');
@@ -32,10 +34,6 @@ function Dashboard() {
         sessionStorage.setItem('dashboard_selectedCategory', selectedCategory);
         sessionStorage.setItem('dashboard_selectedProduct', selectedProduct);
     }, [viewMode, sortMode, hideNoise, searchTerm, selectedCompany, selectedCategory, selectedProduct]);
-    const handleRefresh = () => {
-        forceRefresh();
-    }
-
     // Lógica de filtrado combinado
     const filteredNoticias = (noticias || []).filter(noticia => {
         if (viewMode === 'preferences') {
@@ -84,10 +82,9 @@ function Dashboard() {
         return new Date(b.scraped_at || 0) - new Date(a.scraped_at || 0);
     });
 
-    const newHighPriority = (noticias || []).filter(n => {
-        const isRecent = (new Date() - new Date(n.scraped_at)) < 24 * 60 * 60 * 1000;
-        return isRecent;
-    }).length;
+    const newHighPriority = (noticias || []).filter(n =>
+        (new Date() - new Date(n.scraped_at)) < 24 * 60 * 60 * 1000
+    ).length;
 
     if (loading) return <Spinner message="Sincronizando señales..." />;
     if (error) return <div className="error">{error}</div>;
@@ -162,7 +159,7 @@ function Dashboard() {
                             />
                             Ocultar noticias de baja relevancia
                         </label>
-                        <button onClick={handleRefresh} className="btn-refresh">Actualizar</button>
+                        <button onClick={forceRefresh} className="btn-refresh">Actualizar</button>
                         {(selectedCategory || selectedProduct || selectedCompany || searchTerm) && (
                             <button
                                 onClick={() => {
@@ -184,6 +181,8 @@ function Dashboard() {
                             key={noticia.url_hash || noticia.url || noticia.id || index}
                             noticia={noticia}
                             userCompanies={profile?.favorite_companies || []}
+                            feedbacks={feedbacks}
+                            toggleFeedback={toggleFeedback}
                         />
                     ))
                 ) : (

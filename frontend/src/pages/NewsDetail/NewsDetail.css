@@ -211,19 +211,6 @@
   gap: 0.5rem;
 }
 
-.tag-pill {
-  display: inline-block;
-  background: #f1f5f9;
-  color: #1e293b;
-  padding: 0.4rem 0.8rem;
-  border-radius: 6px;
-  font-size: 0.9rem;
-  font-weight: 500;
-  margin-right: 0.5rem;
-  margin-bottom: 0.5rem;
-  border: 1px solid #e2e8f0;
-}
-
 /* CATEGORÍAS LATERALES */
 .categories-list {
   display: flex;

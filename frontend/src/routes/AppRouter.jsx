@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import ProtectedRoute from '../components/ProtectedRoute';
 import AdminRoute from '../components/AdminRoute';
 
@@ -29,6 +29,9 @@ function AppRouter() {
 
                 {/* Rutas exclusivas de Administrador */}
                 <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+
+                {/* Ruta catch-all: cualquier URL desconocida redirige al inicio */}
+                <Route path="*" element={<Navigate to="/" replace />} />
 
             </Routes>
         </BrowserRouter>

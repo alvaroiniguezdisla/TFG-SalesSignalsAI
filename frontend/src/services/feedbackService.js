@@ -36,10 +36,7 @@ export async function saveFeedback(userId, urlHash, type) {
                 onConflict: 'user_id, noticia_url_hash'
             });
 
-        if (error) {
-            console.error("Error en feedbackService.saveFeedback:", error);
-            throw error;
-        }
+        if (error) throw error;
         return true;
     } catch (error) {
         console.error("Error en feedbackService.saveFeedback:", error);

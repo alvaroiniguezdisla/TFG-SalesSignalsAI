@@ -13,29 +13,28 @@ function Register() {
     const [errorMsg, setErrorMsg] = useState('');
     const [loading, setLoading] = useState(false);
 
-    const {signUp} = useAuth();
+    const { signUp } = useAuth();
     const navigate = useNavigate();
 
     const handleChange = (e) => {
-
         setFormData({
             ...formData,
             [e.target.name]: e.target.value
         });
     };
-    const handleSubmit = async (e) =>{
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
         setErrorMsg('');
 
-        try{
-            await signUp(formData.email, formData.password,{first_name: formData.first_name, last_name: formData.last_name});
+        try {
+            await signUp(formData.email, formData.password, { first_name: formData.first_name, last_name: formData.last_name });
             alert('¡Cuenta creada! Revisa tu correo o inicia sesión.');
             navigate('/login');
-
-        }catch(error){
+        } catch (error) {
             setErrorMsg('Error al registrarse: ' + error.message);
-        }finally{
+        } finally {
             setLoading(false);
         }
     }

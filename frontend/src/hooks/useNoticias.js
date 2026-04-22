@@ -27,7 +27,7 @@ function useNoticias() {
             setLoading(true);
             setError(null);
 
-            //1. LLamamos al backen para que haga la ingesta de nocticias
+            //1. Llamamos al backend para que haga la ingesta de noticias
             await refreshNews();
 
             //2. Volvemos a cargar los datos de la BD
@@ -39,9 +39,6 @@ function useNoticias() {
             setLoading(false);
         }
     }, [loadNews]);
-
-
-
 
     // Carga inicial
     useEffect(() => {
