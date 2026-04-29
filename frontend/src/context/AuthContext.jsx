@@ -1,7 +1,19 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { supabase } from '../supabase/client';
 
-//Creamos un "espacio" donde  guardaremos los datos del usuario
+/**
+ * CONTEXTO DE AUTENTICACIÓN 
+ * 
+ * Este componente actúa como el gestor de sesiones en tiempo real de la SPA (Single Page Application).
+ * Al envolver la aplicación completa con <AuthProvider> desde main.jsx, garantizamos que 
+ * CUALQUIER página o ruta del frontend pueda comprobar instantáneamente:
+ * 
+ * 1. ¿Hay una sesión de Supabase Auth activa? (Variable 'user')
+ * 2. ¿Quién es la persona conectada? (Variable 'profile' con nombre, empresa, rol...)
+ * 
+ * Es la pieza clave de seguridad: si no hay usuario logueado, este contexto informará
+ * al AppRouter para que bloquee el acceso a rutas privadas y redirija a /login.
+ */
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {

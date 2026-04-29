@@ -193,9 +193,12 @@ function AdminDashboard() {
             setSaving(true);
             setMessage({ text: '', type: '' });
 
-            // Usamos updated_at para forzar la validez
+            // Usamos updated_at para forzar la validez y convertimos los campos numéricos
             const configToSave = {
                 ...config,
+                umbral_similitud: Number(config.umbral_similitud),
+                max_emails_ejecucion: Number(config.max_emails_ejecucion),
+                delay_entre_emails: Number(config.delay_entre_emails),
                 updated_at: new Date().toISOString()
             };
 
@@ -222,10 +225,10 @@ function AdminDashboard() {
     };
 
     const handleInputChange = (e) => {
-        const { name, value, type } = e.target;
+        const { name, value } = e.target;
         setConfig(prev => ({
             ...prev,
-            [name]: type === 'number' ? Number(value) : value
+            [name]: value // Guardamos como texto para no romper la experiencia al escribir (ej: "0.")
         }));
     };
 

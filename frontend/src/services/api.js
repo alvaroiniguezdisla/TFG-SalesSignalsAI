@@ -1,9 +1,6 @@
 export const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
-/**
- * Obtiene las últimas noticias del backend.
- * @returns {Promise<Array>} Lista de noticias
- */
+// Llama al Backend para descargarse la lista de noticias (devuelve un array JSON)
 export async function getNoticias() {
     try {
         const response = await fetch(`${API_URL}/noticias`);
@@ -20,9 +17,7 @@ export async function getNoticias() {
     }
 }
 
-/**
- * Obtiene las categorías oficiales del backend
- */
+// Llama al Backend para descargarse las categorías oficiales de los filtros
 export async function getCategories() {
     try {
         const response = await fetch(`${API_URL}/noticias/categorias`);
