@@ -1,297 +1,357 @@
 # SalesSignalsAI
 
-![Status](https://img.shields.io/badge/Status-TFG-success?style=for-the-badge)
-![Python](https://img.shields.io/badge/Python-3.9%2B-blue?style=for-the-badge&logo=python)
-![React](https://img.shields.io/badge/React-19-blue?style=for-the-badge&logo=react)
-![FastAPI](https://img.shields.io/badge/FastAPI-0.122-009688?style=for-the-badge&logo=fastapi)
-![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?style=for-the-badge&logo=docker)
+Plataforma web de monitorización de noticias empresariales para ventas B2B. El sistema recoge noticias de fuentes RSS, las analiza con un modelo de IA local (Ollama + LLaMA 3.1), las deduplica y las presenta en un dashboard personalizado para que los equipos comerciales identifiquen oportunidades de venta.
 
-Plataforma de monitorización de noticias para ventas B2B. Extrae noticias de fuentes RSS y scraping, las deduplica, las clasifica con IA (Ollama + LLaMA 3.1), las almacena en Supabase y las muestra en un dashboard web con autenticación.
+Desarrollado como Trabajo de Fin de Grado en CEU San Pablo en colaboración con HP.
+
+---
+
+## Índice
+
+1. [Arquitectura](#arquitectura)
+2. [Requisitos previos](#requisitos-previos)
+3. [Paso 1 — Configurar Supabase](#paso-1--configurar-supabase)
+4. [Paso 2 — Configurar las variables de entorno](#paso-2--configurar-las-variables-de-entorno)
+5. [Paso 3 — Configurar Ollama](#paso-3--configurar-ollama)
+6. [Paso 4 — Despliegue con Docker (recomendado)](#paso-4--despliegue-con-docker-recomendado)
+7. [Paso 5 — Despliegue sin Docker (desarrollo local)](#paso-5--despliegue-sin-docker-desarrollo-local)
+8. [Paso 6 — Crear el primer usuario administrador](#paso-6--crear-el-primer-usuario-administrador)
+9. [Notificaciones por Microsoft Teams (opcional)](#notificaciones-por-microsoft-teams-opcional)
+10. [Guía de usuario](#guía-de-usuario)
+
+---
 
 ## Arquitectura
 
-| Componente                     | Tecnología                      |
-| ------------------------------ | -------------------------------- |
-| Backend (API)                  | FastAPI + Python                 |
-| Frontend (interfaz web)        | React + Vite                     |
-| Base de datos y autenticación | Supabase (PostgreSQL en la nube) |
-| IA local                       | Ollama con modelo LLaMA 3.1      |
-| Notificaciones                 | Microsoft Graph / Teams          |
+| Capa | Tecnología |
+|---|---|
+| Backend (API) | Python 3.9 + FastAPI + Uvicorn |
+| Frontend (web) | React 19 + Vite 7 + React Router 7 |
+| Base de datos y autenticación | Supabase (PostgreSQL + Auth) |
+| Motor de IA | Ollama con LLaMA 3.1 (inferencia local) |
+| Servidor web frontend | Nginx (en Docker) |
+| Contenedores | Docker + Docker Compose |
+| Notificaciones (opcional) | Microsoft Graph API / Microsoft Teams |
 
-## Estructura del proyecto
+El backend se comunica con Supabase para leer y escribir datos, y con Ollama para el análisis de noticias. El frontend se comunica tanto con el backend (para obtener noticias y ejecutar el pipeline) como directamente con Supabase (para autenticación y feedback de usuarios).
 
 ```
-ceu-salessignalsai/
-├── backend/               # API REST (FastAPI)
-│   ├── app/               # Código fuente del backend
-│   │   ├── api/           # Endpoints de la API
-│   │   ├── core/          # Configuración y scheduler
-│   │   ├── schemas/       # Modelos de datos (Pydantic)
-│   │   └── services/      # Lógica de negocio (extracción, IA, almacenamiento, notificaciones)
-│   ├── scripts/           # Utilidades manuales de apoyo y demostración
-│   ├── tests/             # Tests unitarios y de integración
-│   ├── Dockerfile
-│   └── requirements.txt
-├── frontend/              # Interfaz web (React + Vite)
-│   ├── src/
-│   │   ├── context/       # AuthContext — estado global de sesión
-│   │   ├── routes/        # AppRouter, ProtectedRoute, AdminRoute
-│   │   ├── pages/         # Login, Register, Dashboard, NewsDetail, Profile, AdminDashboard
-│   │   ├── components/    # NewsCard, Spinner, BackToDashboardButton
-│   │   ├── hooks/         # useNoticias, useFeedback
-│   │   ├── services/      # api.js (backend), feedbackService.js (Supabase)
-│   │   └── supabase/      # Cliente de Supabase
-│   └── Dockerfile
-├── docker-compose.yml     # Orquestación de contenedores
-├── GUIA_USUARIO.md        # Guía de uso para el usuario final
-└── README.md
+[Navegador]
+    │
+    ├──► [Frontend React — puerto 5173 / 80]
+    │         │
+    │         ├──► [Backend FastAPI — puerto 8000]
+    │         │         │
+    │         │         ├──► [Supabase — base de datos]
+    │         │         └──► [Ollama — IA local — puerto 11434]
+    │         │
+    │         └──► [Supabase — autenticación y feedback]
 ```
+
+---
 
 ## Requisitos previos
 
-Para ejecutar el proyecto hace falta:
+### Qué hay que instalar en tu máquina
 
-1. **Node.js 20** o superior — [Descargar aquí](https://nodejs.org/)
-2. **Python 3.9** o superior — [Descargar aquí](https://www.python.org/downloads/)
-3. **Docker Desktop** (solo para el método Docker) — [Descargar aquí](https://www.docker.com/products/docker-desktop/)
-4. **Ollama** (solo si se quiere probar el pipeline de IA) — [Descargar aquí](https://ollama.com/)
+| Herramienta | Versión mínima | Para qué se usa |
+|---|---|---|
+| [Docker Desktop](https://www.docker.com/products/docker-desktop/) | 24.x | Ejecutar los contenedores (incluye Docker Compose) |
+| [Ollama](https://ollama.com) | cualquiera | Motor de IA local |
 
-### Ollama
+### Qué no hay que instalar
 
-Ollama se ejecuta fuera de Docker, directamente en el sistema operativo. Si se quiere probar la clasificación con IA, hay que instalarlo y descargar el modelo:
+**Supabase** es un servicio en la nube. No se instala en tu máquina: simplemente creas una cuenta gratuita en [https://supabase.com](https://supabase.com) y usas su panel web para configurar la base de datos. El Paso 1 explica exactamente qué hacer.
+
+---
+
+## Paso 1 — Configurar Supabase
+
+Supabase es el servicio de base de datos y autenticación del proyecto. Tiene un plan gratuito que es suficiente para este despliegue.
+
+### 1.1 Crear el proyecto
+
+1. Ve a [https://supabase.com](https://supabase.com) e inicia sesión o crea una cuenta.
+2. Pulsa **New project**.
+3. Elige un nombre para el proyecto (por ejemplo, `salessignalsai`).
+4. Establece una contraseña para la base de datos. **Guárdala**, la necesitarás si alguna vez accedes directamente a Postgres.
+5. Selecciona la región más cercana (por ejemplo, `West EU`).
+6. Pulsa **Create new project** y espera a que termine el aprovisionamiento (aproximadamente 1 minuto).
+
+### 1.2 Crear las tablas (esquema SQL)
+
+El proyecto incluye un archivo SQL listo para ejecutar que crea todas las tablas, el trigger de registro y las políticas de seguridad.
+
+1. En el menú lateral de tu proyecto de Supabase, ve a **SQL Editor**.
+2. Pulsa **New query**.
+3. Abre el archivo `supabase/schema.sql` de este repositorio y copia todo su contenido.
+4. Pégalo en el editor de Supabase.
+5. Pulsa **Run** (o `Ctrl + Enter`).
+6. Verifica que no hay errores en el panel inferior.
+7. Ve a **Table Editor** en el menú lateral y comprueba que aparecen estas 4 tablas:
+   - `app_config`
+   - `noticias`
+   - `profiles`
+   - `news_feedback`
+
+> Si ves el mensaje `already exists` en alguna tabla, es normal si estás re-ejecutando el script. El script usa `CREATE TABLE IF NOT EXISTS` para evitar errores.
+
+### 1.3 Obtener las tres claves de API
+
+El proyecto necesita tres valores de Supabase: la URL del proyecto y dos claves. A continuación se explica dónde encontrar cada una.
+
+#### URL del proyecto (`SUPABASE_URL` y `VITE_SUPABASE_URL`)
+
+Ruta en el panel de Supabase:
+```
+Tu proyecto → Integrations → Data API → API URL
+```
+Copia la URL y elimina `/rest/v1/` del final. El resultado debe tener esta forma:
+```
+https://<tu-proyecto>.supabase.co
+```
+
+#### Clave pública (`SUPABASE_KEY` y `VITE_SUPABASE_ANON_KEY`)
+
+Es la clave de uso general, segura para el frontend. Ruta en el panel de Supabase:
+```
+Tu proyecto → Project Settings → API Keys → Publishable key
+```
+La clave empieza por `sb_publishable_...`.
+Si tu panel muestra **Legacy API keys**, usa la clave `anon` de ahí. Es equivalente.
+
+#### Clave privada de administrador (`SUPABASE_SERVICE_ROLE_KEY`)
+
+Esta clave solo se usa en el backend para gestionar usuarios. Ruta en el panel de Supabase:
+```
+Tu proyecto → Project Settings → API Keys → Secret keys
+```
+La clave empieza por `sb_secret_...`.
+Si tu panel muestra **Legacy API keys**, usa la clave `service_role` de ahí.
+
+> **Importante:** La clave privada tiene permisos totales sobre la base de datos. Úsala únicamente en el backend y nunca la pongas en el frontend ni en un repositorio público.
+
+---
+
+## Paso 2 — Configurar las variables de entorno
+
+El proyecto tiene dos archivos de variables de entorno: uno para el backend y otro para el frontend.
+
+### Backend
+
+1. Copia el archivo de ejemplo:
+   ```bash
+   cp backend/.env.example backend/.env
+   ```
+2. Abre `backend/.env` y rellena los valores con las claves obtenidas en el paso anterior:
+   ```env
+   # URL del proyecto Supabase
+   SUPABASE_URL="https://TU-PROYECTO.supabase.co"
+
+   # Clave pública (sb_publishable_... o anon)
+   SUPABASE_KEY="TU_CLAVE_PUBLICA"
+
+   # Clave privada de administrador (sb_secret_... o service_role)
+   SUPABASE_SERVICE_ROLE_KEY="TU_CLAVE_PRIVADA"
+
+   # Opcional: solo si se van a usar notificaciones de Teams
+   GRAPH_TENANT_ID=""
+   GRAPH_CLIENT_ID=""
+   GRAPH_SCOPES="User.Read Chat.ReadWrite ChatMessage.Send"
+   TEAMS_TARGET_USER_EMAIL=""
+   ```
+
+### Frontend
+
+1. Copia el archivo de ejemplo:
+   ```bash
+   cp frontend/.env.example frontend/.env
+   ```
+2. Abre `frontend/.env` y rellénalo:
+   ```env
+   # URL del backend (no cambiar si usas Docker en local)
+   VITE_API_URL="http://localhost:8000"
+
+   # Los mismos valores de Supabase que en el backend
+   VITE_SUPABASE_URL="https://TU-PROYECTO.supabase.co"
+   VITE_SUPABASE_ANON_KEY="TU_CLAVE_PUBLICA"
+   ```
+
+> `VITE_SUPABASE_ANON_KEY` es la misma clave pública que pusiste en `SUPABASE_KEY` del backend.
+> Si desplegas en un servidor con dominio propio, cambia `VITE_API_URL` por la URL pública del backend.
+
+---
+
+## Paso 3 — Configurar Ollama
+
+Ollama es el motor de IA que el backend usa para analizar las noticias. Se ejecuta en tu máquina de forma local, fuera de Docker.
+
+### 3.1 Instalar Ollama
+
+Descarga e instala Ollama desde [https://ollama.com](https://ollama.com). Sigue el instalador para tu sistema operativo (Windows, macOS o Linux).
+
+### 3.2 Descargar el modelo
+
+Abre una terminal y ejecuta:
 
 ```bash
 ollama pull llama3.1
 ```
 
-Para comprobar que se ha descargado correctamente:
+La descarga puede tardar varios minutos dependiendo de tu conexión (el modelo pesa aproximadamente 4,7 GB).
+
+### 3.3 Verificar que Ollama está activo
 
 ```bash
 ollama list
 ```
 
-> **Nota:** Si solo se quiere comprobar que la aplicación web arranca (backend + frontend), Ollama no es necesario.
+Deberías ver `llama3.1` en la lista. Ollama queda activo en segundo plano automáticamente tras la instalación.
 
-## Configuración de las variables de entorno
+> El backend llama a Ollama en `http://localhost:11434`. Si usas Docker, el contenedor del backend accede a Ollama del anfitrión a través de `host.docker.internal:11434`, lo cual ya está configurado en el `docker-compose.yml`.
 
-El proyecto necesita dos archivos `.env` con las credenciales de Supabase. Se incluyen plantillas de ejemplo en el repositorio.
+---
 
-### Paso 1: copiar las plantillas
+## Paso 4 — Despliegue con Docker (recomendado)
 
-```bash
-cp backend/.env.example backend/.env
-cp frontend/.env.example frontend/.env
-```
+Esta es la forma más sencilla y reproducible de ejecutar el proyecto.
 
-En Windows (PowerShell):
+### 4.1 Requisitos
 
-```powershell
-Copy-Item backend\.env.example backend\.env
-Copy-Item frontend\.env.example frontend\.env
-```
+- Docker Desktop en ejecución.
+- Los archivos `backend/.env` y `frontend/.env` completados (Paso 2).
+- Ollama activo con el modelo descargado (Paso 3).
 
-### Paso 2: rellenar los valores
+### 4.2 Construir y arrancar los contenedores
 
-Las credenciales reales de Supabase se entregan junto con la memoria del TFG en un documento aparte. Hay que copiarlas en los archivos `.env` creados en el paso anterior.
-
-**`backend/.env`** — Variables del backend:
-
-| Variable                      | Descripción                                             |
-| ----------------------------- | -------------------------------------------------------- |
-| `SUPABASE_URL`              | URL del proyecto en Supabase (se proporciona)            |
-| `SUPABASE_KEY`              | Clave anon/service de Supabase (se proporciona)          |
-| `SUPABASE_SERVICE_ROLE_KEY` | Clave de servicio con permisos elevados (se proporciona) |
-| `GRAPH_TENANT_ID`           | Tenant de Azure para Teams (opcional)                    |
-| `GRAPH_CLIENT_ID`           | Client ID de Azure para Teams (opcional)                 |
-| `GRAPH_SCOPES`              | Permisos de Microsoft Graph (opcional)                   |
-| `TEAMS_TARGET_USER_EMAIL`   | Email del destinatario de Teams (opcional)               |
-
-**`frontend/.env`** — Variables del frontend:
-
-| Variable                   | Descripción                                           |
-| -------------------------- | ------------------------------------------------------ |
-| `VITE_API_URL`           | URL del backend, por defecto `http://localhost:8000` |
-| `VITE_SUPABASE_URL`      | URL del proyecto en Supabase (se proporciona)          |
-| `VITE_SUPABASE_ANON_KEY` | Clave pública (anon) de Supabase (se proporciona)     |
-
-> Las variables marcadas como "opcional" son para las notificaciones de Teams y se pueden dejar vacías sin afectar al funcionamiento general.
-
-## Credenciales de acceso a la aplicación
-
-Una vez arrancada la aplicación, la pantalla inicial es un login. El acceso real se hace con **correo electrónico y contraseña**, no con un alias corto de usuario.
-
-Las credenciales exactas de la cuenta de prueba se entregan junto con el TFG. Al iniciar sesión hay que introducir el **correo completo** de esa cuenta.
-
-| Campo       | Valor       |
-| ----------- | ----------- |
-| Correo electrónico | Cuenta de prueba entregada junto con el TFG |
-| Contraseña | Contraseña entregada junto con el TFG |
-
-## Método 1: arranque en local (sin Docker)
-
-Este método levanta backend y frontend por separado, cada uno en su propia terminal.
-
-### 1. Clonar el repositorio
+Desde la raíz del repositorio (`ceu-salessignalsai/`):
 
 ```bash
-git clone <URL_DEL_REPOSITORIO>
-cd ceu-salessignalsai
+docker compose up --build
 ```
 
-### 2. Backend
+Este comando:
+1. Construye la imagen del backend (Python + Playwright + dependencias).
+2. Construye la imagen del frontend (Vite build + Nginx).
+3. Arranca ambos contenedores.
 
-Abrir una terminal y ejecutar:
+La primera vez puede tardar entre 5 y 10 minutos por la descarga e instalación de dependencias.
 
-```bash
-cd backend
-python -m venv venv
-source venv/bin/activate        # En macOS / Linux
-# venv\Scripts\activate          # En Windows (PowerShell)
-pip install -r requirements.txt
-uvicorn app.main:app --reload
-```
+### 4.3 Acceder a la aplicación
 
-> Este arranque inicia también el scheduler en segundo plano dentro del backend.
+| Servicio | URL |
+|---|---|
+| Frontend (aplicación web) | http://localhost:5173 |
+| Backend (API) | http://localhost:8000 |
+| Documentación de la API | http://localhost:8000/docs |
 
-Para comprobar que funciona, abrir en el navegador `http://localhost:8000`. Debería devolver:
-
-```json
-{"message": "Bienvenido a la API de SalesSignalsAI"}
-```
-
-### 3. Frontend
-
-Abrir otra terminal y ejecutar:
-
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-Abrir en el navegador `http://localhost:5173`. Debería aparecer la pantalla de login.
-
-### 4. Para parar
-
-- Pulsar `Ctrl+C` en cada terminal
-- Escribir `deactivate` en la terminal del backend para salir del entorno virtual
-
-## Método 2: Docker Compose
-
-Levanta todo (backend + frontend) con un solo comando. No hace falta instalar dependencias manualmente.
-
-### Requisitos
-
-- Docker Desktop abierto
-- Archivos `.env` configurados (ver sección anterior)
-
-### Arranque
-
-Desde la carpeta raíz del proyecto:
-
-```bash
-docker compose up --build -d
-```
-
-### Comprobar que funciona
-
-```bash
-docker compose ps
-```
-
-Deberían aparecer dos servicios en estado `Up`:
-
-- Backend → `http://localhost:8000`
-- Frontend → `http://localhost:5173` (servido por Nginx dentro del contenedor en el puerto 80)
-
-### Ver logs
-
-```bash
-docker compose logs -f
-```
-
-### Parar
+### 4.4 Detener los contenedores
 
 ```bash
 docker compose down
 ```
 
-## Guía rápida de verificación para el tribunal
+---
 
-### Verificación básica (sin IA)
+## Paso 5 — Despliegue sin Docker (desarrollo local)
 
-1. Configurar los archivos `.env` con las credenciales proporcionadas
-2. Levantar la aplicación (en local o con Docker)
-3. Abrir `http://localhost:8000` → debe devolver el JSON de bienvenida
-4. Abrir `http://localhost:5173` → debe mostrar la pantalla de login
-5. Iniciar sesión con las credenciales de prueba proporcionadas
+Usa esta opción si prefieres ejecutar el código directamente en tu máquina, por ejemplo para depurar o desarrollar.
 
-Con esto queda comprobado que el backend responde, el frontend carga y la autenticación funciona.
-
-### Verificación del pipeline de IA (opcional)
-
-Para ejecutar manualmente un ciclo completo del scheduler (ingesta, IA, almacenamiento y notificaciones opcionales):
+### Backend
 
 ```bash
+# 1. Entra en la carpeta del backend
 cd backend
-source venv/bin/activate
-python -m app.core.scheduler
+
+# 2. Crea un entorno virtual de Python
+python -m venv venv
+source venv/bin/activate        # En Windows: venv\Scripts\activate
+
+# 3. Instala las dependencias
+pip install -r requirements.txt
+
+# 4. Instala los navegadores que usa Playwright
+playwright install chromium
+
+# 5. Arranca el servidor
+uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
-Este comando ejecuta **una pasada completa** y termina. Requiere:
+El backend queda disponible en `http://localhost:8000`.
 
-- Archivos `.env` configurados
-- Ollama corriendo en el sistema con el modelo `llama3.1`
+### Frontend
 
-Las notificaciones de Teams son opcionales y se pueden omitir en la demostración.
-
-## Tests
-
-El proyecto incluye tests automatizados en el backend:
-
-| Tipo         | Cantidad | Comando                              |
-| ------------ | -------- | ------------------------------------ |
-| Unitarios    | 33       | `pytest tests/unitarios`           |
-| Integración | 23       | `pytest tests/integracion -rs -vv` |
-
-Los tests se organizan en dos bloques claramente diferenciados:
-
-- **Tests unitarios**: validan la lógica interna del sistema (API, deduplicación, pipeline, hashing, notificaciones y scheduler). No dependen del estado de periódicos externos y, por tanto, su comportamiento debe ser determinista.
-- **Tests de integración**: validan el comportamiento real del sistema contra Supabase y contra fuentes externas de noticias mediante tres estrategias de extracción: **RSS** como vía principal, **scraping HTML** como respaldo y **browser automation con Playwright** como último fallback.
-
-Para ejecutarlos:
+Abre una segunda terminal:
 
 ```bash
-cd backend
-source venv/bin/activate
-pytest tests/unitarios          # Tests unitarios
-pytest tests/integracion -rs -vv  # Tests de integración reales (necesitan red)
+# 1. Entra en la carpeta del frontend
+cd frontend
+
+# 2. Instala las dependencias de Node
+npm install
+
+# 3. Arranca el servidor de desarrollo
+npm run dev
 ```
 
-Si se desea lanzar toda la batería del backend en una sola orden:
+El frontend queda disponible en `http://localhost:5173`.
 
-```bash
-pytest
+---
+
+## Paso 6 — Crear el primer usuario administrador
+
+Al arrancar la aplicación por primera vez no hay ningún usuario creado. Para poder acceder al panel de administración necesitas al menos un usuario con rol `admin`.
+
+### Opción A — Registro desde la aplicación y promoción manual
+
+1. Abre la aplicación en http://localhost:5173.
+2. Pulsa **Regístrate aquí** y crea una cuenta con tu correo y contraseña.
+3. Vuelve a Supabase → **SQL Editor** y ejecuta la siguiente consulta, sustituyendo el correo:
+   ```sql
+   UPDATE public.profiles
+   SET role = 'admin'
+   WHERE email = 'tu-correo@ejemplo.com';
+   ```
+4. Recarga la aplicación e inicia sesión. Ahora tendrás acceso al **Panel de administración**.
+
+### Opción B — Crear el usuario directamente desde el panel de administración
+
+Una vez que ya tienes un usuario administrador, puedes crear usuarios adicionales directamente desde el panel de administración de la aplicación sin necesidad de tocar Supabase.
+
+---
+
+## Notificaciones por Microsoft Teams (opcional)
+
+El sistema puede enviar notificaciones automáticas por Teams cuando el pipeline detecta noticias relevantes. Esta integración es opcional y requiere una cuenta de Microsoft con acceso a Teams.
+
+### Requisitos
+
+- Una aplicación registrada en el portal de Azure con los permisos `User.Read`, `Chat.ReadWrite` y `ChatMessage.Send`.
+- El `Tenant ID` y el `Client ID` de esa aplicación.
+
+### Configuración
+
+Rellena las siguientes variables en `backend/.env`:
+
+```env
+GRAPH_TENANT_ID="tu-tenant-id"
+GRAPH_CLIENT_ID="tu-client-id"
+GRAPH_SCOPES="User.Read Chat.ReadWrite ChatMessage.Send"
+TEAMS_TARGET_USER_EMAIL="correo-destino@empresa.com"
 ```
 
-### Interpretación de los resultados
+La primera vez que el sistema intente enviar una notificación, el backend mostrará en consola un enlace de autenticación de Microsoft. Ábrelo en el navegador, inicia sesión con tu cuenta de Microsoft y autoriza los permisos. El token se guarda localmente y no hace falta repetir el proceso.
 
-En los tests unitarios, el resultado esperado es que todos los casos pasen correctamente. En los tests de integración, pueden aparecer casos marcados como `SKIPPED` sin que esto implique un fallo del backend. Esto ocurre cuando una fuente externa:
+> En el contexto de este TFG, las notificaciones se envían únicamente al correo configurado en `TEAMS_TARGET_USER_EMAIL`.
 
-- no devuelve artículos en ese momento,
-- cambia su estructura HTML/XML,
-- aplica bloqueos anti-bot,
-- o está temporalmente caída o sin novedades.
+---
 
-En este proyecto, esos `SKIPPED` se consideran una **omisión controlada** ante dependencias de terceros, y no un error funcional de la aplicación.
+## Guía de usuario
 
-La estrategia recomendada de explotación prioriza **RSS** por su mayor estabilidad, dejando **scraper** y **browser** como mecanismos de resiliencia para fuentes concretas.
+Una vez que la aplicación está en marcha, consulta el archivo [GUIA_USUARIO.md](GUIA_USUARIO.md) para aprender a:
 
-## Resolución de problemas
-
-| Problema                                        | Solución                                                                              |
-| ----------------------------------------------- | -------------------------------------------------------------------------------------- |
-| Los puertos `8000` o `5173` están ocupados | Cerrar la aplicación que los está usando antes de arrancar                           |
-| `ollama: command not found`                   | Instalar Ollama desde https://ollama.com/                                              |
-| El frontend no conecta con el backend           | Comprobar que `VITE_API_URL` en `frontend/.env` apunta a `http://localhost:8000` |
-| Error de credenciales de Supabase               | Verificar que los valores en los `.env` coinciden con los proporcionados             |
+- Navegar el dashboard de señales comerciales.
+- Filtrar y priorizar noticias.
+- Consultar el análisis de IA de cada noticia.
+- Gestionar el perfil y las preferencias.
+- Administrar usuarios, fuentes y configuración (rol administrador).

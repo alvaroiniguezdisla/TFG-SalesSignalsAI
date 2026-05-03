@@ -85,7 +85,7 @@ Si no puedes iniciar sesión, solicita acceso a un administrador.
 3. Selecciona **Iniciar sesión**.
 4. Espera a que se cargue el dashboard principal.
 
-![1776414359611](image/GUIA_USUARIO/1776414359611.png)
+![1777473428994](image/GUIA_USUARIO/1777473428994.png)
 
 ### Opcional: crear una cuenta
 
@@ -106,7 +106,7 @@ Si el acceso está controlado por la organización, solicita el alta a un admini
 4. Abre el correo recibido.
 5. Sigue el enlace y define una nueva contraseña.
 
-![1776414405701](image/GUIA_USUARIO/1776414405701.png)
+![1777473459792](image/GUIA_USUARIO/1777473459792.png)
 
 ## Usar el dashboard
 
@@ -131,7 +131,7 @@ Cada tarjeta del dashboard representa una noticia ya procesada. En cada tarjeta 
 
 Para abrir el detalle completo de una señal, pulsa sobre su tarjeta.
 
-![1776414458055](image/GUIA_USUARIO/1776414458055.png)
+![1777473482739](image/GUIA_USUARIO/1777473482739.png)
 
 ### Filtrar la información
 
@@ -205,7 +205,7 @@ La vista de detalle puede incluir:
 4. Si el borrador de correo está disponible, selecciona **Copiar Email** para reutilizarlo.
 5. Contrasta siempre con la noticia original si necesitas contexto adicional.
 
-![1776414492497](image/GUIA_USUARIO/1776414492497.png)
+![1777473511913](image/GUIA_USUARIO/1777473511913.png)
 
 ## Gestionar el perfil de usuario
 
@@ -256,9 +256,9 @@ La sección **Empresas Objetivo** permite marcar clientes o cuentas que quieres 
 
 Estas empresas se usan para resaltar noticias relacionadas en el dashboard con la marca **TU CLIENTE**.
 
-![1776414511550](image/GUIA_USUARIO/1776414511550.png)
+![1777473540361](image/GUIA_USUARIO/1777473540361.png)
 
-## Opcional: usar el panel de administración
+Opcional: usar el panel de administración
 
 El acceso al panel de administración solo aparece para usuarios con rol **admin**.
 
@@ -291,9 +291,7 @@ Desde la tabla de usuarios puedes:
 
 Las acciones de usuarios se aplican directamente al ejecutarlas. No requieren pulsar el botón de guardado general del panel.
 
-![1776414542596](image/GUIA_USUARIO/1776414542596.png)
-
-![1776414548671](image/GUIA_USUARIO/1776414548671.png)
+![1777473597190](image/GUIA_USUARIO/1777473597190.png)
 
 ### Editar parámetros principales
 
