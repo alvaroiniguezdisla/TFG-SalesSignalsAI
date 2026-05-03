@@ -6,6 +6,22 @@ Desarrollado como Trabajo de Fin de Grado en CEU San Pablo en colaboración con 
 
 ---
 
+## Repositorio Oficial (GitHub)
+
+El código fuente de este proyecto para la evaluación académica se encuentra alojado en GitHub:
+**🔗 URL del repositorio:** [https://github.com/alvaroiniguezdisla/TFG-SalesSignalsAI](https://github.com/alvaroiniguezdisla/TFG-SalesSignalsAI)
+
+Para probar la aplicación en tu entorno local, el primer paso es clonar este repositorio en tu máquina:
+
+```bash
+git clone https://github.com/alvaroiniguezdisla/TFG-SalesSignalsAI.git
+cd TFG-SalesSignalsAI
+```
+
+Una vez clonado, sigue los pasos de configuración detallados a continuación.
+
+---
+
 ## Índice
 
 1. [Arquitectura](#arquitectura)
