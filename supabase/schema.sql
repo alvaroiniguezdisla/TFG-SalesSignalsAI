@@ -25,10 +25,67 @@ CREATE TABLE IF NOT EXISTS public.app_config (
   CONSTRAINT app_config_pkey PRIMARY KEY (id)
 );
 
--- Insertar la fila de configuración inicial si no existe
-INSERT INTO public.app_config (id)
-VALUES (1)
-ON CONFLICT (id) DO NOTHING;
+-- Insertar la configuración inicial con valores de producción.
+-- Si ya existe la fila, actualiza los valores para garantizar la configuración correcta.
+INSERT INTO public.app_config (
+  id,
+  umbral_similitud,
+  max_emails_ejecucion,
+  delay_entre_emails,
+  ollama_model,
+  rss_sources,
+  ai_prompt
+)
+VALUES (
+  1,
+  0.8,
+  50,
+  1,
+  'llama3.1',
+  '[
+    {"url": "https://www.expansion.com/rss/empresas.xml",        "name": "Expansión",        "type": "rss", "scraper_url": "https://www.expansion.com/empresas.html"},
+    {"url": "https://rss.elconfidencial.com/empresas/",          "name": "El Confidencial",  "type": "rss", "scraper_url": "https://www.elconfidencial.com/empresas/"},
+    {"url": "https://cincodias.elpais.com/rss/cincodias/companias.xml", "name": "Cinco Días","type": "rss", "scraper_url": "https://cincodias.elpais.com/companias/"},
+    {"url": "https://www.europapress.es/rss/rss.aspx?ch=136",    "name": "Europa Press",     "type": "rss", "scraper_url": "https://www.europapress.es/economia/"},
+    {"url": "https://negocios.com/feed/?post_type=post&cat=25",  "name": "Negocios.com",     "type": "rss", "scraper_url": "https://negocios.com/category/negocios/empresas/"}
+  ]'::jsonb,
+  $prompt$ACTUA COMO: Un analista senior de ventas B2B de HP (Hewlett-Packard) con 15 años de experiencia.
+TU OBJETIVO: Analizar una noticia y generar inteligencia comercial accionable para el equipo de ventas de HP.
+
+PASO 2: ASIGNAR PRODUCTO HP
+Elige la linea de producto MAS adecuada:
+- "Gaming / OMEN": eSports, videojuegos, diseño gráfico.
+- "Impresión y Escáner": Oficinas fisicas, gestion documental, logistica.
+- "PC Consumo (Hogar/Estudiantes)": Usuarios finales, educación.
+- "Soluciones Empresariales (ProBook/Elite)": Portatiles y PCs corporativos para empleados.
+- "Servicios y Soluciones IT": Ciberseguridad, nube, gestion de flotas IT.
+- "Otros / No Aplica": Si es ruido o no encaja.
+
+PASO 3: IDENTIFICAR EMPRESAS Y CLASIFICAR SU TAMANO
+Detecta las empresas mencionadas en la noticia (maximo 3). Para cada una, clasifica su tamano:
+- "Startup": Menos de 50 empleados, rondas de financiacion, recien creada.
+- "PYME": Entre 50 y 250 empleados, ambito local o regional.
+- "Mediana Empresa": Entre 250 y 1000 empleados, presencia nacional.
+- "Gran Cuenta": Mas de 1000 empleados, multinacionales, cotizadas en bolsa.
+- "Desconocido": Si no hay datos suficientes.
+
+PASO 4: RESUMEN COMERCIAL (resumen_comercial)
+Escribe un resumen de 3-5 frases para el vendedor.
+
+PASO 5: ARGUMENTARIO COMERCIAL (talk_track)
+Genera exactamente 3-4 puntos que el comercial puede usar al llamar al cliente.
+
+PASO 6: BORRADOR DE EMAIL (email_draft)
+Escribe un email profesional de primer contacto (maximo 150 palabras).$prompt$
+)
+ON CONFLICT (id) DO UPDATE SET
+  umbral_similitud      = EXCLUDED.umbral_similitud,
+  max_emails_ejecucion  = EXCLUDED.max_emails_ejecucion,
+  delay_entre_emails    = EXCLUDED.delay_entre_emails,
+  ollama_model          = EXCLUDED.ollama_model,
+  rss_sources           = EXCLUDED.rss_sources,
+  ai_prompt             = EXCLUDED.ai_prompt,
+  updated_at            = timezone('utc', now());
 
 
 -- -----------------------------------------------------------------------------

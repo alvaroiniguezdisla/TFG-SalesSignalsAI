@@ -52,6 +52,14 @@ El backend se comunica con Supabase para leer y escribir datos, y con Ollama par
 
 ## Requisitos previos
 
+### Requisitos de hardware (Ollama)
+
+El modelo de inteligencia artificial (LLaMA 3.1) se ejecuta de manera local en tu máquina. Para que funcione correctamente y el tiempo de respuesta sea aceptable, se requiere:
+- **Mínimo:** 8 GB de memoria RAM libre.
+- **Recomendado:** 16 GB o más de memoria RAM.
+
+> Si tu equipo tiene recursos muy limitados, la inferencia del modelo será extremadamente lenta o fallará al intentar cargar en memoria.
+
 ### Qué hay que instalar en tu máquina
 
 | Herramienta | Versión mínima | Para qué se usa |
@@ -317,6 +325,17 @@ Al arrancar la aplicación por primera vez no hay ningún usuario creado. Para p
 ### Opción B — Crear el usuario directamente desde el panel de administración
 
 Una vez que ya tienes un usuario administrador, puedes crear usuarios adicionales directamente desde el panel de administración de la aplicación sin necesidad de tocar Supabase.
+
+---
+
+## Paso 7 — Obtener las primeras noticias
+
+Al ejecutar el script de la base de datos (Paso 1), se han cargado automáticamente unas fuentes RSS y un prompt de IA por defecto. Sin embargo, el sistema arranca sin noticias hasta que el pipeline se ejecute por primera vez:
+
+1. Entra en la aplicación web con tu usuario administrador recién creado.
+2. Navega al panel de **Administración**.
+3. Pulsa el botón para **Ejecutar Pipeline** (o equivalente). Esto hará que el backend empiece a descargar las noticias de las fuentes RSS y a analizarlas usando Ollama.
+4. Una vez termine el proceso, vuelve al **Dashboard** principal para empezar a ver la inteligencia comercial generada.
 
 ---
 
