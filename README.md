@@ -306,7 +306,7 @@ python -m ensurepip --upgrade
 python -m pip install "pip==24.3.1"
 pip install -r requirements.txt
 playwright install chromium
-uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+uvicorn app.main:app --host 0.0.0.0 --port 8000
 ```
 
 En Linux:
@@ -320,7 +320,7 @@ python -m ensurepip --upgrade
 python -m pip install "pip==24.3.1"
 pip install -r requirements.txt
 playwright install chromium
-uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+uvicorn app.main:app --host 0.0.0.0 --port 8000
 ```
 
 En Windows PowerShell:
@@ -338,10 +338,12 @@ python -m ensurepip --upgrade
 python -m pip install "pip==24.3.1"
 pip install -r requirements.txt
 playwright install chromium
-uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+uvicorn app.main:app --host 0.0.0.0 --port 8000
 ```
 
 El backend queda disponible en `http://localhost:8000`.
+
+> Para desarrollar y reiniciar automáticamente al cambiar código, puedes añadir `--reload` al comando de Uvicorn. Para una demo o ejecución estable, especialmente si el proyecto está dentro de iCloud Drive, es mejor arrancarlo sin `--reload`.
 
 ### Frontend
 
