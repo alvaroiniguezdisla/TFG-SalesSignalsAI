@@ -113,6 +113,134 @@ CREATE TABLE IF NOT EXISTS public.noticias (
   CONSTRAINT noticias_pkey PRIMARY KEY (id)
 );
 
+-- Insertar noticias demo para que el frontend tenga contenido tras crear la base de datos.
+-- Si ya existen, se actualizan por url_hash para evitar duplicados al re-ejecutar el script.
+INSERT INTO public.noticias (
+  url_hash,
+  url,
+  titulo,
+  resumen,
+  fuente,
+  published_at,
+  scraped_at,
+  categoria_ia,
+  relevancia_ia,
+  resumen_comercial_ia,
+  empresas_clave_ia,
+  urls_extra,
+  categoria_producto_ia,
+  talk_track_ia,
+  email_draft_ia,
+  empresas_detalle_ia
+)
+VALUES
+(
+  'db6ade9cdd2937a090b18708cdb34ca9',
+  'https://www.europapress.es/economia/finanzas-00340/noticia-santander-gana-5455-millones-marzo-603-mas-gracias-plusvalia-polonia-20260429071148.html',
+  'Santander gana 5.455 millones hasta marzo, un 60,3% más gracias a la plusvalía de Polonia',
+  'El Banco Santander obtuvo un beneficio neto de 5.455 millones de euros en el primer trimestre de 2026, lo que supone un incremento del 60,3% en comparación con el mismo periodo de 2025.',
+  'Europa Press',
+  '2026-04-29 05:11:48+00',
+  '2026-04-29 09:53:12+00',
+  'Resultados Financieros',
+  85,
+  'Santander presenta un fuerte crecimiento de beneficios, lo que indica capacidad presupuestaria para nuevas inversiones tecnológicas. Es una oportunidad para plantear soluciones de puesto de trabajo corporativo, renovación de equipos y servicios de soporte para grandes cuentas.',
+  ARRAY['Banco Santander'],
+  '[]'::jsonb,
+  'Soluciones Empresariales (ProBook/Elite)',
+  '1. Santander está en un momento financiero favorable para abordar proyectos de eficiencia interna. 2. HP puede ayudar en renovación de parque corporativo y gestión del puesto de trabajo. 3. Una propuesta orientada a productividad y reducción de costes encaja con el contexto de resultados.',
+  'Asunto: Oportunidad de eficiencia tecnológica para Santander\n\nHola [Nombre],\nHe visto los resultados recientes de Santander y el fuerte crecimiento del beneficio en el primer trimestre. Desde HP creemos que este puede ser un buen momento para revisar iniciativas de productividad, renovación de equipos corporativos y gestión del puesto de trabajo.\n\nMe gustaría comentar cómo podríamos apoyar a vuestro equipo con soluciones empresariales adaptadas a una gran cuenta financiera.\n\nUn saludo,\n[Tu nombre]',
+  '[{"nombre": "Banco Santander", "tamano": "Gran Cuenta"}]'::jsonb
+),
+(
+  '4df336d7e276727d2e22e589ef49d758',
+  'https://www.europapress.es/economia/noticia-redeia-eleva-18-beneficio-marzo-140-millones-impulsa-inversiones-350-millones-20260429081251.html',
+  'Redeia eleva un 1,8% su beneficio a marzo, hasta 140 millones, e impulsa inversiones hasta los 350 millones',
+  'Redeia obtuvo un beneficio neto de 140,3 millones de euros en el primer trimestre e impulsó sus inversiones hasta los 350 millones.',
+  'Europa Press',
+  '2026-04-29 06:12:51+00',
+  '2026-04-29 09:53:12+00',
+  'Transformación Digital',
+  75,
+  'Redeia combina estabilidad financiera con un aumento relevante de inversión. Para HP, el ángulo comercial más claro está en servicios IT, gestión de flotas, seguridad y soporte tecnológico para una compañía crítica del sector energético.',
+  ARRAY['Redeia'],
+  '[]'::jsonb,
+  'Servicios y Soluciones IT',
+  '1. El aumento de inversión abre conversación sobre modernización tecnológica. 2. La criticidad del negocio exige continuidad, seguridad y gestión eficiente del parque IT. 3. HP puede posicionarse como socio para servicios gestionados y protección de endpoints.',
+  'Asunto: Apoyo tecnológico para el plan inversor de Redeia\n\nHola [Nombre],\nHe leído que Redeia está impulsando sus inversiones en 2026. Desde HP podemos ayudar a convertir ese esfuerzo inversor en mejoras concretas de productividad, seguridad y gestión del parque tecnológico.\n\n¿Te parece si agendamos una breve llamada para revisar posibles áreas de apoyo?\n\nUn saludo,\n[Tu nombre]',
+  '[{"nombre": "Redeia", "tamano": "Gran Cuenta"}]'::jsonb
+),
+(
+  'ee6caa8bf3351e4438251233702dd126',
+  'https://www.elconfidencial.com/empresas/2026-04-28/cotizacion-holaluz-subida-bolsa-negocio-venta-gas-natural_4346260/',
+  'Holaluz despunta un 9,5% en bolsa tras volver al negocio de venta de gas natural',
+  'Holaluz vuelve al negocio de venta de gas natural más de tres años después y el mercado reacciona con una subida del 9,5% en bolsa.',
+  'El Confidencial',
+  '2026-04-28 09:19:00+00',
+  '2026-04-29 09:53:12+00',
+  'Expansión / Crecimiento ',
+  70,
+  'Holaluz retoma una línea de negocio y entra en una fase de crecimiento operativo. La oportunidad comercial está en acompañar esa expansión con equipos corporativos, escalabilidad IT y servicios que reduzcan fricción en nuevos procesos internos.',
+  ARRAY['Holaluz'],
+  '[]'::jsonb,
+  'Soluciones Empresariales (ProBook/Elite)',
+  '1. La vuelta al negocio de gas puede requerir refuerzo operativo y nuevos equipos. 2. HP puede apoyar la escalabilidad con soluciones de puesto de trabajo y servicios IT. 3. El enfoque debe ser crecimiento ordenado, productividad y control de costes.',
+  'Asunto: Tecnología para acompañar el crecimiento de Holaluz\n\nHola [Nombre],\nHe visto la noticia sobre la vuelta de Holaluz al negocio de venta de gas natural. En una fase de expansión, contar con una base tecnológica escalable puede ayudar a crecer sin perder eficiencia operativa.\n\nDesde HP podemos apoyar con soluciones corporativas y servicios IT adaptados a equipos en crecimiento.\n\nUn saludo,\n[Tu nombre]',
+  '[{"nombre": "Holaluz", "tamano": "Gran Cuenta"}]'::jsonb
+),
+(
+  '68c6f7b39b3c5b91714b1e2607fac668',
+  'https://www.europapress.es/economia/finanzas-00340/noticia-mapfre-gana-311-millones-euros-primer-trimestre-127-mas-20260429074835.html',
+  'Mapfre gana 311 millones de euros en el primer trimestre, un 12,7% más',
+  'Mapfre obtuvo un beneficio neto de 310,9 millones de euros en el primer trimestre, un 12,7% más que en el mismo periodo de 2025.',
+  'Europa Press',
+  '2026-04-29 05:48:35+00',
+  '2026-04-29 09:53:12+00',
+  'Resultados Financieros',
+  55,
+  'Mapfre mejora rentabilidad y resultados, pero la noticia no apunta a una necesidad tecnológica inmediata. Es una señal comercial media para iniciar seguimiento y detectar posibles proyectos internos de eficiencia, digitalización o renovación de equipos.',
+  ARRAY['Mapfre'],
+  '[]'::jsonb,
+  'Servicios y Soluciones IT',
+  '1. La mejora de rentabilidad puede facilitar conversaciones de inversión selectiva. 2. En seguros, la eficiencia operativa y la seguridad del puesto de trabajo son temas relevantes. 3. Conviene abrir una conversación exploratoria sin asumir urgencia de compra.',
+  'Asunto: Seguimiento de iniciativas tecnológicas en Mapfre\n\nHola [Nombre],\nHe visto los resultados positivos de Mapfre en el primer trimestre. Desde HP estamos trabajando con grandes organizaciones en eficiencia del puesto de trabajo, seguridad y servicios IT.\n\nMe gustaría conocer si tenéis alguna iniciativa tecnológica prevista para los próximos meses.\n\nUn saludo,\n[Tu nombre]',
+  '[{"nombre": "Mapfre", "tamano": "Gran Cuenta"}]'::jsonb
+),
+(
+  'cd216017e124a0dff353a48f4650913a',
+  'https://www.europapress.es/economia/noticia-aena-gana-329-millones-marzo-93-mas-eleva-ingresos-116-20260429081436.html',
+  'Aena gana 329 millones hasta marzo, un 9,3% más, y eleva sus ingresos un 11,6%',
+  'Aena aumentó sus ingresos y centró parte de su inversión en la mejora de instalaciones y seguridad operacional de los aeropuertos.',
+  'Europa Press',
+  '2026-04-29 06:14:36+00',
+  '2026-04-29 09:53:12+00',
+  'Resultados Financieros',
+  35,
+  'Aena muestra buenos resultados e inversión en instalaciones, aunque la relación con HP es menos directa que en otras señales. Puede servir como oportunidad de baja prioridad para explorar necesidades de dispositivos, soporte y seguridad en entornos operativos.',
+  ARRAY['Aena'],
+  '[]'::jsonb,
+  'Impresión y Escáner',
+  '1. La inversión en instalaciones puede implicar necesidades de soporte documental y dispositivos en operaciones. 2. HP puede aportar impresión gestionada, endpoints y servicios para entornos distribuidos. 3. Es una señal de seguimiento, no una oportunidad urgente.',
+  'Asunto: Posibles necesidades tecnológicas en operaciones aeroportuarias\n\nHola [Nombre],\nHe visto que Aena está aumentando inversión en instalaciones y seguridad operacional. Desde HP podemos apoyar entornos distribuidos con soluciones de impresión, dispositivos corporativos y servicios gestionados.\n\nSi tiene sentido, me gustaría comentar posibles áreas de colaboración.\n\nUn saludo,\n[Tu nombre]',
+  '[{"nombre": "Aena", "tamano": "Gran Cuenta"}]'::jsonb
+)
+ON CONFLICT (url_hash) DO UPDATE SET
+  url = EXCLUDED.url,
+  titulo = EXCLUDED.titulo,
+  resumen = EXCLUDED.resumen,
+  fuente = EXCLUDED.fuente,
+  published_at = EXCLUDED.published_at,
+  scraped_at = EXCLUDED.scraped_at,
+  categoria_ia = EXCLUDED.categoria_ia,
+  relevancia_ia = EXCLUDED.relevancia_ia,
+  resumen_comercial_ia = EXCLUDED.resumen_comercial_ia,
+  empresas_clave_ia = EXCLUDED.empresas_clave_ia,
+  urls_extra = EXCLUDED.urls_extra,
+  categoria_producto_ia = EXCLUDED.categoria_producto_ia,
+  talk_track_ia = EXCLUDED.talk_track_ia,
+  email_draft_ia = EXCLUDED.email_draft_ia,
+  empresas_detalle_ia = EXCLUDED.empresas_detalle_ia;
+
 
 -- -----------------------------------------------------------------------------
 -- 3. profiles

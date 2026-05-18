@@ -32,8 +32,10 @@ Una vez clonado, sigue los pasos de configuración detallados a continuación.
 6. [Paso 4 — Despliegue con Docker (recomendado)](#paso-4--despliegue-con-docker-recomendado)
 7. [Paso 5 — Despliegue sin Docker (desarrollo local)](#paso-5--despliegue-sin-docker-desarrollo-local)
 8. [Paso 6 — Crear el primer usuario administrador](#paso-6--crear-el-primer-usuario-administrador)
-9. [Notificaciones por Microsoft Teams (opcional)](#notificaciones-por-microsoft-teams-opcional)
-10. [Guía de usuario](#guía-de-usuario)
+9. [Paso 7 — Verificar las noticias y ejecutar el pipeline](#paso-7--verificar-las-noticias-y-ejecutar-el-pipeline)
+10. [Notificaciones por Microsoft Teams (opcional)](#notificaciones-por-microsoft-teams-opcional)
+11. [Comandos de prueba y operación](#comandos-de-prueba-y-operación)
+12. [Guía de usuario](#guía-de-usuario)
 
 ---
 
@@ -82,6 +84,7 @@ El modelo de inteligencia artificial (LLaMA 3.1) se ejecuta de manera local en t
 |---|---|---|
 | [Docker Desktop](https://www.docker.com/products/docker-desktop/) | 24.x | Ejecutar los contenedores (incluye Docker Compose) |
 | [Ollama](https://ollama.com) | cualquiera | Motor de IA local |
+| Python | 3.9 o 3.10 | Ejecutar el backend sin Docker |
 
 ### Qué no hay que instalar
 
@@ -135,7 +138,23 @@ Copia la URL y elimina `/rest/v1/` del final. El resultado debe tener esta forma
 https://<tu-proyecto>.supabase.co
 ```
 
-#### Clave pública (`SUPABASE_KEY` y `VITE_SUPABASE_ANON_KEY`)
+#### Clave privada del backend (`SUPABASE_KEY`)
+
+Esta clave se usa solo en el backend para que la API pueda comunicarse con Supabase. Ruta en el panel de Supabase:
+```
+Tu proyecto → Project Settings → API Keys → Secret keys
+```
+La clave empieza por `sb_secret_...`.
+
+#### Clave privada de administrador (`SUPABASE_SERVICE_ROLE_KEY`)
+
+Esta clave solo se usa en el backend para gestionar usuarios. Ruta en el panel de Supabase:
+```
+Tu proyecto → Project Settings → API Keys → Legacy anon, service_role API keys
+```
+Usa la clave `service_role`.
+
+#### Clave pública del frontend (`VITE_SUPABASE_ANON_KEY`)
 
 Es la clave de uso general, segura para el frontend. Ruta en el panel de Supabase:
 ```
@@ -143,15 +162,6 @@ Tu proyecto → Project Settings → API Keys → Publishable key
 ```
 La clave empieza por `sb_publishable_...`.
 Si tu panel muestra **Legacy API keys**, usa la clave `anon` de ahí. Es equivalente.
-
-#### Clave privada de administrador (`SUPABASE_SERVICE_ROLE_KEY`)
-
-Esta clave solo se usa en el backend para gestionar usuarios. Ruta en el panel de Supabase:
-```
-Tu proyecto → Project Settings → API Keys → Secret keys
-```
-La clave empieza por `sb_secret_...`.
-Si tu panel muestra **Legacy API keys**, usa la clave `service_role` de ahí.
 
 > **Importante:** La clave privada tiene permisos totales sobre la base de datos. Úsala únicamente en el backend y nunca la pongas en el frontend ni en un repositorio público.
 
@@ -172,11 +182,11 @@ El proyecto tiene dos archivos de variables de entorno: uno para el backend y ot
    # URL del proyecto Supabase
    SUPABASE_URL="https://TU-PROYECTO.supabase.co"
 
-   # Clave pública (sb_publishable_... o anon)
-   SUPABASE_KEY="TU_CLAVE_PUBLICA"
+   # Clave privada del backend (sb_secret_...)
+   SUPABASE_KEY="TU_CLAVE_SECRET"
 
-   # Clave privada de administrador (sb_secret_... o service_role)
-   SUPABASE_SERVICE_ROLE_KEY="TU_CLAVE_PRIVADA"
+   # Clave legacy service_role
+   SUPABASE_SERVICE_ROLE_KEY="TU_CLAVE_SERVICE_ROLE"
 
    # Opcional: solo si se van a usar notificaciones de Teams
    GRAPH_TENANT_ID=""
@@ -196,12 +206,14 @@ El proyecto tiene dos archivos de variables de entorno: uno para el backend y ot
    # URL del backend (no cambiar si usas Docker en local)
    VITE_API_URL="http://localhost:8000"
 
-   # Los mismos valores de Supabase que en el backend
+   # URL del proyecto Supabase
    VITE_SUPABASE_URL="https://TU-PROYECTO.supabase.co"
+
+   # Clave pública del frontend (sb_publishable_... o anon)
    VITE_SUPABASE_ANON_KEY="TU_CLAVE_PUBLICA"
    ```
 
-> `VITE_SUPABASE_ANON_KEY` es la misma clave pública que pusiste en `SUPABASE_KEY` del backend.
+> `VITE_SUPABASE_ANON_KEY` debe ser una clave pública (`sb_publishable_...` o `anon`). No uses aquí `sb_secret_...` ni `service_role`.
 > Si desplegas en un servidor con dominio propio, cambia `VITE_API_URL` por la URL pública del backend.
 
 ---
@@ -248,7 +260,7 @@ Esta es la forma más sencilla y reproducible de ejecutar el proyecto.
 
 ### 4.2 Construir y arrancar los contenedores
 
-Desde la raíz del repositorio (`ceu-salessignalsai/`):
+Desde la raíz del repositorio (`TFG-CEU/`):
 
 ```bash
 docker compose up --build
@@ -283,21 +295,49 @@ Usa esta opción si prefieres ejecutar el código directamente en tu máquina, p
 
 ### Backend
 
+En macOS:
+
 ```bash
-# 1. Entra en la carpeta del backend
+cd backend
+/usr/bin/python3 -m venv venv
+source venv/bin/activate
+python --version
+python -m ensurepip --upgrade
+python -m pip install "pip==24.3.1"
+pip install -r requirements.txt
+playwright install chromium
+uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+En Linux:
+
+```bash
+cd backend
+python3 -m venv venv
+source venv/bin/activate
+python --version
+python -m ensurepip --upgrade
+python -m pip install "pip==24.3.1"
+pip install -r requirements.txt
+playwright install chromium
+uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+En Windows PowerShell:
+
+```powershell
 cd backend
 
-# 2. Crea un entorno virtual de Python
-python -m venv venv
-source venv/bin/activate        # En Windows: venv\Scripts\activate
+# Comprueba las versiones disponibles y usa Python 3.9 o 3.10
+py -0p
+py -3.10 -m venv venv
 
-# 3. Instala las dependencias
+.\venv\Scripts\Activate.ps1
+python --version
+python -m ensurepip --upgrade
+python -m pip install "pip==24.3.1"
 pip install -r requirements.txt
-
-# 4. Instala los navegadores que usa Playwright
 playwright install chromium
-
-# 5. Arranca el servidor
 uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
@@ -344,14 +384,15 @@ Una vez que ya tienes un usuario administrador, puedes crear usuarios adicionale
 
 ---
 
-## Paso 7 — Obtener las primeras noticias
+## Paso 7 — Verificar las noticias y ejecutar el pipeline
 
-Al ejecutar el script de la base de datos (Paso 1), se han cargado automáticamente unas fuentes RSS y un prompt de IA por defecto. Sin embargo, el sistema arranca sin noticias hasta que el pipeline se ejecute por primera vez:
+Al ejecutar `supabase/schema.sql` en el Paso 1, la base de datos ya carga 5 noticias demo para que el dashboard tenga contenido desde el primer arranque.
 
-1. Entra en la aplicación web con tu usuario administrador recién creado.
-2. Navega al panel de **Administración**.
-3. Pulsa el botón para **Ejecutar Pipeline** (o equivalente). Esto hará que el backend empiece a descargar las noticias de las fuentes RSS y a analizarlas usando Ollama.
-4. Una vez termine el proceso, vuelve al **Dashboard** principal para empezar a ver la inteligencia comercial generada.
+1. Entra en la aplicación web con tu usuario recién creado.
+2. Abre el **Dashboard** principal y comprueba que aparecen las noticias demo.
+3. Si quieres obtener noticias nuevas, entra con un usuario administrador y navega al panel de **Administración**.
+4. Pulsa el botón para **Ejecutar Pipeline**. Esto hará que el backend descargue noticias de las fuentes RSS y las analice usando Ollama.
+5. Una vez termine el proceso, vuelve al **Dashboard** principal para ver las noticias actualizadas.
 
 ---
 
@@ -378,6 +419,50 @@ TEAMS_TARGET_USER_EMAIL="correo-destino@empresa.com"
 La primera vez que el sistema intente enviar una notificación, el backend mostrará en consola un enlace de autenticación de Microsoft. Ábrelo en el navegador, inicia sesión con tu cuenta de Microsoft y autoriza los permisos. El token se guarda localmente y no hace falta repetir el proceso.
 
 > En el contexto de este TFG, las notificaciones se envían únicamente al correo configurado en `TEAMS_TARGET_USER_EMAIL`.
+
+---
+
+## Comandos de prueba y operación
+
+Estos comandos sirven para comprobar que el sistema funciona y para lanzar procesos manuales.
+
+### Si la aplicación está levantada con Docker
+
+Ejecuta los comandos desde la raíz del repositorio (`TFG-CEU/`), con los contenedores activos.
+
+```bash
+docker compose up --build
+```
+
+| Quiero... | Comando |
+|---|---|
+| Ver logs del backend | `docker compose logs -f backend` |
+| Ejecutar todos los tests | `docker compose exec backend pytest` |
+| Ejecutar solo tests unitarios | `docker compose exec backend pytest tests/unitarios` |
+| Ejecutar solo tests de integración | `docker compose exec backend pytest tests/integracion` |
+| Ejecutar un test concreto | `docker compose exec backend pytest tests/unitarios/test_planificador.py -q` |
+| Probar ingesta sin IA ni base de datos | `docker compose exec backend python -m scripts.manual_ingesta` |
+| Ejecutar ingesta + IA + guardado en Supabase | `docker compose exec backend python -m scripts.manual_pipeline_completo` |
+| Enviar notificaciones de Teams con noticias ya guardadas | `docker compose exec backend python -m scripts.manual_notificador` |
+| Ejecutar pipeline + notificaciones en una sola pasada | `docker compose exec backend python -m app.core.scheduler` |
+
+### Si ejecutas el backend sin Docker
+
+Ejecuta los comandos desde `TFG-CEU/backend/`, con el entorno virtual activado.
+
+| Quiero... | Comando |
+|---|---|
+| Ejecutar todos los tests | `pytest` |
+| Ejecutar solo tests unitarios | `pytest tests/unitarios` |
+| Ejecutar solo tests de integración | `pytest tests/integracion` |
+| Probar ingesta sin IA ni base de datos | `python -m scripts.manual_ingesta` |
+| Ejecutar ingesta + IA + guardado en Supabase | `python -m scripts.manual_pipeline_completo` |
+| Enviar notificaciones de Teams con noticias ya guardadas | `python -m scripts.manual_notificador` |
+| Ejecutar pipeline + notificaciones en una sola pasada | `python -m app.core.scheduler` |
+
+El scheduler se inicia automáticamente al arrancar el backend y queda programado para ejecutarse cada 6 horas. El comando del scheduler sirve para forzar una ejecución manual sin esperar.
+
+> Los tests de integración pueden requerir conexión a internet, credenciales válidas de Supabase y servicios externos disponibles. Para una comprobación rápida, ejecuta primero los tests unitarios.
 
 ---
 
