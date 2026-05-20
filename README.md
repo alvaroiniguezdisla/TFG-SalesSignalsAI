@@ -26,16 +26,14 @@ Una vez clonado, sigue los pasos de configuración detallados a continuación.
 
 1. [Arquitectura](#arquitectura)
 2. [Requisitos previos](#requisitos-previos)
-3. [Paso 1 — Configurar Supabase](#paso-1--configurar-supabase)
-4. [Paso 2 — Configurar las variables de entorno](#paso-2--configurar-las-variables-de-entorno)
-5. [Paso 3 — Configurar Ollama](#paso-3--configurar-ollama)
-6. [Paso 4 — Despliegue con Docker (recomendado)](#paso-4--despliegue-con-docker-recomendado)
-7. [Paso 5 — Despliegue sin Docker (desarrollo local)](#paso-5--despliegue-sin-docker-desarrollo-local)
-8. [Paso 6 — Crear el primer usuario administrador](#paso-6--crear-el-primer-usuario-administrador)
-9. [Paso 7 — Verificar las noticias y ejecutar el pipeline](#paso-7--verificar-las-noticias-y-ejecutar-el-pipeline)
-10. [Notificaciones por Microsoft Teams (opcional)](#notificaciones-por-microsoft-teams-opcional)
-11. [Comandos de prueba y operación](#comandos-de-prueba-y-operación)
-12. [Guía de usuario](#guía-de-usuario)
+3. [Paso 1 — Configurar las variables de entorno](#paso-1--configurar-las-variables-de-entorno)
+4. [Paso 2 — Despliegue 100% automatizado con Docker](#paso-2--despliegue-100-automatizado-con-docker)
+5. [Paso 3 — Despliegue sin Docker (desarrollo local)](#paso-3--despliegue-sin-docker-desarrollo-local)
+6. [Paso 4 — Crear el primer usuario administrador](#paso-4--crear-el-primer-usuario-administrador)
+7. [Paso 5 — Verificar las noticias y ejecutar el pipeline](#paso-5--verificar-las-noticias-y-ejecutar-el-pipeline)
+8. [Notificaciones por Microsoft Teams (opcional)](#notificaciones-por-microsoft-teams-opcional)
+9. [Comandos de prueba y operación](#comandos-de-prueba-y-operación)
+10. [Guía de usuario](#guía-de-usuario)
 
 ---
 
@@ -72,7 +70,7 @@ El backend se comunica con Supabase para leer y escribir datos, y con Ollama par
 
 ### Requisitos de hardware (Ollama)
 
-El modelo de inteligencia artificial (LLaMA 3.1) se ejecuta de manera local en tu máquina. Para que funcione correctamente y el tiempo de respuesta sea aceptable, se requiere:
+El modelo de inteligencia artificial (LLaMA 3.1) se ejecuta localmente, ya sea dentro del contenedor de Docker o mediante una instalación manual de Ollama. Para que funcione correctamente y el tiempo de respuesta sea aceptable, se requiere:
 - **Mínimo:** 8 GB de memoria RAM libre.
 - **Recomendado:** 16 GB o más de memoria RAM.
 
@@ -83,93 +81,20 @@ El modelo de inteligencia artificial (LLaMA 3.1) se ejecuta de manera local en t
 | Herramienta | Versión mínima | Para qué se usa |
 |---|---|---|
 | [Docker Desktop](https://www.docker.com/products/docker-desktop/) | 24.x | Ejecutar los contenedores (incluye Docker Compose) |
-| [Ollama](https://ollama.com) | cualquiera | Motor de IA local |
-| Python | 3.9 o 3.10 | Ejecutar el backend sin Docker |
+| [Ollama](https://ollama.com) | Opcional | Solo necesario si se ejecuta el backend sin Docker |
+| Python | 3.9 o 3.10 | Solo necesario si se ejecuta el backend sin Docker |
 
 ### Qué no hay que instalar
 
-**Supabase** es un servicio en la nube. No se instala en tu máquina: simplemente creas una cuenta gratuita en [https://supabase.com](https://supabase.com) y usas su panel web para configurar la base de datos. El Paso 1 explica exactamente qué hacer.
+**Supabase** es un servicio en la nube. No se instala en tu máquina: el entorno de demostración utilizado para la evaluación se configura mediante los archivos `.env`.
+
+**Ollama** tampoco debe instalarse manualmente si se usa el despliegue recomendado con Docker: `docker compose up --build` arranca el contenedor de Ollama y descarga el modelo `llama3.1` automáticamente.
 
 ---
 
-## Paso 1 — Configurar Supabase
+## Paso 1 — Configurar las variables de entorno
 
-Supabase es el servicio de base de datos y autenticación del proyecto. Tiene un plan gratuito que es suficiente para este despliegue.
-
-### 1.1 Crear el proyecto
-
-1. Ve a [https://supabase.com](https://supabase.com) e inicia sesión o crea una cuenta.
-2. Pulsa **New project**.
-3. Elige un nombre para el proyecto (por ejemplo, `salessignalsai`).
-4. Establece una contraseña para la base de datos. **Guárdala**, la necesitarás si alguna vez accedes directamente a Postgres.
-5. Selecciona la región más cercana (por ejemplo, `West EU`).
-6. Pulsa **Create new project** y espera a que termine el aprovisionamiento (aproximadamente 1 minuto).
-
-### 1.2 Crear las tablas (esquema SQL)
-
-El proyecto incluye un archivo SQL listo para ejecutar que crea todas las tablas, el trigger de registro y las políticas de seguridad.
-
-1. En el menú lateral de tu proyecto de Supabase, ve a **SQL Editor**.
-2. Pulsa **New query**.
-3. Abre el archivo `supabase/schema.sql` de este repositorio y copia todo su contenido.
-4. Pégalo en el editor de Supabase.
-5. Pulsa **Run** (o `Ctrl + Enter`).
-6. Verifica que no hay errores en el panel inferior.
-7. Ve a **Table Editor** en el menú lateral y comprueba que aparecen estas 4 tablas:
-   - `app_config`
-   - `noticias`
-   - `profiles`
-   - `news_feedback`
-
-> Si ves el mensaje `already exists` en alguna tabla, es normal si estás re-ejecutando el script. El script usa `CREATE TABLE IF NOT EXISTS` para evitar errores.
-
-### 1.3 Obtener las tres claves de API
-
-El proyecto necesita tres valores de Supabase: la URL del proyecto y dos claves. A continuación se explica dónde encontrar cada una.
-
-#### URL del proyecto (`SUPABASE_URL` y `VITE_SUPABASE_URL`)
-
-Ruta en el panel de Supabase:
-```
-Tu proyecto → Integrations → Data API → API URL
-```
-Copia la URL y elimina `/rest/v1/` del final. El resultado debe tener esta forma:
-```
-https://<tu-proyecto>.supabase.co
-```
-
-#### Clave privada del backend (`SUPABASE_KEY`)
-
-Esta clave se usa solo en el backend para que la API pueda comunicarse con Supabase. Ruta en el panel de Supabase:
-```
-Tu proyecto → Project Settings → API Keys → Secret keys
-```
-La clave empieza por `sb_secret_...`.
-
-#### Clave privada de administrador (`SUPABASE_SERVICE_ROLE_KEY`)
-
-Esta clave solo se usa en el backend para gestionar usuarios. Ruta en el panel de Supabase:
-```
-Tu proyecto → Project Settings → API Keys → Legacy anon, service_role API keys
-```
-Usa la clave `service_role`.
-
-#### Clave pública del frontend (`VITE_SUPABASE_ANON_KEY`)
-
-Es la clave de uso general, segura para el frontend. Ruta en el panel de Supabase:
-```
-Tu proyecto → Project Settings → API Keys → Publishable key
-```
-La clave empieza por `sb_publishable_...`.
-Si tu panel muestra **Legacy API keys**, usa la clave `anon` de ahí. Es equivalente.
-
-> **Importante:** La clave privada tiene permisos totales sobre la base de datos. Úsala únicamente en el backend y nunca la pongas en el frontend ni en un repositorio público.
-
----
-
-## Paso 2 — Configurar las variables de entorno
-
-El proyecto tiene dos archivos de variables de entorno: uno para el backend y otro para el frontend.
+El proyecto requiere un archivo `.env` para el backend y otro para el frontend. Para facilitar la evaluación del tribunal y al mismo tiempo mantener las buenas prácticas de seguridad en este repositorio público, **las claves del entorno de demostración se proporcionan exclusivamente en la Memoria del TFG (Sección 5.2 - Despliegue de la Aplicación)**.
 
 ### Backend
 
@@ -177,23 +102,7 @@ El proyecto tiene dos archivos de variables de entorno: uno para el backend y ot
    ```bash
    cp backend/.env.example backend/.env
    ```
-2. Abre `backend/.env` y rellena los valores con las claves obtenidas en el paso anterior:
-   ```env
-   # URL del proyecto Supabase
-   SUPABASE_URL="https://TU-PROYECTO.supabase.co"
-
-   # Clave privada del backend (sb_secret_...)
-   SUPABASE_KEY="TU_CLAVE_SECRET"
-
-   # Clave legacy service_role
-   SUPABASE_SERVICE_ROLE_KEY="TU_CLAVE_SERVICE_ROLE"
-
-   # Opcional: solo si se van a usar notificaciones de Teams
-   GRAPH_TENANT_ID=""
-   GRAPH_CLIENT_ID=""
-   GRAPH_SCOPES="User.Read Chat.ReadWrite ChatMessage.Send"
-   TEAMS_TARGET_USER_EMAIL=""
-   ```
+2. Abre `backend/.env` e introduce las claves que encontrarás en la memoria académica.
 
 ### Frontend
 
@@ -201,79 +110,33 @@ El proyecto tiene dos archivos de variables de entorno: uno para el backend y ot
    ```bash
    cp frontend/.env.example frontend/.env
    ```
-2. Abre `frontend/.env` y rellénalo:
-   ```env
-   # URL del backend (no cambiar si usas Docker en local)
-   VITE_API_URL="http://localhost:8000"
-
-   # URL del proyecto Supabase
-   VITE_SUPABASE_URL="https://TU-PROYECTO.supabase.co"
-
-   # Clave pública del frontend (sb_publishable_... o anon)
-   VITE_SUPABASE_ANON_KEY="TU_CLAVE_PUBLICA"
-   ```
-
-> `VITE_SUPABASE_ANON_KEY` debe ser una clave pública (`sb_publishable_...` o `anon`). No uses aquí `sb_secret_...` ni `service_role`.
-> Si desplegas en un servidor con dominio propio, cambia `VITE_API_URL` por la URL pública del backend.
+2. Abre `frontend/.env` e introduce las claves que encontrarás en la memoria académica.
 
 ---
 
-## Paso 3 — Configurar Ollama
+## Paso 2 — Despliegue 100% automatizado con Docker
 
-Ollama es el motor de IA que el backend usa para analizar las noticias. Se ejecuta en tu máquina de forma local, fuera de Docker.
+Esta es la forma recomendada para ejecutar el proyecto de manera reproducible, sin instalar dependencias locales.
 
-### 3.1 Instalar Ollama
-
-Descarga e instala Ollama desde [https://ollama.com](https://ollama.com). Sigue el instalador para tu sistema operativo (Windows, macOS o Linux).
-
-### 3.2 Descargar el modelo
-
-Abre una terminal y ejecuta:
-
-```bash
-ollama pull llama3.1
-```
-
-La descarga puede tardar varios minutos dependiendo de tu conexión (el modelo pesa aproximadamente 4,7 GB).
-
-### 3.3 Verificar que Ollama está activo
-
-```bash
-ollama list
-```
-
-Deberías ver `llama3.1` en la lista. Ollama queda activo en segundo plano automáticamente tras la instalación.
-
-> El backend llama a Ollama en `http://localhost:11434`. Si usas Docker, el contenedor del backend accede a Ollama del anfitrión a través de `host.docker.internal:11434`, lo cual ya está configurado en el `docker-compose.yml`.
-
----
-
-## Paso 4 — Despliegue con Docker (recomendado)
-
-Esta es la forma más sencilla y reproducible de ejecutar el proyecto.
-
-### 4.1 Requisitos
+### 2.1 Requisitos
 
 - Docker Desktop en ejecución.
-- Los archivos `backend/.env` y `frontend/.env` completados (Paso 2).
-- Ollama activo con el modelo descargado (Paso 3).
+- Los archivos `backend/.env` y `frontend/.env` completados (Paso 1).
 
-### 4.2 Construir y arrancar los contenedores
+### 2.2 Construir y arrancar los contenedores
 
-Desde la raíz del repositorio (`TFG-CEU/`):
+Desde la raíz del repositorio (`TFG-SalesSignalsAI/`):
 
 ```bash
 docker compose up --build
 ```
 
-Este comando:
-1. Construye la imagen del backend (Python + Playwright + dependencias).
-2. Construye la imagen del frontend (Vite build + Nginx).
-3. Arranca ambos contenedores.
+Este comando se encarga de todo el ciclo de vida:
+1. Inicia el contenedor de la IA (Ollama) y descarga automáticamente el modelo `llama3.1` en segundo plano (este primer paso puede tardar unos minutos ya que el modelo pesa 4,7 GB).
+2. Construye y arranca el backend (FastAPI).
+3. Construye y arranca el frontend (Vite/Nginx).
 
-La primera vez puede tardar entre 5 y 10 minutos por la descarga e instalación de dependencias.
-
-### 4.3 Acceder a la aplicación
+### 2.3 Acceder a la aplicación
 
 | Servicio | URL |
 |---|---|
@@ -281,7 +144,7 @@ La primera vez puede tardar entre 5 y 10 minutos por la descarga e instalación 
 | Backend (API) | http://localhost:8000 |
 | Documentación de la API | http://localhost:8000/docs |
 
-### 4.4 Detener los contenedores
+### 2.4 Detener los contenedores
 
 ```bash
 docker compose down
@@ -289,7 +152,7 @@ docker compose down
 
 ---
 
-## Paso 5 — Despliegue sin Docker (desarrollo local)
+## Paso 3 — Despliegue sin Docker (desarrollo local)
 
 Usa esta opción si prefieres ejecutar el código directamente en tu máquina, por ejemplo para depurar o desarrollar.
 
@@ -364,7 +227,7 @@ El frontend queda disponible en `http://localhost:5173`.
 
 ---
 
-## Paso 6 — Crear el primer usuario administrador
+## Paso 4 — Crear el primer usuario administrador
 
 Al arrancar la aplicación por primera vez no hay ningún usuario creado. Para poder acceder al panel de administración necesitas al menos un usuario con rol `admin`.
 
@@ -386,9 +249,9 @@ Una vez que ya tienes un usuario administrador, puedes crear usuarios adicionale
 
 ---
 
-## Paso 7 — Verificar las noticias y ejecutar el pipeline
+## Paso 5 — Verificar las noticias y ejecutar el pipeline
 
-Al ejecutar `supabase/schema.sql` en el Paso 1, la base de datos ya carga 5 noticias demo para que el dashboard tenga contenido desde el primer arranque.
+El entorno de demostración indicado en la memoria incluye noticias precargadas para que el dashboard tenga contenido desde el primer arranque.
 
 1. Entra en la aplicación web con tu usuario recién creado.
 2. Abre el **Dashboard** principal y comprueba que aparecen las noticias demo.
@@ -430,7 +293,7 @@ Estos comandos sirven para comprobar que el sistema funciona y para lanzar proce
 
 ### Si la aplicación está levantada con Docker
 
-Ejecuta los comandos desde la raíz del repositorio (`TFG-CEU/`), con los contenedores activos.
+Ejecuta los comandos desde la raíz del repositorio (`TFG-SalesSignalsAI/`), con los contenedores activos.
 
 ```bash
 docker compose up --build
@@ -450,7 +313,7 @@ docker compose up --build
 
 ### Si ejecutas el backend sin Docker
 
-Ejecuta los comandos desde `TFG-CEU/backend/`, con el entorno virtual activado.
+Ejecuta los comandos desde `TFG-SalesSignalsAI/backend/`, con el entorno virtual activado.
 
 | Quiero... | Comando |
 |---|---|
