@@ -292,6 +292,14 @@ El entorno de demostración indicado en la memoria incluye noticias precargadas 
 4. Pulsa el botón para **Ejecutar Pipeline**. Esto hará que el backend descargue noticias de las fuentes RSS y las analice usando Ollama.
 5. Una vez termine el proceso, vuelve al **Dashboard** principal para ver las noticias actualizadas.
 
+Para comprobar el flujo completo del scheduler desde terminal (ingesta, IA, guardado en Supabase y notificaciones si Teams está configurado), ejecuta:
+
+```bash
+docker compose exec backend python -m app.core.scheduler
+```
+
+El botón de la aplicación sirve para lanzar el pipeline de extracción y análisis. El comando anterior fuerza una ejecución completa del scheduler sin esperar a la ejecución automática programada.
+
 ---
 
 ## Notificaciones por Microsoft Teams (opcional)
@@ -342,7 +350,7 @@ docker compose up --build
 | Probar ingesta sin IA ni base de datos | `docker compose exec backend python -m scripts.manual_ingesta` |
 | Ejecutar ingesta + IA + guardado en Supabase | `docker compose exec backend python -m scripts.manual_pipeline_completo` |
 | Enviar notificaciones de Teams con noticias ya guardadas | `docker compose exec backend python -m scripts.manual_notificador` |
-| Ejecutar pipeline + notificaciones en una sola pasada | `docker compose exec backend python -m app.core.scheduler` |
+| Ejecutar scheduler completo: pipeline + notificaciones en una sola pasada | `docker compose exec backend python -m app.core.scheduler` |
 
 ### Si ejecutas el backend sin Docker
 
@@ -356,7 +364,7 @@ Ejecuta los comandos desde `TFG-SalesSignalsAI/backend/`, con el entorno virtual
 | Probar ingesta sin IA ni base de datos | `python -m scripts.manual_ingesta` |
 | Ejecutar ingesta + IA + guardado en Supabase | `python -m scripts.manual_pipeline_completo` |
 | Enviar notificaciones de Teams con noticias ya guardadas | `python -m scripts.manual_notificador` |
-| Ejecutar pipeline + notificaciones en una sola pasada | `python -m app.core.scheduler` |
+| Ejecutar scheduler completo: pipeline + notificaciones en una sola pasada | `python -m app.core.scheduler` |
 
 El scheduler se inicia automáticamente al arrancar el backend y queda programado para ejecutarse cada 6 horas. El comando del scheduler sirve para forzar una ejecución manual sin esperar.
 
