@@ -29,7 +29,7 @@ Una vez clonado, sigue los pasos de configuración detallados a continuación.
 3. [Paso 1 — Configurar las variables de entorno](#paso-1--configurar-las-variables-de-entorno)
 4. [Paso 2 — Despliegue 100% automatizado con Docker](#paso-2--despliegue-100-automatizado-con-docker)
 5. [Paso 3 — Despliegue sin Docker (desarrollo local)](#paso-3--despliegue-sin-docker-desarrollo-local)
-6. [Paso 4 — Crear el primer usuario administrador](#paso-4--crear-el-primer-usuario-administrador)
+6. [Paso 4 — Acceder con usuario administrador](#paso-4--acceder-con-usuario-administrador)
 7. [Paso 5 — Verificar las noticias y ejecutar el pipeline](#paso-5--verificar-las-noticias-y-ejecutar-el-pipeline)
 8. [Notificaciones por Microsoft Teams (opcional)](#notificaciones-por-microsoft-teams-opcional)
 9. [Comandos de prueba y operación](#comandos-de-prueba-y-operación)
@@ -59,7 +59,7 @@ El backend se comunica con Supabase para leer y escribir datos, y con Ollama par
     │         ├──► [Backend FastAPI — puerto 8000]
     │         │         │
     │         │         ├──► [Supabase — base de datos]
-    │         │         └──► [Ollama — IA local — puerto 11434]
+    │         │         └──► [Ollama — IA local — red interna Docker]
     │         │
     │         └──► [Supabase — autenticación y feedback]
 ```
@@ -76,7 +76,33 @@ El modelo de inteligencia artificial (LLaMA 3.1) se ejecuta localmente, ya sea d
 
 > Si tu equipo tiene recursos muy limitados, la inferencia del modelo será extremadamente lenta o fallará al intentar cargar en memoria.
 
+### Configuración recomendada de Docker Desktop
+
+Si se ejecuta el proyecto con Docker, no basta con que el ordenador tenga memoria RAM suficiente: Docker Desktop debe tener memoria asignada en su propia configuración.
+
+Antes de arrancar el proyecto, se recomienda revisar:
+
+```text
+Docker Desktop -> Settings -> Resources -> Advanced
+```
+
+Configuración recomendada:
+
+| Recurso | Valor recomendado |
+|---|---|
+| Memory limit | 10-12 GB |
+| Swap | 4 GB |
+| CPU limit | 6-8 CPU |
+
+Con menos memoria asignada, Ollama puede arrancar correctamente pero fallar durante la clasificación con un error similar a:
+
+```text
+model requires more system memory
+```
+
 ### Qué hay que instalar en tu máquina
+
+Para la ejecución recomendada con Docker, solo es necesario instalar Docker Desktop. Ollama y Python únicamente son necesarios si se decide ejecutar el backend manualmente sin Docker.
 
 | Herramienta | Versión mínima | Para qué se usa |
 |---|---|---|
@@ -121,6 +147,7 @@ Esta es la forma recomendada para ejecutar el proyecto de manera reproducible, s
 ### 2.1 Requisitos
 
 - Docker Desktop en ejecución.
+- Docker Desktop con memoria suficiente asignada (ver "Configuración recomendada de Docker Desktop").
 - Los archivos `backend/.env` y `frontend/.env` completados (Paso 1).
 
 ### 2.2 Construir y arrancar los contenedores
@@ -227,11 +254,17 @@ El frontend queda disponible en `http://localhost:5173`.
 
 ---
 
-## Paso 4 — Crear el primer usuario administrador
+## Paso 4 — Acceder con usuario administrador
 
-Al arrancar la aplicación por primera vez no hay ningún usuario creado. Para poder acceder al panel de administración necesitas al menos un usuario con rol `admin`.
+Para la evaluación del TFG se proporciona un usuario administrador ya creado en el entorno de demostración. Las credenciales de acceso se indican en la memoria académica.
 
-### Opción A — Registro desde la aplicación y promoción manual
+1. Abre la aplicación en http://localhost:5173.
+2. Inicia sesión con el usuario administrador de evaluación.
+3. Accede al **Panel de administración** desde el dashboard principal.
+
+### Crear un administrador en una instalación nueva
+
+Los siguientes pasos solo son necesarios si se despliega el sistema sobre una instancia nueva de Supabase, sin usar el entorno de demostración proporcionado para la evaluación.
 
 1. Abre la aplicación en http://localhost:5173.
 2. Pulsa **Regístrate aquí** y crea una cuenta con tu correo y contraseña.
@@ -243,7 +276,7 @@ Al arrancar la aplicación por primera vez no hay ningún usuario creado. Para p
    ```
 4. Recarga la aplicación e inicia sesión. Ahora tendrás acceso al **Panel de administración**.
 
-### Opción B — Crear el usuario directamente desde el panel de administración
+### Crear usuarios adicionales
 
 Una vez que ya tienes un usuario administrador, puedes crear usuarios adicionales directamente desde el panel de administración de la aplicación sin necesidad de tocar Supabase.
 
@@ -253,7 +286,7 @@ Una vez que ya tienes un usuario administrador, puedes crear usuarios adicionale
 
 El entorno de demostración indicado en la memoria incluye noticias precargadas para que el dashboard tenga contenido desde el primer arranque.
 
-1. Entra en la aplicación web con tu usuario recién creado.
+1. Entra en la aplicación web con el usuario administrador de evaluación.
 2. Abre el **Dashboard** principal y comprueba que aparecen las noticias demo.
 3. Si quieres obtener noticias nuevas, entra con un usuario administrador y navega al panel de **Administración**.
 4. Pulsa el botón para **Ejecutar Pipeline**. Esto hará que el backend descargue noticias de las fuentes RSS y las analice usando Ollama.
