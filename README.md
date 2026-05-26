@@ -256,25 +256,13 @@ El frontend queda disponible en `http://localhost:5173`.
 
 ## Paso 4 — Acceder con usuario administrador
 
-Para la evaluación del TFG se proporciona un usuario administrador ya creado en el entorno de demostración. Las credenciales de acceso se indican en la memoria académica.
+Para la evaluación del TFG se usa el entorno de Supabase ya configurado y proporcionado junto con el proyecto. No es necesario crear una instancia nueva de Supabase ni ejecutar consultas SQL manuales.
+
+El usuario administrador de evaluación ya está creado en ese entorno. Las credenciales de acceso se indican en la memoria académica.
 
 1. Abre la aplicación en http://localhost:5173.
 2. Inicia sesión con el usuario administrador de evaluación.
 3. Accede al **Panel de administración** desde el dashboard principal.
-
-### Crear un administrador en una instalación nueva
-
-Los siguientes pasos solo son necesarios si se despliega el sistema sobre una instancia nueva de Supabase, sin usar el entorno de demostración proporcionado para la evaluación.
-
-1. Abre la aplicación en http://localhost:5173.
-2. Pulsa **Regístrate aquí** y crea una cuenta con tu correo y contraseña.
-3. Vuelve a Supabase → **SQL Editor** y ejecuta la siguiente consulta, sustituyendo el correo:
-   ```sql
-   UPDATE public.profiles
-   SET role = 'admin'
-   WHERE email = 'tu-correo@ejemplo.com';
-   ```
-4. Recarga la aplicación e inicia sesión. Ahora tendrás acceso al **Panel de administración**.
 
 ### Crear usuarios adicionales
 
@@ -304,16 +292,17 @@ El botón de la aplicación sirve para lanzar el pipeline de extracción y anál
 
 ## Notificaciones por Microsoft Teams (opcional)
 
-El sistema puede enviar notificaciones automáticas por Teams cuando el pipeline detecta noticias relevantes. Esta integración es opcional y requiere una cuenta de Microsoft con acceso a Teams.
+El sistema incluye soporte para enviar notificaciones automáticas por Microsoft Teams cuando el pipeline detecta noticias relevantes. Esta funcionalidad forma parte de la arquitectura del proyecto, pero **no se activa en el entorno de evaluación**, ya que requiere credenciales corporativas de Microsoft/Azure que no se distribuyen junto con el repositorio.
+
+La aplicación puede ejecutarse, probarse y evaluarse correctamente sin configurar Teams. En ese caso, el pipeline seguirá realizando la ingesta, el análisis con IA y el guardado de noticias en Supabase.
 
 ### Requisitos
 
-- Una aplicación registrada en el portal de Azure con los permisos `User.Read`, `Chat.ReadWrite` y `ChatMessage.Send`.
-- El `Tenant ID` y el `Client ID` de esa aplicación.
+Para activar esta integración en un entorno corporativo real sería necesario disponer de una aplicación registrada en Azure/Microsoft y de las credenciales correspondientes.
 
 ### Configuración
 
-Rellena las siguientes variables en `backend/.env`:
+Si se dispone de esas credenciales, la integración se configura mediante variables de entorno en `backend/.env`:
 
 ```env
 GRAPH_TENANT_ID="tu-tenant-id"
@@ -322,9 +311,7 @@ GRAPH_SCOPES="User.Read Chat.ReadWrite ChatMessage.Send"
 TEAMS_TARGET_USER_EMAIL="correo-destino@empresa.com"
 ```
 
-La primera vez que el sistema intente enviar una notificación, el backend mostrará en consola un enlace de autenticación de Microsoft. Ábrelo en el navegador, inicia sesión con tu cuenta de Microsoft y autoriza los permisos. El token se guarda localmente y no hace falta repetir el proceso.
-
-> En el contexto de este TFG, las notificaciones se envían únicamente al correo configurado en `TEAMS_TARGET_USER_EMAIL`.
+En el contexto de este TFG, esta parte queda documentada como integración opcional y no es necesaria para la demostración principal de la aplicación.
 
 ---
 
@@ -349,8 +336,8 @@ docker compose up --build
 | Ejecutar un test concreto | `docker compose exec backend pytest tests/unitarios/test_planificador.py -q` |
 | Probar ingesta sin IA ni base de datos | `docker compose exec backend python -m scripts.manual_ingesta` |
 | Ejecutar ingesta + IA + guardado en Supabase | `docker compose exec backend python -m scripts.manual_pipeline_completo` |
-| Enviar notificaciones de Teams con noticias ya guardadas | `docker compose exec backend python -m scripts.manual_notificador` |
-| Ejecutar scheduler completo: pipeline + notificaciones en una sola pasada | `docker compose exec backend python -m app.core.scheduler` |
+| Enviar notificaciones de Teams, solo si se han configurado credenciales | `docker compose exec backend python -m scripts.manual_notificador` |
+| Ejecutar scheduler completo en una sola pasada | `docker compose exec backend python -m app.core.scheduler` |
 
 ### Si ejecutas el backend sin Docker
 
@@ -363,8 +350,8 @@ Ejecuta los comandos desde `TFG-SalesSignalsAI/backend/`, con el entorno virtual
 | Ejecutar solo tests de integración | `pytest tests/integracion` |
 | Probar ingesta sin IA ni base de datos | `python -m scripts.manual_ingesta` |
 | Ejecutar ingesta + IA + guardado en Supabase | `python -m scripts.manual_pipeline_completo` |
-| Enviar notificaciones de Teams con noticias ya guardadas | `python -m scripts.manual_notificador` |
-| Ejecutar scheduler completo: pipeline + notificaciones en una sola pasada | `python -m app.core.scheduler` |
+| Enviar notificaciones de Teams, solo si se han configurado credenciales | `python -m scripts.manual_notificador` |
+| Ejecutar scheduler completo en una sola pasada | `python -m app.core.scheduler` |
 
 El scheduler se inicia automáticamente al arrancar el backend y queda programado para ejecutarse cada 6 horas. El comando del scheduler sirve para forzar una ejecución manual sin esperar.
 
