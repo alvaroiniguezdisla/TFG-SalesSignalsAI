@@ -9,8 +9,6 @@ class RssSource(BaseModel):
 
 class AppConfig(BaseModel):
     umbral_similitud: float
-    max_emails_ejecucion: int
-    delay_entre_emails: int
     ollama_model: str
     ai_prompt: str = ""
     ai_prompt_default: str = ""

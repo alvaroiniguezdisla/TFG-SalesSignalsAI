@@ -16,8 +16,6 @@
 CREATE TABLE IF NOT EXISTS public.app_config (
   id                    integer       NOT NULL CHECK (id = 1),
   umbral_similitud      numeric       DEFAULT 0.82,
-  max_emails_ejecucion  integer       DEFAULT 50,
-  delay_entre_emails    integer       DEFAULT 1,
   ollama_model          text          DEFAULT 'llama3.1',
   rss_sources           jsonb         NOT NULL DEFAULT '[]'::jsonb,
   updated_at            timestamptz   NOT NULL DEFAULT timezone('utc', now()),
@@ -30,8 +28,6 @@ CREATE TABLE IF NOT EXISTS public.app_config (
 INSERT INTO public.app_config (
   id,
   umbral_similitud,
-  max_emails_ejecucion,
-  delay_entre_emails,
   ollama_model,
   rss_sources,
   ai_prompt
@@ -39,8 +35,6 @@ INSERT INTO public.app_config (
 VALUES (
   1,
   0.8,
-  50,
-  1,
   'llama3.1',
   '[
     {"url": "https://www.expansion.com/rss/empresas.xml",        "name": "Expansión",        "type": "rss", "scraper_url": "https://www.expansion.com/empresas.html"},
@@ -80,8 +74,6 @@ Escribe un email profesional de primer contacto (maximo 150 palabras).$prompt$
 )
 ON CONFLICT (id) DO UPDATE SET
   umbral_similitud      = EXCLUDED.umbral_similitud,
-  max_emails_ejecucion  = EXCLUDED.max_emails_ejecucion,
-  delay_entre_emails    = EXCLUDED.delay_entre_emails,
   ollama_model          = EXCLUDED.ollama_model,
   rss_sources           = EXCLUDED.rss_sources,
   ai_prompt             = EXCLUDED.ai_prompt,

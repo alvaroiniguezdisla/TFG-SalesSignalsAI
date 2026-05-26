@@ -197,8 +197,6 @@ function AdminDashboard() {
             const configToSave = {
                 ...config,
                 umbral_similitud: Number(config.umbral_similitud),
-                max_emails_ejecucion: Number(config.max_emails_ejecucion),
-                delay_entre_emails: Number(config.delay_entre_emails),
                 updated_at: new Date().toISOString()
             };
 
@@ -455,27 +453,6 @@ function AdminDashboard() {
                                 onChange={handleInputChange}
                             />
                             <small style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', marginTop: '4px' }}>Rango: 0.0 - 1.0 (Ej: 0.85 significa 85% de exactitud requerida para fusionar)</small>
-                        </div>
-
-                        <div className="form-group">
-                            <label>Límite correos simultáneos</label>
-                            <input
-                                type="number"
-                                name="max_emails_ejecucion"
-                                value={config.max_emails_ejecucion}
-                                onChange={handleInputChange}
-                            />
-                        </div>
-
-                        <div className="form-group">
-                            <label>Delay entre correos (segundos)</label>
-                            <input
-                                type="number"
-                                name="delay_entre_emails"
-                                value={config.delay_entre_emails}
-                                onChange={handleInputChange}
-                            />
-                            <small style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', marginTop: '4px' }}>Previene que Gmail bloquee la cuenta por SPAM.</small>
                         </div>
 
                     </div>

@@ -299,8 +299,6 @@ La sección **Parámetros principales** permite modificar:
 
 - Modelo de IA.
 - Umbral de similitud para deduplicación.
-- Límite de correos simultáneos.
-- Retardo entre correos.
 
 #### Recomendación
 

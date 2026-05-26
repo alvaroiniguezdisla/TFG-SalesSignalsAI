@@ -2,7 +2,6 @@
 Servicio de notificaciones.
 Filtra noticias por preferencias de usuario y envía mensajes a Teams.
 """
-import time
 import logging
 from app.services.almacenamiento.database import get_supabase_service
 from app.services.notificaciones.teams_graph_service import get_teams_graph_service
@@ -67,9 +66,6 @@ def enviar_notificaciones_a_todos():
 
     try:
         db = get_supabase_service()
-        app_config = db.get_app_config()
-        max_notifs = app_config.get("max_emails_ejecucion", 50)
-        delay_notifs = app_config.get("delay_entre_emails", 1)
         target_email = (settings.TEAMS_TARGET_USER_EMAIL or "").strip().lower()
 
         if not target_email:
@@ -96,14 +92,9 @@ def enviar_notificaciones_a_todos():
             logger.info("No hay usuarios registrados.")
             return 0
 
-        # 3. Enviar a cada usuario (con límite y delay)
+        # 3. Enviar solo al usuario configurado para Teams
         enviados = 0
         for usuario in usuarios:
-            # Limite de notificaciones por ejecucion
-            if enviados >= max_notifs:
-                logger.warning(f"Limite de {max_notifs} notificaciones alcanzado")
-                break
-                
             email = usuario.get("email")
             nombre = usuario.get("first_name") or "Usuario"
             
@@ -119,9 +110,6 @@ def enviar_notificaciones_a_todos():
                     logger.info(f"Enviando {len(noticias_usuario)} noticias vía Teams a {email}")
                     if get_teams_graph_service().enviar_notificacion(email, nombre, noticias_usuario):
                         enviados += 1
-                        # Delay para evitar rate limits
-                        if enviados < len(usuarios):
-                            time.sleep(delay_notifs)
                 else:
                     logger.info(f"Omitiendo notificación a {email} (solo se alerta al usuario configurado ).")
 

@@ -23,8 +23,6 @@ client = TestClient(app)
 
 CONFIG_FAKE = {
     "umbral_similitud": 0.85,
-    "max_emails_ejecucion": 50,
-    "delay_entre_emails": 1,
     "ollama_model": "llama3.1",
     "ai_prompt": "Analiza la siguiente noticia...",
     "ai_prompt_default": "",
