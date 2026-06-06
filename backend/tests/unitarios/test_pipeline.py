@@ -1,5 +1,5 @@
 # ----------------------------------------------------------------------------------
-# TEST DEL PIPELINE COMPLETO (SIMULACION CON MOCKS)
+# TEST DEL PIPELINE COMPLETO
 #
 # Objetivo: Verificar que el flujo completo (Extraccion -> IA -> Base de Datos)
 # funciona correctamente usando datos simulados para no depender de servicios
@@ -17,7 +17,7 @@ import sys
 
 # Mock de ollama para evitar error de importacion si no esta instalado.
 # Ollama se importa dentro de LlmService, y si no existe en el sistema,
-# Python peta al importar pipeline.py (ni siquiera llega a ejecutar el test).
+# Python peta al importar pipeline.py 
 sys.modules["ollama"] = MagicMock()
 
 from app.services.orquestacion.pipeline import NewsPipeline

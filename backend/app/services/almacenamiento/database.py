@@ -354,9 +354,6 @@ class SupabaseService:
             logger.error(f"Error actualizando app_config de DB: {e}")
             raise e
             
-# ------------------------------------------------------------------ #
-#                SINGLETON: Punto de Acceso Global                    #
-# ------------------------------------------------------------------ #
 
 _supabase_service_instance = None
 

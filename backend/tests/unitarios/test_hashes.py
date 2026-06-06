@@ -10,9 +10,7 @@
 #   3. Que dos URLs distintas producen hashes distintos (unicidad).
 #   4. Que URLs con caracteres especiales (acentos, ñ) se hashean sin error.
 #   5. Que el hash solo contiene caracteres hexadecimales validos.
-#
-# Por que es importante: Si los hashes no son consistentes, el sistema guardaria
-# la misma noticia varias veces en la base de datos.
+
 # ----------------------------------------------------------------------------------
 
 from app.core.utils import hash_url

@@ -40,7 +40,6 @@ def test_browser_extrae_articulos_reales(fuente):
     Verifica que el HTML sigue teniendo <article> o tags equivalentes
     y nuestra heurística de JavaScript no se rompe.
     
-    NOTA: Esta prueba es más lenta porque levanta un navegador de verdad por cada iteración.
     """
     target_url = fuente["scraper_url"]
     

@@ -1,5 +1,4 @@
 from app.services.extraccion.manager import get_extractor_manager
-
 from app.services.inteligencia import LlmService
 from app.services.almacenamiento import SupabaseService
 from pydantic import ValidationError

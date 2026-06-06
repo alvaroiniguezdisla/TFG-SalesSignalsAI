@@ -118,6 +118,7 @@ def test_obtener_metricas_admin():
     """
     Verifica que GET /api/admin/metrics devuelve los KPIs del sistema
     con todos los campos numericos esperados.
+    ```
     """
     mock_service = MagicMock()
     mock_service.get_admin_metrics.return_value = METRICAS_FAKE
@@ -134,3 +135,4 @@ def test_obtener_metricas_admin():
     assert data["dislikes_count"] == 10
 
     app.dependency_overrides.clear()
+

@@ -75,7 +75,7 @@ function Profile() {
         }
     };
 
-    // --- HANDLERS PREFERENCIAS (Agregación Genérica) ---
+    // --- HANDLERS PREFERENCIAS  ---
     const addItem = (listName, item) => {
         if (!item) return;
         const list = formData[listName];

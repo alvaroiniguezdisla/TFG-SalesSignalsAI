@@ -40,8 +40,7 @@ def scrape_noticias(target_url: str,nombre_fuente: str="Scraper Genérico") -> L
             articulos = [t.parent for t in titulares if t.find('a')]
 
         for item in articulos[:15]: 
-            # 1. Búsqueda del nodo de título (Prioridad heurística: h2, h3)
-            # Para soportar medios que emplean estructuras semánticas heterogéneas (ej. h1, h4, o <a> directo)
+            # 1. Búsqueda del nodo de título 
             titulo_nodo = item.find(['h2', 'h3'])
             
             if titulo_nodo and titulo_nodo.find('a'):

@@ -372,22 +372,3 @@ Esto no implica necesariamente un fallo. El sistema puede no mostrar novedades s
 ### No recibo avisos por Teams
 
 Las notificaciones por Teams dependen de que esa integración esté activa en el despliegue y correctamente configurada. No todos los entornos tienen esta función habilitada.
-
-## Cierre
-
-La aplicación está diseñada para que el usuario pueda pasar de una noticia detectada a una posible acción comercial con el menor número de pasos posible: revisar, filtrar, analizar, valorar y priorizar.
-
-Como criterio de uso diario:
-
-1. Entra al dashboard.
-2. Revisa primero las señales de mayor relevancia.
-3. Abre en detalle las noticias que encajen con tu cartera o tus intereses.
-4. Ajusta el perfil para mejorar la personalización.
-5. Si eres administrador, revisa periódicamente usuarios, fuentes y configuración.
-
-Si vas a incorporar esta guía a la memoria del TFG, procura que todas las capturas:
-
-- estén hechas con el mismo navegador y el mismo tamaño de ventana,
-- muestren solo la parte relevante de la pantalla,
-- eviten datos sensibles reales,
-- y lleven un pie breve y descriptivo.

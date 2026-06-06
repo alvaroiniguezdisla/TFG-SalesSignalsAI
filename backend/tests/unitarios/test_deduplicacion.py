@@ -1,5 +1,5 @@
 # ----------------------------------------------------------------------------------
-# TEST DE DEDUPLICACION POR TITULO (LOGICA DIFUSA)
+# TEST DE DEDUPLICACION POR TITULO 
 #
 # Objetivo: Verificar que el sistema de deduplicacion detecta noticias
 # con titulos similares, las fusiona correctamente, y conserva las distintas.

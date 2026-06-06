@@ -1,5 +1,5 @@
 # ----------------------------------------------------------------------------------
-# TEST DE INTEGRACION: DEDUPLICACION REAL EN SUPABASE (CASO APPLE)
+# TEST DE INTEGRACION: DEDUPLICACION REAL EN SUPABASE 
 #
 # Objetivo: Verificar que el sistema de deduplicacion funciona contra la base
 # de datos real. Inserta una noticia y luego intenta meter otra casi identica
